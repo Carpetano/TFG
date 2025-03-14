@@ -1,6 +1,0 @@
-mysql-connector-python
-pymysql
-
-# or
-
-supabase-py

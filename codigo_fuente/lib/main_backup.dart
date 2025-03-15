@@ -1,4 +1,4 @@
-import 'package:codigo/register_use_page.dart';
+import 'package:codigo/register_user_page.dart';
 import 'package:flutter/material.dart';
 import 'mysql_manager.dart';
 import 'package:bcrypt/bcrypt.dart';

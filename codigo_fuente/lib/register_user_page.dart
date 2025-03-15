@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'mysql_manager.dart';
+import 'package:codigo/mysql_manager.dart';
 import 'package:bcrypt/bcrypt.dart';
+import 'package:codigo/user.dart';
 
 class RegistrationPage extends StatefulWidget {
   final MysqlManager dbManager;
@@ -89,7 +90,9 @@ class _MyWidgetState extends State<RegistrationPage>
   }
 
   String hashPassword(String password) {
-    return BCrypt.hashpw(password, BCrypt.gensalt());
+    const String fixedSalt =
+        '\$2a\$10\$yVxztTQyA0dxldZfbx7TuOQ2akDZxKc6o7l0ns29kw.XJ2ykQyySO';
+    return BCrypt.hashpw(password, fixedSalt);
   }
 
   @override

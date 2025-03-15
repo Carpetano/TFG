@@ -1,4 +1,5 @@
 import 'package:codigo_flutter/calendar_page.dart';
+import 'package:codigo_flutter/multiplatform_page.dart';
 import 'package:codigo_flutter/slidable_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -204,10 +205,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   );
                 },
-                child: Text("Go to New Page"),
+                child: Text("Go to Slidable Page"),
               ),
             ),
 
+            const SizedBox(height: 10),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
               height: MediaQuery.of(context).size.height * 0.07,
@@ -218,7 +220,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(builder: (context) => CalendarPage()),
                   );
                 },
-                child: Text("Go to New Page"),
+                child: Text("Calendar Page"),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: MediaQuery.of(context).size.height * 0.07,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MultiplatformPage(),
+                    ),
+                  );
+                },
+                child: Text("Multiplatform Page"),
               ),
             ),
           ],

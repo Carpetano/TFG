@@ -3,17 +3,18 @@ import 'package:codigo/mysql_manager.dart';
 import 'package:bcrypt/bcrypt.dart';
 import 'package:codigo/user.dart';
 
-class RegistrationPage extends StatefulWidget {
-  final MysqlManager dbManager;
+class EditUserPage extends StatefulWidget {
+  // final MysqlManager dbManager;
+  final User userToEdit;
 
   // Constructor
-  const RegistrationPage({Key? key, required this.dbManager}) : super(key: key);
+  const EditUserPage({Key? key, required this.userToEdit}) : super(key: key);
 
   @override
-  State<RegistrationPage> createState() => _MyWidgetState();
+  State<EditUserPage> createState() => _MyWidgetState();
 }
 
-class _MyWidgetState extends State<RegistrationPage>
+class _MyWidgetState extends State<EditUserPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -23,7 +24,6 @@ class _MyWidgetState extends State<RegistrationPage>
   final TextEditingController _secondLastNameController =
       TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
   // Move selectedRole outside of build to make it persist
@@ -32,7 +32,19 @@ class _MyWidgetState extends State<RegistrationPage>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
+
+    // Initialize the controllers with data from the userToEdit object
+    _firstNameController.text = widget.userToEdit.firstName;
+    _lastNameController.text = widget.userToEdit.lastName;
+    _secondLastNameController.text = widget.userToEdit.secondLastName;
+    _emailController.text = widget.userToEdit.email;
+    _phoneController.text = widget.userToEdit.phone; // Auto-fill phone here
+
+    // Set the selected role dropdown to the user's current role
+    selectedRole = widget.userToEdit.role.replaceAll(
+      '_',
+      ' ',
+    ); // Adjust the format for consistency
   }
 
   @override
@@ -44,52 +56,51 @@ class _MyWidgetState extends State<RegistrationPage>
   // This function will be called when the user selects a new item
   void onChanged(String? newValue) {
     setState(() {
-      selectedRole = newValue;
+      selectedRole = newValue?.replaceAll(
+        ' ',
+        '_',
+      ); // Match the DB format (e.g., Sala_de_Profesores)
     });
   }
 
   // Function to handle the registration and print the data
-  void registerIntoDB() {
+  Future<void> editUserById() async {
     // Get the text from the controllers
+    int id = widget.userToEdit.id;
     String firstName = _firstNameController.text;
     String lastName = _lastNameController.text;
     String secondLastName = _secondLastNameController.text;
     String email = _emailController.text;
-    String password = _passwordController.text;
-    String hashedPassword = hashPassword(password);
     String phone = _phoneController.text;
     String selectedRoleText = selectedRole!.replaceAll(
       ' ',
       '_',
-    ); // Convert spaces to underscores for DB
+    ); // Format role text for DB
 
-    // Print the data to the console
+    // Print the data to the console for debugging
     print('First Name: $firstName');
     print('Last Name: $lastName');
     print('Second Last Name: $secondLastName');
     print('Email: $email');
-    print('Password: $password');
-    print('Hashed password: $hashedPassword');
     print('Phone: $phone');
     print('Selected Role: $selectedRoleText');
 
-    // Finally insert into db
-    widget.dbManager.registerUser(
-      email: email,
-      hashedPassword: hashedPassword,
+    // Create the updated User object
+    final updatedUser = User(
+      id: id,
       firstName: firstName,
       lastName: lastName,
       secondLastName: secondLastName,
+      email: email,
       phone: phone,
-      role: selectedRoleText, // Use the formatted role
-      registrationDate: DateTime.now(),
+      role: selectedRoleText,
+      registrationDate: DateTime.now().toUtc(),
     );
-  }
 
-  String hashPassword(String password) {
-    const String fixedSalt =
-        '\$2a\$10\$yVxztTQyA0dxldZfbx7TuOQ2akDZxKc6o7l0ns29kw.XJ2ykQyySO';
-    return BCrypt.hashpw(password, fixedSalt);
+    // Call the update function to update the user in the database
+    // Await the instance of MysqlManager
+    final dbManager = await MysqlManager.getInstance();
+    await dbManager.updateUserByIdWithoutPassword(id, updatedUser);
   }
 
   @override
@@ -159,21 +170,6 @@ class _MyWidgetState extends State<RegistrationPage>
           SizedBox(height: 10),
           //
           //
-          // PASSWORD TEXTFIELD
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: screenWidth * scalingFactor,
-              child: TextFormField(
-                obscureText: true,
-                controller: _passwordController, // Link controller
-                decoration: InputDecoration(hintText: "Contraseña"),
-              ),
-            ),
-          ),
-          SizedBox(height: 30),
-          //
-          //
           // PHONE TEXTFIELD
           Align(
             alignment: Alignment.center,
@@ -194,22 +190,28 @@ class _MyWidgetState extends State<RegistrationPage>
             child: Container(
               width: screenWidth * scalingFactor,
               child: DropdownButton<String>(
-                value: selectedRole, // Set the initial selected value
+                value: selectedRole, // This is the currently selected role
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedRole = newValue!;
+                  });
+                },
                 items:
-                    ["Administrador", "Profesor", "Sala de profesores"].map((
-                      String value,
-                    ) {
+                    [
+                      'Sala de Profesores',
+                      'Administrador',
+                      'Estudiante',
+                      'Profesor',
+                    ].map<DropdownMenuItem<String>>((String role) {
                       return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value), // Display each value as an option
+                        value: role,
+                        child: Text(role),
                       );
                     }).toList(),
-                onChanged:
-                    onChanged, // Function to call when an option is selected
               ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 40),
           //
           //
           // REGISTER BUTTON
@@ -218,7 +220,7 @@ class _MyWidgetState extends State<RegistrationPage>
             child: Container(
               width: screenWidth * scalingFactor,
               child: ElevatedButton(
-                onPressed: registerIntoDB,
+                onPressed: editUserById,
                 child: Text("Registrar"),
               ),
             ),

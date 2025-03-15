@@ -1,4 +1,4 @@
-import 'package:codigo/register_user_page.dart';
+import 'package:codigo/admin_menu_page.dart';
 import 'package:flutter/material.dart';
 import 'mysql_manager.dart';
 import 'package:bcrypt/bcrypt.dart';
@@ -35,9 +35,6 @@ class MyHomePage extends StatefulWidget {
 
 /// State for MyHomePage, which interacts with the database.
 class _MyHomePageState extends State<MyHomePage> {
-  // DBManager instance
-  MysqlManager dbManager = MysqlManager();
-
   // Controller to get data from textedit widgets
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -55,15 +52,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return BCrypt.hashpw(password, fixedSalt);
   }
 
-  void insertTestData() {
-    dbManager.insert("Test data2wer");
-  }
-
-  void login() async {
+  Future<void> login() async {
     String email = _emailController.text;
     String hashedPassword = hashPassword(_passwordController.text);
 
-    loggedInUser = await dbManager.login(
+    // Await the static instance of MysqlManager
+    final mysqlManager = await MysqlManager.getInstance();
+
+    // Call the login method on the instance
+    loggedInUser = await mysqlManager.login(
       email: email,
       hashedPassword: hashedPassword,
     );
@@ -71,19 +68,31 @@ class _MyHomePageState extends State<MyHomePage> {
     if (loggedInUser == null) {
       print("Not logged in");
     } else {
-      print(loggedInUser?.role.toString());
-
-      switch (loggedInUser?.role.toString()) {
+      print("Logged in as: ${loggedInUser!.role}");
+      switch (loggedInUser!.role) {
         case "Administrador":
           print("Navigating to Admin page");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => AdminMenu(
+                    dbManager: mysqlManager,
+                    loggedAsUser: loggedInUser!,
+                  ),
+            ),
+          );
           break;
         case "Profesor":
-          print("Navigating to Profesot page");
+          print("Navigating to Profesor page");
+          // Add navigation for Profesor here if needed
           break;
         case "Sala_de_Profesores":
-          print("Navigating to Sala page");
+          print("Navigating to Sala de Profesores page");
+          // Add navigation for Sala_de_Profesores here if needed
           break;
         default:
+          print("Unknown role");
       }
     }
   }
@@ -137,7 +146,10 @@ class _MyHomePageState extends State<MyHomePage> {
             alignment: Alignment.center,
             child: Container(
               width: screenWidth * scalingFactor,
-              child: ElevatedButton(onPressed: login, child: Text("Registrar")),
+              child: ElevatedButton(
+                onPressed: login,
+                child: Text("Iniciar Sesión"),
+              ),
             ),
           ),
         ],

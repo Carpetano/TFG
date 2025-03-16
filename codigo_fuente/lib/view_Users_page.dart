@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:codigo/supabase_manager.dart'; // Adjust the import path as needed
-import 'package:codigo/logged_in_user.dart';
+import 'package:codigo/user_object.dart';
 
 class ViewUsersPage extends StatefulWidget {
   const ViewUsersPage({super.key});
@@ -16,9 +16,9 @@ class ViewUsersPage extends StatefulWidget {
 
 class _ViewUsersPageState extends State<ViewUsersPage> {
   // List of all users fetched from Supabase
-  List<LoggedInUser> users = [];
+  List<UserObject> users = [];
   // List of users that match the current search query
-  List<LoggedInUser> filteredUsers = [];
+  List<UserObject> filteredUsers = [];
   // Controller for the search text field
   final TextEditingController searchController = TextEditingController();
 
@@ -41,7 +41,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
   /// Fetch all users from the Supabase 'usuarios' table.
   Future<void> fetchUsers() async {
     // Retrieve the list of users using the SupabaseManager
-    List<LoggedInUser> fetchedUsers =
+    List<UserObject> fetchedUsers =
         await SupabaseManager.instance.getAllUsers();
     // Update both the full users list and the filtered list
     setState(() {
@@ -59,7 +59,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
             // Filter by first name, last name, or role (ignoring case)
             return user.firstName.toLowerCase().contains(query) ||
                 user.lastName.toLowerCase().contains(query) ||
-                user.role.toLowerCase().contains(query);
+                user.role.toLowerCase().contains(query.replaceAll(' ', '_'));
           }).toList();
     });
   }
@@ -88,18 +88,18 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
   }
 
   /// Deletes the user and re-fetches the list of users after deletion.
-  void deactivateUser(LoggedInUser user) async {
+  void deactivateUser(UserObject user) async {
     print("Deactivating user: ${user.id}");
     SupabaseManager.instance.setUserAsInactive(user.id);
   }
 
   /// Navigate to the appropriate edit page based on the user.
-  void editUser(LoggedInUser user) {
+  void editUser(UserObject user) {
     // If you need to differentiate the edit page based on the current user, adjust here.
   }
 
   /// Display a confirmation dialog to reset the user's password
-  void resetPassword(LoggedInUser user) {
+  void resetPassword(UserObject user) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -165,7 +165,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
               : ListView.builder(
                 itemCount: filteredUsers.length,
                 itemBuilder: (context, index) {
-                  LoggedInUser user = filteredUsers[index];
+                  UserObject user = filteredUsers[index];
                   // Each user item is wrapped in a Slidable widget for slide actions
                   return Slidable(
                     // Action pane when swiped from the start (left)

@@ -3,7 +3,7 @@ import 'package:codigo/admin_main_menu_page.dart';
 import 'package:codigo/sala_main_menu_page.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:codigo/logged_in_user.dart';
+import 'package:codigo/user_object.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure initialization
@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   // ignore: avoid_init_to_null
-  LoggedInUser? loggedInUser = null;
+  UserObject? loggedInUser = null;
 
   @override
   void initState() {

@@ -1,4 +1,4 @@
-class LoggedInUser {
+class UserObject {
   final int id;
   final String authId;
   final String role;
@@ -12,7 +12,7 @@ class LoggedInUser {
   final DateTime registrationDate;
   final String status;
 
-  LoggedInUser({
+  UserObject({
     required this.id,
     required this.authId,
     required this.firstName,
@@ -26,8 +26,8 @@ class LoggedInUser {
   });
 
   // Convert a JSON map to a User object
-  factory LoggedInUser.fromJson(Map<String, dynamic> json) {
-    return LoggedInUser(
+  factory UserObject.fromJson(Map<String, dynamic> json) {
+    return UserObject(
       id: json['id_usuario'],
       firstName: json['nombre'],
       lastName: json['apellido1'],

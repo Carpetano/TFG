@@ -1,4 +1,4 @@
-import 'package:codigo/logged_in_user.dart';
+import 'package:codigo/user_object.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/register_user_page.dart';
 import 'package:codigo/mysql_manager.dart';
@@ -6,7 +6,7 @@ import 'package:codigo/view_Users_page.dart';
 
 class AdminMenu extends StatefulWidget {
   final MysqlManager dbManager;
-  final LoggedInUser loggedAsUser;
+  final UserObject loggedAsUser;
 
   // Constructor
   const AdminMenu({

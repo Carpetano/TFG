@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'package:codigo/logged_in_user.dart';
+import 'package:codigo/user_object.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -28,7 +28,7 @@ class SupabaseManager {
   }
 
   // Login function - Now returns a LoggedInUser
-  Future<LoggedInUser?> login(String email, String password) async {
+  Future<UserObject?> login(String email, String password) async {
     try {
       final AuthResponse response = await Supabase.instance.client.auth
           .signInWithPassword(email: email, password: password);
@@ -46,7 +46,7 @@ class SupabaseManager {
   }
 
   // Register function - Now returns a LoggedInUser
-  Future<LoggedInUser?> register(
+  Future<UserObject?> register(
     String email,
     String password,
     String name,
@@ -102,7 +102,7 @@ class SupabaseManager {
   }
 
   // Map Supabase User to LoggedInUser
-  Future<LoggedInUser?> mapUser(User user) async {
+  Future<UserObject?> mapUser(User user) async {
     try {
       final response =
           await Supabase.instance.client
@@ -116,7 +116,7 @@ class SupabaseManager {
         return null;
       }
 
-      return LoggedInUser(
+      return UserObject(
         id: response['id_usuario'],
         authId: user.id,
         firstName: response['nombre'] ?? '',
@@ -159,7 +159,7 @@ class SupabaseManager {
     print("Salta una exception, pero lo cambia sin problemas");
   }
 
-  Future<List<LoggedInUser>> getAllUsers() async {
+  Future<List<UserObject>> getAllUsers() async {
     try {
       // Fetch all users from the 'usuarios' table.
       // The call returns a PostgrestList (essentially a List) directly.
@@ -172,10 +172,10 @@ class SupabaseManager {
       }
 
       // Map each entry in the response list to a LoggedInUser object.
-      List<LoggedInUser> users =
+      List<UserObject> users =
           (response as List)
               .map(
-                (userData) => LoggedInUser(
+                (userData) => UserObject(
                   id: userData['id_usuario'],
                   authId: userData['id_auth'],
                   firstName: userData['nombre'] ?? '',

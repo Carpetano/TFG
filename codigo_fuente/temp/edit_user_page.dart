@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:codigo/mysql_manager.dart';
 import 'package:bcrypt/bcrypt.dart';
-import 'package:codigo/logged_in_user.dart';
+import 'package:codigo/user_object.dart';
 
 class EditUserPage extends StatefulWidget {
   // final MysqlManager dbManager;
-  final LoggedInUser userToEdit;
+  final UserObject userToEdit;
 
   // Constructor
   const EditUserPage({Key? key, required this.userToEdit}) : super(key: key);
@@ -86,7 +86,7 @@ class _MyWidgetState extends State<EditUserPage>
     print('Selected Role: $selectedRoleText');
 
     // Create the updated User object
-    final updatedUser = LoggedInUser(
+    final updatedUser = UserObject(
       id: id,
       firstName: firstName,
       lastName: lastName,

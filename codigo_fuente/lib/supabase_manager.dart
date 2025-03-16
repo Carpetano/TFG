@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:codigo/logged_in_user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -127,6 +129,31 @@ class SupabaseManager {
       print("❌ Error mapping user: $e");
       return null;
     }
+  }
+
+  Future<void> setUserAsInactive(int userId) async {
+    try {
+      final response = await Supabase.instance.client
+          .from('usuarios')
+          .update({'estado': 'Inactivo'}) // Update the 'estado' field
+          .eq('id_usuario', userId); // Apply filter to select the specific user
+
+      // Check if there's an error or if the response data is empty
+      if (response.error != null ||
+          response.data == null ||
+          response.data.isEmpty) {
+        print(
+          "❌ Error marking user as inactive: ${response.error?.message ?? 'Unknown error'}",
+        );
+        throw Exception("Error marking user as inactive");
+      }
+
+      print("✅ User MARKED AS INACTIVE successfully: $userId");
+    } catch (e) {
+      print("❌ Error during user update: $e");
+      throw Exception("Error marking user as inactive");
+    }
+    print("Salta una exception, pero lo cambia sin problemas");
   }
 
   Future<List<LoggedInUser>> getAllUsers() async {

@@ -1,3 +1,7 @@
+// ignore_for_file: avoid_print
+
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:codigo/supabase_manager.dart'; // Adjust the import path as needed
@@ -60,11 +64,33 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
     });
   }
 
-  /// Placeholder method for deleting a user.
-  void deleteUser(LoggedInUser user) async {
-    print("Deleting user: ${user.id}");
-    // After deletion, re-fetch the users list.
-    await fetchUsers();
+  /// Function to generate a random password
+  String generateRandomPassword({int length = 10}) {
+    const String chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#\$%^&*';
+    final Random random = Random();
+
+    return List.generate(
+      length,
+      (index) => chars[random.nextInt(chars.length)],
+    ).join();
+  }
+
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  /// Deletes the user and re-fetches the list of users after deletion.
+  void deactivateUser(LoggedInUser user) async {
+    print("Deactivating user: ${user.id}");
+    SupabaseManager.instance.setUserAsInactive(user.id);
   }
 
   /// Navigate to the appropriate edit page based on the user.
@@ -72,7 +98,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
     // If you need to differentiate the edit page based on the current user, adjust here.
   }
 
-  /// Display a confirmation dialog to reset the user's password.
+  /// Display a confirmation dialog to reset the user's password
   void resetPassword(LoggedInUser user) {
     showDialog(
       context: context,
@@ -83,13 +109,16 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
             "Are you sure you want to reset the password for ${user.firstName} ${user.lastName}?",
           ),
           actions: [
+            // Cancel button to dismiss the dialog
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text("Cancel"),
             ),
+            // Confirm button to trigger password reset
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+
                 print("Reset password for user: ${user.id}");
               },
               child: const Text("Confirm", style: TextStyle(color: Colors.red)),
@@ -162,10 +191,10 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                           label: 'Edit',
                         ),
                         SlidableAction(
-                          onPressed: (context) => deleteUser(user),
+                          onPressed: (context) => deactivateUser(user),
                           backgroundColor: Colors.red,
                           icon: Icons.delete,
-                          label: 'Delete',
+                          label: 'Desactivar',
                         ),
                       ],
                     ),

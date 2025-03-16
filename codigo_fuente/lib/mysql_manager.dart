@@ -6,6 +6,8 @@ class MysqlManager {
   late MySqlConnection conn;
 
   static MysqlManager? _instance; // Private static variable
+  static String fixedSalt =
+      '\$2a\$10\$yVxztTQyA0dxldZfbx7TuOQ2akDZxKc6o7l0ns29kw.XJ2ykQyySO';
 
   // Private constructor to prevent direct instantiation
   MysqlManager._();

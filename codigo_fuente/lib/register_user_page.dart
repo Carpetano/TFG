@@ -81,7 +81,7 @@ class _MyWidgetState extends State<RegistrationPage>
       lastName: lastName,
       secondLastName: secondLastName,
       phone: phone,
-      role: selectedRoleText, // Use the formatted role
+      role: selectedRoleText,
       registrationDate: DateTime.now(),
     );
   }

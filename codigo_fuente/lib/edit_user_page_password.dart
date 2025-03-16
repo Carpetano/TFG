@@ -225,7 +225,6 @@ class _MyWidgetState extends State<EditUserPagePassword>
                     [
                       'Sala de Profesores',
                       'Administrador',
-                      'Estudiante',
                       'Profesor',
                     ].map<DropdownMenuItem<String>>((String role) {
                       return DropdownMenuItem<String>(

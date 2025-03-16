@@ -21,6 +21,20 @@ class User {
     required this.registrationDate,
   });
 
+  // Convert a JSON map to a User object
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id_usuario'],
+      firstName: json['nombre'],
+      lastName: json['apellido1'],
+      secondLastName: json['apellido2'],
+      role: json['rol'],
+      email: json['email'],
+      phone: json['telefono'],
+      registrationDate: DateTime.parse(json['fecha_incorporacion']),
+    );
+  }
+
   // Add a toString method for better readability
   @override
   String toString() {

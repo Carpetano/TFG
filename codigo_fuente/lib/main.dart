@@ -1,3 +1,6 @@
+import 'package:codigo/Profesor_main_menu_page.dart';
+import 'package:codigo/admin_main_menu_page.dart';
+import 'package:codigo/sala_main_menu_page.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/logged_in_user.dart';
@@ -71,12 +74,26 @@ class _MyHomePageState extends State<MyHomePage> {
       switch (supabaseUser.role.toLowerCase()) {
         case "administrador":
           print("Navigating to Admin page");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminMainMenuPage()),
+          );
           break;
         case "profesor":
           print("Navigating to Profesor page");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ProfesorMainMenuPage(),
+            ),
+          );
           break;
         case "sala_de_profesores":
           print("Navigating to Sala page");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SalaMainMenuPage()),
+          );
           break;
         default:
           print("Unknown role: ${supabaseUser.role}");

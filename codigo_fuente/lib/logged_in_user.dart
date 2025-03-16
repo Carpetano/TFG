@@ -1,5 +1,6 @@
-class User {
+class LoggedInUser {
   final int id;
+  final String authId;
   final String role;
 
   final String firstName;
@@ -10,8 +11,9 @@ class User {
   final String email;
   final DateTime registrationDate;
 
-  User({
+  LoggedInUser({
     required this.id,
+    required this.authId,
     required this.firstName,
     required this.lastName,
     required this.secondLastName,
@@ -22,8 +24,8 @@ class User {
   });
 
   // Convert a JSON map to a User object
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
+  factory LoggedInUser.fromJson(Map<String, dynamic> json) {
+    return LoggedInUser(
       id: json['id_usuario'],
       firstName: json['nombre'],
       lastName: json['apellido1'],
@@ -32,12 +34,13 @@ class User {
       email: json['email'],
       phone: json['telefono'],
       registrationDate: DateTime.parse(json['fecha_incorporacion']),
+      authId: json['auth_id'],
     );
   }
 
   // Add a toString method for better readability
   @override
   String toString() {
-    return 'User(id: $id, firstName: $firstName, lastName: $lastName, secondLastName: $secondLastName, role: $role, email: $email, phone: $phone, registrationDate: $registrationDate)';
+    return 'User(id: $id, firstName: $firstName, lastName: $lastName, secondLastName: $secondLastName, role: $role, email: $email, phone: $phone, registrationDate: $registrationDate, auth_id: $authId)';
   }
 }

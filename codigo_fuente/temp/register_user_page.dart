@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:codigo/mysql_manager.dart';
 import 'package:bcrypt/bcrypt.dart';
-import 'package:codigo/user.dart';
 
 class RegistrationPage extends StatefulWidget {
   final MysqlManager dbManager;

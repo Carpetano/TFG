@@ -1,14 +1,14 @@
-import 'package:codigo/admin_menu_page.dart';
+import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
-import 'mysql_manager.dart';
-import 'package:bcrypt/bcrypt.dart';
-import 'package:codigo/user.dart';
+import 'package:codigo/logged_in_user.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure initialization
+  await SupabaseManager.instance
+      .initialize(); // Initialize Supabase before running the app
   runApp(const MyApp());
 }
 
-/// The root widget of the application.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -24,7 +24,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// Home page widget that demonstrates CRUD operations.
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
@@ -33,67 +32,82 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-/// State for MyHomePage, which interacts with the database.
 class _MyHomePageState extends State<MyHomePage> {
-  // Controller to get data from textedit widgets
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  User? loggedInUser = null;
+  // ignore: avoid_init_to_null
+  LoggedInUser? loggedInUser = null;
 
   @override
   void initState() {
     super.initState();
-    // Load data when the page initializes.
   }
 
-  String hashPassword(String password) {
-    const String fixedSalt =
-        '\$2a\$10\$yVxztTQyA0dxldZfbx7TuOQ2akDZxKc6o7l0ns29kw.XJ2ykQyySO';
-    return BCrypt.hashpw(password, fixedSalt);
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Future<void> login() async {
-    String email = _emailController.text;
-    String hashedPassword = hashPassword(_passwordController.text);
-
-    // Await the static instance of MysqlManager
-    final mysqlManager = await MysqlManager.getInstance();
-
-    // Call the login method on the instance
-    loggedInUser = await mysqlManager.login(
-      email: email,
-      hashedPassword: hashedPassword,
+  Future<void> supabaseLogin() async {
+    final supabaseUser = await SupabaseManager.instance.login(
+      _emailController.text,
+      _passwordController.text,
     );
 
-    if (loggedInUser == null) {
-      print("Not logged in");
-    } else {
-      print("Logged in as: ${loggedInUser!.role}");
-      switch (loggedInUser!.role) {
-        case "Administrador":
+    if (supabaseUser != null) {
+      print('Logged in successfully via Supabase: ${supabaseUser}');
+      showSnackBar(
+        "Iniciado sesión con éxito, Bienvenido ${supabaseUser.firstName.toString()}",
+        Colors.white,
+        Colors.black,
+      );
+      print("Role: ${supabaseUser.role}");
+      switch (supabaseUser.role.toLowerCase()) {
+        case "administrador":
           print("Navigating to Admin page");
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => AdminMenu(
-                    dbManager: mysqlManager,
-                    loggedAsUser: loggedInUser!,
-                  ),
-            ),
-          );
           break;
-        case "Profesor":
+        case "profesor":
           print("Navigating to Profesor page");
-          // Add navigation for Profesor here if needed
           break;
-        case "Sala_de_Profesores":
-          print("Navigating to Sala de Profesores page");
-          // Add navigation for Sala_de_Profesores here if needed
+        case "sala_de_profesores":
+          print("Navigating to Sala page");
           break;
         default:
-          print("Unknown role");
+          print("Unknown role: ${supabaseUser.role}");
+          break;
       }
+    } else {
+      print('Login failed via Supabase');
+      showSnackBar(
+        "No se ha podido iniciar sesión",
+        Colors.white,
+        Colors.black,
+      );
+    }
+  }
+
+  Future<void> supabaseRegister() async {
+    final supabaseUser = await SupabaseManager.instance.register(
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    if (supabaseUser != null) {
+      showSnackBar(
+        "Te hemos envíado un correo para verificar tu cuenta",
+        Colors.white,
+        Colors.black,
+      );
+      print('Registered successfully via Supabase: ${supabaseUser.email}');
+    } else {
+      print('Registration failed via Supabase');
+      showSnackBar("Algo salió mal", Colors.redAccent, Colors.black);
     }
   }
 
@@ -109,49 +123,52 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: [
-          //
-          //
-          // MAIL TEXTFIELD
           Align(
             alignment: Alignment.center,
             child: Container(
               width: screenWidth * scalingFactor,
               child: TextFormField(
                 autofocus: true,
-                controller: _emailController, // Link controller
+                controller: _emailController,
                 decoration: InputDecoration(hintText: "Correo"),
               ),
             ),
           ),
           SizedBox(height: 10),
-          //
-          //
-          // PASSWORD TEXT FIELD
           Align(
             alignment: Alignment.center,
             child: Container(
               width: screenWidth * scalingFactor,
               child: TextFormField(
                 obscureText: true,
-                controller: _passwordController, // Link controller
+                controller: _passwordController,
                 decoration: InputDecoration(hintText: "Contraseña"),
               ),
             ),
           ),
           SizedBox(height: 10),
-          //
-          //
-          // LOGIN BUTTON
           Align(
             alignment: Alignment.center,
             child: Container(
               width: screenWidth * scalingFactor,
               child: ElevatedButton(
-                onPressed: login,
-                child: Text("Iniciar Sesión"),
+                onPressed: supabaseLogin,
+                child: Text("Login in Supabase"),
               ),
             ),
           ),
+          SizedBox(height: 10),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: screenWidth * scalingFactor,
+              child: ElevatedButton(
+                onPressed: supabaseRegister,
+                child: Text("Register in Supabase"),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
         ],
       ),
     );

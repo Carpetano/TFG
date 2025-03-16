@@ -6,11 +6,11 @@ import 'package:codigo/edit_user_page_password.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:codigo/mysql_manager.dart';
-import 'package:codigo/user.dart';
+import 'package:codigo/logged_in_user.dart';
 
 class ViewUsers extends StatefulWidget {
   final MysqlManager dbManager;
-  final User loggedAsUser;
+  final LoggedInUser loggedAsUser;
 
   const ViewUsers({
     super.key,
@@ -23,8 +23,8 @@ class ViewUsers extends StatefulWidget {
 }
 
 class _ViewUsersState extends State<ViewUsers> {
-  List<User> users = [];
-  List<User> filteredUsers = []; // This will hold the filtered list
+  List<LoggedInUser> users = [];
+  List<LoggedInUser> filteredUsers = []; // This will hold the filtered list
   TextEditingController searchController =
       TextEditingController(); // Controller for search box
 
@@ -38,7 +38,7 @@ class _ViewUsersState extends State<ViewUsers> {
   }
 
   Future<void> fetchUsers() async {
-    List<User> fetchedUsers = await widget.dbManager.getAllUsers();
+    List<LoggedInUser> fetchedUsers = await widget.dbManager.getAllUsers();
     setState(() {
       users = fetchedUsers;
       filteredUsers = fetchedUsers; // Initially show all users
@@ -75,7 +75,7 @@ class _ViewUsersState extends State<ViewUsers> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void deleteUser(User user) async {
+  void deleteUser(LoggedInUser user) async {
     if (user.id == widget.loggedAsUser.id) {
       showSnackBar(
         "You are trying to delete yourself, don't do that!",
@@ -88,7 +88,7 @@ class _ViewUsersState extends State<ViewUsers> {
     }
   }
 
-  void editUser(User user) {
+  void editUser(LoggedInUser user) {
     if (user.id == widget.loggedAsUser.id) {
       Navigator.push(
         context,
@@ -119,7 +119,7 @@ class _ViewUsersState extends State<ViewUsers> {
     return BCrypt.hashpw(password, MysqlManager.fixedSalt);
   }
 
-  Future<void> resetPassword(User user) async {
+  Future<void> resetPassword(LoggedInUser user) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -207,7 +207,7 @@ class _ViewUsersState extends State<ViewUsers> {
               : ListView.builder(
                 itemCount: filteredUsers.length,
                 itemBuilder: (context, index) {
-                  User user = filteredUsers[index];
+                  LoggedInUser user = filteredUsers[index];
 
                   return Slidable(
                     startActionPane: ActionPane(

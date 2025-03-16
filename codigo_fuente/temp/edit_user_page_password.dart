@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:codigo/mysql_manager.dart';
 import 'package:bcrypt/bcrypt.dart';
-import 'package:codigo/user.dart';
+import 'package:codigo/logged_in_user.dart';
 
 class EditUserPagePassword extends StatefulWidget {
-  final User userToEdit;
+  final LoggedInUser userToEdit;
 
   const EditUserPagePassword({Key? key, required this.userToEdit})
     : super(key: key);
@@ -99,7 +99,7 @@ class _MyWidgetState extends State<EditUserPagePassword>
     print('Selected Role: $selectedRoleText');
 
     // Create the updated User object
-    final updatedUser = User(
+    final updatedUser = LoggedInUser(
       id: id,
       firstName: firstName,
       lastName: lastName,

@@ -10,6 +10,7 @@ class LoggedInUser {
   final String phone;
   final String email;
   final DateTime registrationDate;
+  final String status;
 
   LoggedInUser({
     required this.id,
@@ -21,6 +22,7 @@ class LoggedInUser {
     required this.email,
     required this.phone,
     required this.registrationDate,
+    required this.status,
   });
 
   // Convert a JSON map to a User object
@@ -35,6 +37,7 @@ class LoggedInUser {
       phone: json['telefono'],
       registrationDate: DateTime.parse(json['fecha_incorporacion']),
       authId: json['auth_id'],
+      status: json['estado'],
     );
   }
 

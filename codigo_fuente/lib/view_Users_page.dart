@@ -199,7 +199,9 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                       ],
                     ),
                     child: ListTile(
-                      title: Text("${user.firstName} ${user.lastName}"),
+                      title: Text(
+                        "${user.firstName} ${user.lastName} ${user.status.toLowerCase() == 'activo' ? "" : "[INACTIVO]"}",
+                      ),
                       subtitle: Text(user.role.replaceAll("_", " ")),
                     ),
                   );

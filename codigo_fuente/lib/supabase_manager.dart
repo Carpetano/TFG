@@ -61,6 +61,8 @@ class SupabaseManager {
       );
 
       if (response.user != null) {
+        print("Registration mail Sent to: $email");
+
         final userId = response.user!.id;
         final userEmail = response.user!.email;
 
@@ -124,6 +126,7 @@ class SupabaseManager {
         email: response['email'] ?? user.email ?? '',
         phone: response['telefono'] ?? '',
         registrationDate: DateTime.tryParse(user.createdAt) ?? DateTime.now(),
+        status: response['estado'],
       );
     } catch (e) {
       print("❌ Error mapping user: $e");
@@ -181,6 +184,7 @@ class SupabaseManager {
                   role: userData['rol'] ?? 'Inactivo',
                   email: userData['email'] ?? '',
                   phone: userData['telefono'] ?? '',
+                  status: userData['estado'],
                   // Parse the registration date from the 'created_at' field,
                   // fallback to current time if parsing fails.
                   registrationDate:

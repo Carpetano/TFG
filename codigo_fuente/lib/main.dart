@@ -113,6 +113,10 @@ class _MyHomePageState extends State<MyHomePage> {
     final supabaseUser = await SupabaseManager.instance.register(
       _emailController.text,
       _passwordController.text,
+      "Sin asignar",
+      "Sin asignar",
+      "Sin asignar",
+      "Sin asignar",
     );
 
     if (supabaseUser != null) {

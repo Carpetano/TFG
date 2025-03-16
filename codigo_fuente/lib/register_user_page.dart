@@ -1,12 +1,8 @@
+import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:codigo/mysql_manager.dart';
-import 'package:bcrypt/bcrypt.dart';
 
 class RegistrationPage extends StatefulWidget {
-  final MysqlManager dbManager;
-
-  // Constructor
-  const RegistrationPage({Key? key, required this.dbManager}) : super(key: key);
+  const RegistrationPage({Key? key}) : super(key: key);
 
   @override
   State<RegistrationPage> createState() => _MyWidgetState();
@@ -55,7 +51,6 @@ class _MyWidgetState extends State<RegistrationPage>
     String secondLastName = _secondLastNameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
-    String hashedPassword = hashPassword(password);
     String phone = _phoneController.text;
     String selectedRoleText = selectedRole!.replaceAll(
       ' ',
@@ -68,27 +63,17 @@ class _MyWidgetState extends State<RegistrationPage>
     print('Second Last Name: $secondLastName');
     print('Email: $email');
     print('Password: $password');
-    print('Hashed password: $hashedPassword');
     print('Phone: $phone');
     print('Selected Role: $selectedRoleText');
 
-    // Finally insert into db
-    widget.dbManager.registerUser(
-      email: email,
-      hashedPassword: hashedPassword,
-      firstName: firstName,
-      lastName: lastName,
-      secondLastName: secondLastName,
-      phone: phone,
-      role: selectedRoleText,
-      registrationDate: DateTime.now(),
+    SupabaseManager.instance.register(
+      email,
+      password,
+      firstName,
+      lastName,
+      secondLastName,
+      phone,
     );
-  }
-
-  String hashPassword(String password) {
-    const String fixedSalt =
-        '\$2a\$10\$yVxztTQyA0dxldZfbx7TuOQ2akDZxKc6o7l0ns29kw.XJ2ykQyySO';
-    return BCrypt.hashpw(password, fixedSalt);
   }
 
   @override

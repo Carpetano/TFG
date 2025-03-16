@@ -44,7 +44,14 @@ class SupabaseManager {
   }
 
   // Register function - Now returns a LoggedInUser
-  Future<LoggedInUser?> register(String email, String password) async {
+  Future<LoggedInUser?> register(
+    String email,
+    String password,
+    String name,
+    String lastName,
+    String secondLastName,
+    String phone,
+  ) async {
     try {
       final AuthResponse response = await Supabase.instance.client.auth.signUp(
         email: email,
@@ -63,10 +70,10 @@ class SupabaseManager {
                   'id_auth': userId,
                   'rol': 'Sala_de_Profesores',
                   'estado': 'Inactivo',
-                  'nombre': null, // NULL values allowed
-                  'apellido1': null,
-                  'apellido2': null,
-                  'telefono': null,
+                  'nombre': name, // NULL values allowed
+                  'apellido1': lastName,
+                  'apellido2': secondLastName,
+                  'telefono': phone,
                   'email': userEmail,
                 })
                 .select()
@@ -119,6 +126,49 @@ class SupabaseManager {
     } catch (e) {
       print("❌ Error mapping user: $e");
       return null;
+    }
+  }
+
+  Future<List<LoggedInUser>> getAllUsers() async {
+    try {
+      // Fetch all users from the 'usuarios' table.
+      // The call returns a PostgrestList (essentially a List) directly.
+      final response = await Supabase.instance.client.from('usuarios').select();
+
+      // Check if the response is null or empty.
+      if (response == null || (response is List && response.isEmpty)) {
+        print("❌ No users found in the 'usuarios' table.");
+        return []; // Return an empty list if no data is found.
+      }
+
+      // Map each entry in the response list to a LoggedInUser object.
+      List<LoggedInUser> users =
+          (response as List)
+              .map(
+                (userData) => LoggedInUser(
+                  id: userData['id_usuario'],
+                  authId: userData['id_auth'],
+                  firstName: userData['nombre'] ?? '',
+                  lastName: userData['apellido1'] ?? '',
+                  secondLastName: userData['apellido2'] ?? '',
+                  role: userData['rol'] ?? 'Inactivo',
+                  email: userData['email'] ?? '',
+                  phone: userData['telefono'] ?? '',
+                  // Parse the registration date from the 'created_at' field,
+                  // fallback to current time if parsing fails.
+                  registrationDate:
+                      DateTime.tryParse(userData['created_at'] ?? '') ??
+                      DateTime.now(),
+                ),
+              )
+              .toList();
+
+      // Return the list of LoggedInUser objects.
+      return users;
+    } catch (e) {
+      // If an error occurs during the query, log the error and return an empty list.
+      print("❌ Error fetching users: $e");
+      return [];
     }
   }
 }

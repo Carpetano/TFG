@@ -1,6 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'package:codigo/Paginas/admin_main_menu_page.dart';
 import 'package:codigo/Paginas/sala_main_menu_page.dart';
 import 'package:codigo/supabase_manager.dart';
+import 'package:codigo/theme_config.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:video_player/video_player.dart';
@@ -34,90 +37,22 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Guardias Calderón',
-      themeMode: _themeMode, // Set theme mode dynamically
-      theme: ThemeData(
-        // Define the main color scheme for the application
-        colorScheme: ColorScheme(
-          primary:
-              Colors
-                  .black, // Main color for primary elements (e.g. AppBar, Buttons)
-          secondary: Colors.blue, // Accent color used in UI elements like FABs
-          surface: Colors.white, // Surface color for cards, dialogs, etc.
-          error:
-              Colors
-                  .red, // Error color, typically used for form fields, error messages
-          onPrimary:
-              Colors.white, // Text and icons on the primary background color
-          onSecondary:
-              Colors.white, // Text and icons on the secondary background color
-          onSurface:
-              Colors
-                  .black, // Text and icons on surface (e.g. Card) background color
-          onError: Colors.white, // Text and icons on error color background
-          brightness: Brightness.light, // Light theme
-        ),
-        scaffoldBackgroundColor:
-            Colors.grey[100], // App background color (light grey)
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.black, // Black AppBar
-          foregroundColor: Colors.white, // White text/icons on the AppBar
-        ),
-        buttonTheme: ButtonThemeData(
-          buttonColor: Colors.blue, // Default button color
-          textTheme: ButtonTextTheme.primary, // Button text color (inverted)
-        ),
-        textTheme: TextTheme(
-          bodySmall: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
-          bodyMedium: TextStyle(color: Colors.grey[700], fontFamily: 'Roboto'),
-          bodyLarge: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Roboto',
-          ),
-        ),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme(
-          primary: Colors.white, // Main color for primary elements in dark mode
-          secondary: Colors.blue, // Accent color used in UI elements like FABs
-          surface: Colors.black, // Surface color for dark mode (cards, dialogs)
-          error: Colors.red,
-          onPrimary:
-              Colors.black, // Text and icons on primary background in dark mode
-          onSecondary: Colors.black, // Text and icons on secondary background
-          onSurface: Colors.white, // Text and icons on surface (e.g. Card)
-          onError: Colors.black, // Text and icons on error background
-          brightness: Brightness.dark, // Dark theme
-        ),
-        scaffoldBackgroundColor: Colors.grey[900], // Dark background color
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.black, // Black AppBar
-          foregroundColor: Colors.white, // White text/icons on the AppBar
-        ),
-        buttonTheme: ButtonThemeData(
-          buttonColor: Colors.blue,
-          textTheme: ButtonTextTheme.primary,
-        ),
-        textTheme: TextTheme(
-          bodySmall: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-          bodyMedium: TextStyle(color: Colors.grey[400], fontFamily: 'Roboto'),
-          bodyLarge: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Roboto',
-          ),
-        ),
-      ),
-      home: const MyHomePage(title: 'Iniciar Sesión'),
+    return AppEasyTheme().buildAppWithTheme(
+      isDarkMode: _themeMode == ThemeMode.dark, // Pass the correct theme mode
+      title: "Test",
+      onThemeToggle: _toggleTheme, // Pass the theme toggle function
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({
+    super.key,
+    required this.title,
+    required this.onThemeToggle,
+  });
   final String title;
+  final VoidCallback onThemeToggle; // Accept the theme toggle function
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -238,24 +173,18 @@ class _MyHomePageState extends State<MyHomePage> {
               ? buildDesktopLayout(screenWidth, screenHeight)
               : buildMobileLayout(screenWidth),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            // Toggle the theme mode when the button is pressed
-            (context.findAncestorStateOfType<_MyAppState>() as _MyAppState)
-                ._toggleTheme();
-          });
-        },
-        child: Icon(Icons.brightness_6),
+        onPressed: widget.onThemeToggle,
         backgroundColor:
             Theme.of(
               context,
-            ).colorScheme.secondary, // Accent color for the button
+            ).colorScheme.secondary, // Call the theme toggle function
+        child: Icon(Icons.brightness_6), // Accent color for the button
       ),
     );
   }
 
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
-    return Container(
+    return SizedBox(
       height: screenHeight, // Full vertical space
       child: Row(
         children: [
@@ -314,17 +243,40 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
+          // Vertical Divider (Bar) between the two sections
+          VerticalDivider(
+            thickness: 1, // Thickness of the divider
+            width: 1, // Width of the divider
+            color:
+                Theme.of(context).colorScheme.onSurfaceVariant, // Divider color
+          ),
           // Video Section (40% width)
           Expanded(
             flex: 2, // 40% of the screen
             child: Container(
-              color: Colors.grey[200], // Placeholder background
+              padding: EdgeInsets.all(20),
               child: Center(
                 child:
                     _videoController.value.isInitialized
-                        ? AspectRatio(
-                          aspectRatio: _videoController.value.aspectRatio,
-                          child: VideoPlayer(_videoController),
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                            10,
+                          ), // Rounded corners
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.primary, // Border color
+                                width: 2, // Border width
+                              ),
+                            ),
+                            child: AspectRatio(
+                              aspectRatio: _videoController.value.aspectRatio,
+                              child: VideoPlayer(_videoController),
+                            ),
+                          ),
                         )
                         : CircularProgressIndicator(),
               ),

@@ -32,11 +32,9 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage>
       appBar: AppBar(title: Text("Menú administrador")),
       body: Column(
         children: [
-          //
-          //
-          // GO TO USER REGISTRATION PAGE
+          // Existing content
           Row(
-            mainAxisAlignment: MainAxisAlignment.center, // Centers items in row
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
                 onPressed: () {
@@ -49,14 +47,10 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage>
                 },
                 child: Text('Registrar nuevo Usuario'),
               ),
-              SizedBox(width: 20), // Space between buttons
+              SizedBox(width: 20),
             ],
           ),
-          SizedBox(height: 20), // Space between row and next element
-          //
-          //
-          // GO TO VIEW USERS
-          SizedBox(height: 20), // Space before next row
+          SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -90,6 +84,9 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage>
               ),
             ],
           ),
+          SizedBox(height: 20),
+
+          // Floating action button to toggle theme
         ],
       ),
     );

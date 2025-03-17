@@ -112,11 +112,6 @@ class SupabaseManager {
               .eq('id_auth', user.id)
               .single();
 
-      if (response == null) {
-        print("❌ Error: No profile found for user ${user.id}");
-        return null;
-      }
-
       return UserObject(
         id: response['id_usuario'],
         authId: user.id,
@@ -167,7 +162,7 @@ class SupabaseManager {
       final response = await Supabase.instance.client.from('usuarios').select();
 
       // Check if the response is null or empty.
-      if (response == null || (response is List && response.isEmpty)) {
+      if ((response.isEmpty)) {
         print("❌ No users found in the 'usuarios' table.");
         return []; // Return an empty list if no data is found.
       }
@@ -241,7 +236,7 @@ class SupabaseManager {
       print("Raw Supabase Response: $response");
 
       // Check if response is empty
-      if (response == null || response.isEmpty) {
+      if (response.isEmpty) {
         print("No active users found.");
         return [];
       }
@@ -333,24 +328,20 @@ class SupabaseManager {
               .single(); // This assumes that the query returns a single result
 
       // Check if response is not null and map it to UserObject
-      if (response != null) {
-        return UserObject(
-          id: response['id_usuario'] ?? 0,
-          authId: response['auth_id'] ?? '',
-          role: response['role'] ?? '',
-          firstName: response['primer_nombre'] ?? '',
-          lastName: response['apellido_paterno'] ?? '',
-          secondLastName: response['apellido_materno'] ?? '',
-          phone: response['telefono'] ?? '',
-          email: response['email'] ?? '',
-          registrationDate: DateTime.parse(
-            response['fecha_registro'] ?? '2000-01-01',
-          ),
-          status: response['estado'] ?? '',
-        );
-      } else {
-        throw Exception('User not found');
-      }
+      return UserObject(
+        id: response['id_usuario'] ?? 0,
+        authId: response['auth_id'] ?? '',
+        role: response['role'] ?? '',
+        firstName: response['primer_nombre'] ?? '',
+        lastName: response['apellido_paterno'] ?? '',
+        secondLastName: response['apellido_materno'] ?? '',
+        phone: response['telefono'] ?? '',
+        email: response['email'] ?? '',
+        registrationDate: DateTime.parse(
+          response['fecha_registro'] ?? '2000-01-01',
+        ),
+        status: response['estado'] ?? '',
+      );
     } catch (e) {
       print("Error getting user object: $e");
       rethrow; // Re-throw the exception so you can handle it higher up

@@ -179,7 +179,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
                   foregroundColor:
                       _selectedDay != null ? Colors.black : Colors.grey[600],
                 ),
-                child: const Text("Añadir baja"),
+                child: const Text("Añadir Ausencia"),
               ),
 
               ElevatedButton(

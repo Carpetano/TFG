@@ -353,6 +353,29 @@ class _MyHomePageState extends State<MyHomePage> {
               decoration: InputDecoration(hintText: "Contraseña"),
             ),
           ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  Theme.of(context).colorScheme.primary, // Background color
+              foregroundColor:
+                  Theme.of(context).colorScheme.onPrimary, // Text color
+              padding: EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ), // Button padding
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+                side: BorderSide(
+                  color:
+                      Theme.of(context).colorScheme.secondary, // Border color
+                  width: 2, // Border thickness
+                ),
+              ),
+            ),
+            onPressed: supabaseLogin,
+            child: Text("Iniciar Sesión"),
+          ),
         ],
       ),
     );

@@ -306,7 +306,7 @@ class SupabaseManager {
           (response as List)
               .map(
                 (ausenciaData) => AusenciaObject(
-                  id: ausenciaData['id'] ?? 0, // id
+                  id: ausenciaData['id_ausencia'] ?? 0, // id
                   missingTeacherId:
                       ausenciaData['profesor_ausente'] ?? 0, // profesor_ausente
                   classCode: ausenciaData['aula'] ?? '', // aula
@@ -320,6 +320,40 @@ class SupabaseManager {
     } catch (e) {
       print("Error getting all unassigned ausencias: $e");
       return []; // Return empty list in case of exception
+    }
+  }
+
+  Future<UserObject> getUserObjectById(int id) async {
+    try {
+      final response =
+          await Supabase.instance.client
+              .from('usuarios')
+              .select()
+              .eq('id_usuario', id)
+              .single(); // This assumes that the query returns a single result
+
+      // Check if response is not null and map it to UserObject
+      if (response != null) {
+        return UserObject(
+          id: response['id_usuario'] ?? 0,
+          authId: response['auth_id'] ?? '',
+          role: response['role'] ?? '',
+          firstName: response['primer_nombre'] ?? '',
+          lastName: response['apellido_paterno'] ?? '',
+          secondLastName: response['apellido_materno'] ?? '',
+          phone: response['telefono'] ?? '',
+          email: response['email'] ?? '',
+          registrationDate: DateTime.parse(
+            response['fecha_registro'] ?? '2000-01-01',
+          ),
+          status: response['estado'] ?? '',
+        );
+      } else {
+        throw Exception('User not found');
+      }
+    } catch (e) {
+      print("Error getting user object: $e");
+      rethrow; // Re-throw the exception so you can handle it higher up
     }
   }
 }

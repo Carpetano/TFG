@@ -1,3 +1,4 @@
+import 'package:codigo/profesor_main_menu_page.dart';
 import 'package:codigo/register_user_page.dart';
 import 'package:codigo/view_Users_page.dart';
 import 'package:flutter/material.dart';
@@ -71,6 +72,24 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage>
                   );
                 },
                 child: Text('Ver Usuarios registrados'),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  print("thing2");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfesorMainMenuPage(),
+                    ),
+                  );
+                },
+                child: Text('Ver ausencias'),
               ),
             ],
           ),

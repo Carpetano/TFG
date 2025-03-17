@@ -1,8 +1,12 @@
+// ignore_for_file: avoid_print
+
 import 'package:codigo/add_ausencia_page.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:codigo/ausencia_object.dart'; // Your model for 'ausencias'
+import 'package:codigo/user_object.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart'; // Import the slidable package
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Import the slidable package
 
 class ProfesorMainMenuPage extends StatefulWidget {
   const ProfesorMainMenuPage({super.key});
@@ -58,9 +62,46 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
   }
 
   // Function to show info of an ausencia
-  void showInfo(AusenciaObject ausencia) {
+  void showInfo(AusenciaObject ausencia) async {
     print("Showing info for ausencia with id: ${ausencia.id}");
-    // You can navigate to a new screen here to show details
+
+    // Fetch the user data asynchronously
+    UserObject user = await SupabaseManager.instance.getUserObjectById(
+      ausencia.missingTeacherId,
+    );
+
+    if (!mounted) return;
+
+    // Show the AlertDialog
+    showDialog(
+      context: context, // The BuildContext to show the dialog in
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Información de Ausencia'),
+          content: Column(
+            mainAxisSize:
+                MainAxisSize.min, // This makes the dialog content fit its size
+            children: [
+              Text('ID: ${ausencia.id}'),
+              Text(
+                'Profesor Ausente: ${user.id} ${user.firstName} ${user.lastName}',
+              ), // Display the user's first and last name
+              Text('Aula: ${ausencia.classCode}'),
+              Text('Tarea: ${ausencia.tasks}'),
+              Text('Estado: ${ausencia.status}'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

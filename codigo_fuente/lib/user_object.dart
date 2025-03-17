@@ -25,22 +25,6 @@ class UserObject {
     required this.status,
   });
 
-  // Convert a JSON map to a User object
-  factory UserObject.fromJson(Map<String, dynamic> json) {
-    return UserObject(
-      id: json['id_usuario'],
-      firstName: json['nombre'],
-      lastName: json['apellido1'],
-      secondLastName: json['apellido2'],
-      role: json['rol'],
-      email: json['email'],
-      phone: json['telefono'],
-      registrationDate: DateTime.parse(json['fecha_incorporacion']),
-      authId: json['auth_id'],
-      status: json['estado'],
-    );
-  }
-
   // Add a toString method for better readability
   @override
   String toString() {

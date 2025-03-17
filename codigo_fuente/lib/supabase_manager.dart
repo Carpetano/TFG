@@ -1,7 +1,8 @@
 // ignore_for_file: avoid_print
 
+import 'package:codigo/aula_object.dart';
+import 'package:codigo/ausencia_object.dart';
 import 'package:codigo/user_object.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseManager {
@@ -200,6 +201,125 @@ class SupabaseManager {
       // If an error occurs during the query, log the error and return an empty list.
       print("❌ Error fetching users: $e");
       return [];
+    }
+  }
+
+  Future<void> insertAusencia(
+    int missingTeacherId,
+    String classCode,
+    String status,
+    String task,
+    DateTime horaInicio, // Change to DateTime
+    DateTime horaFin, // Change to DateTime
+  ) async {
+    try {
+      final response = await Supabase.instance.client.from('ausencias').insert({
+        'profesor_ausente': missingTeacherId,
+        'aula': classCode,
+        'tarea': task,
+        'estado': status,
+        'hora_inicio':
+            horaInicio.toIso8601String(), // Convert DateTime to string
+        'hora_fin': horaFin.toIso8601String(), // Convert DateTime to string
+      });
+
+      print("Inserted Ausencia: $response");
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Future<List<UserObject>> getActiveUsers() async {
+    try {
+      // Fetch data from Supabase
+      final response = await Supabase.instance.client
+          .from('usuarios')
+          .select()
+          .ilike('estado', 'activo'); // Case-insensitive match
+
+      // Debugging: Print raw response
+      print("Raw Supabase Response: $response");
+
+      // Check if response is empty
+      if (response == null || response.isEmpty) {
+        print("No active users found.");
+        return [];
+      }
+
+      // Map response to UserObject list
+      List<UserObject> users =
+          response.map<UserObject>((userData) {
+            return UserObject(
+              id: userData['id_usuario'],
+              authId: userData['id_auth'],
+              firstName: userData['nombre'] ?? '',
+              lastName: userData['apellido1'] ?? '',
+              secondLastName: userData['apellido2'] ?? '',
+              role: userData['rol'] ?? 'Inactivo',
+              email: userData['email'] ?? '',
+              phone: userData['telefono'] ?? '',
+              status: userData['estado'],
+              registrationDate:
+                  DateTime.tryParse(userData['created_at'] ?? '') ??
+                  DateTime.now(),
+            );
+          }).toList();
+
+      return users;
+    } catch (e) {
+      print("Error getting active users: $e");
+      return [];
+    }
+  }
+
+  Future<List<AulaObject>> getAllAulas() async {
+    try {
+      final response = await Supabase.instance.client.from('aulas').select();
+
+      List<AulaObject> aulas =
+          (response as List)
+              .map(
+                (aulaData) => AulaObject(
+                  classcode: aulaData['cod_aula'] ?? '',
+                  floor: aulaData['planta'] ?? '',
+                  wing: aulaData['ala'] ?? '',
+                  group: aulaData['grupo'] ?? '',
+                ),
+              )
+              .toList();
+
+      return aulas;
+    } catch (e) {
+      print("Error getting aulas: $e");
+      return [];
+    }
+  }
+
+  Future<List<AusenciaObject>> getAllUnasignedAusencias() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('ausencias')
+          .select()
+          .like('estado', 'Pendiente'); // Execute the query
+
+      List<AusenciaObject> ausencias =
+          (response as List)
+              .map(
+                (ausenciaData) => AusenciaObject(
+                  id: ausenciaData['id'] ?? 0, // id
+                  missingTeacherId:
+                      ausenciaData['profesor_ausente'] ?? 0, // profesor_ausente
+                  classCode: ausenciaData['aula'] ?? '', // aula
+                  tasks: ausenciaData['tarea'] ?? '', // tarea
+                  status: ausenciaData['estado'] ?? '', // estado
+                ),
+              )
+              .toList();
+
+      return ausencias;
+    } catch (e) {
+      print("Error getting all unassigned ausencias: $e");
+      return []; // Return empty list in case of exception
     }
   }
 }

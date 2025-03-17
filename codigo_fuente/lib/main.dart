@@ -192,6 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             flex: 3, // 60% of the screen
             child: Container(
+              color: Theme.of(context).colorScheme.surface,
               padding: EdgeInsets.all(40),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -236,8 +237,32 @@ class _MyHomePageState extends State<MyHomePage> {
                   SizedBox(height: 40),
                   // LOGIN BUTTON
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(
+                            context,
+                          ).colorScheme.primary, // Background color
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onPrimary, // Text color
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ), // Button padding
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          8,
+                        ), // Rounded corners
+                        side: BorderSide(
+                          color:
+                              Theme.of(
+                                context,
+                              ).colorScheme.secondary, // Border color
+                          width: 2, // Border thickness
+                        ),
+                      ),
+                    ),
                     onPressed: supabaseLogin,
-                    child: Text("Login in Supabase"),
+                    child: Text("Iniciar Sesión"),
                   ),
                 ],
               ),
@@ -269,7 +294,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     Theme.of(
                                       context,
                                     ).colorScheme.primary, // Border color
-                                width: 2, // Border width
+                                width: 3, // Border width
                               ),
                             ),
                             child: AspectRatio(
@@ -292,6 +317,26 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Text(
+            "Guardias Calderón",
+            style: TextStyle(
+              fontSize: 48, // Font size of 48
+              fontWeight: FontWeight.bold, // Make the text bold
+              fontStyle: FontStyle.italic, // Make the text italic
+              color:
+                  Theme.of(
+                    context,
+                  ).colorScheme.primary, // Use the primary color from the theme
+              shadows: [
+                Shadow(
+                  blurRadius: 30.0, // Blur radius of the shadow
+                  color: Theme.of(context).colorScheme.primary, // Shadow color
+                  offset: Offset(5.0, 5.0), // Shadow offset (x, y)
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
           SizedBox(
             width: screenWidth * 0.8,
             child: TextFormField(

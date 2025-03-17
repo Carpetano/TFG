@@ -39,7 +39,7 @@ class AppEasyTheme {
                   .black87, // Text color on surface-colored elements (soft black text)
           onSurfaceVariant:
               Colors
-                  .grey[600]!, // Text color for secondary surfaces or variant elements
+                  .grey[300]!, // Text color for secondary surfaces or variant elements
           onError:
               Colors
                   .white, // Text color for error-related elements (white text on red)
@@ -103,7 +103,7 @@ class AppEasyTheme {
                   .white70, // Text color on surface-colored elements (light text on dark backgrounds)
           onSurfaceVariant:
               Colors
-                  .grey[400]!, // Text color for secondary surfaces or variant elements
+                  .grey[800]!, // Text color for secondary surfaces or variant elements
           onError:
               Colors
                   .white, // Text color for error-related elements (white text on red)

@@ -4,31 +4,6 @@ import 'screens/asignar_guardia.dart';
 import 'screens/anadir_baja.dart';
 import 'screens/mis_guardias.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Gestión de Guardias',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-        scaffoldBackgroundColor: Colors.white,
-        primaryColor: Colors.blueAccent,
-        buttonTheme: ButtonThemeData(
-          buttonColor: Colors.blueAccent,
-          textTheme: ButtonTextTheme.primary,
-        ),
-      ),
-      home: const CalendarScreen(),
-    );
-  }
-}
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});

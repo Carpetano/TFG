@@ -199,28 +199,30 @@ class SupabaseManager {
     }
   }
 
+  /// Inserts a new ausencia record into the "ausencias" table.
+  /// Optionally, an assignedTeacherId can be provided.
   Future<void> insertAusencia(
     int missingTeacherId,
     String classCode,
     String status,
     String task,
-    DateTime horaInicio, // Change to DateTime
-    DateTime horaFin, // Change to DateTime
-  ) async {
+    DateTime horaInicio,
+    DateTime horaFin, {
+    int? assignedTeacherId, // Optional: assigned teacher (profesor_asignado)
+  }) async {
     try {
       final response = await Supabase.instance.client.from('ausencias').insert({
         'profesor_ausente': missingTeacherId,
+        'profesor_asignado': assignedTeacherId,
         'aula': classCode,
         'tarea': task,
         'estado': status,
-        'hora_inicio':
-            horaInicio.toIso8601String(), // Convert DateTime to string
-        'hora_fin': horaFin.toIso8601String(), // Convert DateTime to string
+        'hora_inicio': horaInicio.toIso8601String(),
+        'hora_fin': horaFin.toIso8601String(),
       });
-
       print("Inserted Ausencia: $response");
     } catch (e) {
-      print("Error: $e");
+      print("Error inserting ausencia: $e");
     }
   }
 
@@ -290,31 +292,33 @@ class SupabaseManager {
     }
   }
 
+  /// Retrieves all ausencias with a pending status (or "Pendiente")
+  /// and maps them to a list of AusenciaObject.
   Future<List<AusenciaObject>> getAllUnasignedAusencias() async {
     try {
       final response = await Supabase.instance.client
           .from('ausencias')
           .select()
-          .like('estado', 'Pendiente'); // Execute the query
+          .like('estado', 'Pendiente'); // Filter for pending ausencias
 
       List<AusenciaObject> ausencias =
-          (response as List)
-              .map(
-                (ausenciaData) => AusenciaObject(
-                  id: ausenciaData['id_ausencia'] ?? 0, // id
-                  missingTeacherId:
-                      ausenciaData['profesor_ausente'] ?? 0, // profesor_ausente
-                  classCode: ausenciaData['aula'] ?? '', // aula
-                  tasks: ausenciaData['tarea'] ?? '', // tarea
-                  status: ausenciaData['estado'] ?? '', // estado
-                ),
-              )
-              .toList();
+          (response as List).map((ausenciaData) {
+            return AusenciaObject(
+              id: ausenciaData['id_ausencia'] ?? 0,
+              missingTeacherId: ausenciaData['profesor_ausente'] ?? 0,
+              assignedTeacherId: ausenciaData['profesor_asignado'] as int?,
+              classCode: ausenciaData['aula'] ?? '',
+              tasks: ausenciaData['tarea'] ?? '',
+              status: ausenciaData['estado'] ?? '',
+              startTime: DateTime.parse(ausenciaData['hora_inicio']),
+              endTime: DateTime.parse(ausenciaData['hora_fin']),
+            );
+          }).toList();
 
       return ausencias;
     } catch (e) {
       print("Error getting all unassigned ausencias: $e");
-      return []; // Return empty list in case of exception
+      return []; // Return empty list in case of error
     }
   }
 

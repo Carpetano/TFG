@@ -1,13 +1,13 @@
 // ignore_for_file: avoid_print
 
 import 'package:codigo/Paginas/admin_main_menu_page.dart';
+import 'package:codigo/Paginas/profesor_main_menu_page.dart';
 import 'package:codigo/Paginas/sala_main_menu_page.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:codigo/theme_config.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:video_player/video_player.dart';
-import 'package:codigo/Paginas/profesor_main_menu_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure initialization

@@ -1,176 +1,213 @@
 // ignore_for_file: avoid_print
 
 import 'package:codigo/Objetos/ausencia_object.dart';
-import 'package:codigo/Objetos/user_object.dart';
-import 'package:codigo/Paginas/add_ausencia_page.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:codigo/Paginas/asignar_guardia.dart';
+import 'package:codigo/Paginas/add_ausencia_page.dart';
+import 'package:codigo/Paginas/mis_guardias.dart';
 
 class ProfesorMainMenuPage extends StatefulWidget {
   const ProfesorMainMenuPage({super.key});
 
   @override
-  State<ProfesorMainMenuPage> createState() => _ProfesorMainMenuPageState();
+  _ProfesorMainMenuPageState createState() => _ProfesorMainMenuPageState();
 }
 
-class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  List<AusenciaObject> ausencias = []; // List to store fetched 'ausencias'
+class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime? _selectedDay;
+  DateTime _focusedDay = DateTime.now();
+  List<AusenciaObject> unasignedAusencias = []; // Holds all retrieved ausencias
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
-    fetchAusencias(); // Fetch the ausencias when the page is initialized
+    fetchUnasignedAusencias();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  // Fetch the ausencias from the database
-  Future<void> fetchAusencias() async {
-    try {
-      // Fetch the list of unassigned ausencias (pendiente)
-      List<AusenciaObject> fetchedAusencias =
-          await SupabaseManager.instance.getAllUnasignedAusencias();
-      setState(() {
-        ausencias = fetchedAusencias; // Set the fetched ausencias to the state
-      });
-    } catch (e) {
-      print("Error fetching ausencias: $e");
+  /// Fetches all pending ausencias from Supabase and saves them in state.
+  Future<void> fetchUnasignedAusencias() async {
+    final response = await SupabaseManager.instance.getAllUnasignedAusencias();
+    setState(() {
+      unasignedAusencias = response;
+    });
+    // Debug print each ausencia
+    for (var ausencia in response) {
+      print(
+        "ID: ${ausencia.id}, Teacher ID: ${ausencia.missingTeacherId}, "
+        "Class: ${ausencia.classCode}, Task: ${ausencia.tasks}, "
+        "Status: ${ausencia.status}, From: ${ausencia.startTime}, Until: ${ausencia.endTime}",
+      );
     }
   }
 
-  void gotoAddAusencia() {
-    print("Navigating to Adding ausencia page");
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AddAusenciaPage()),
-    );
-  }
+  List<AusenciaObject> _getEventsForDay(DateTime day) {
+    // Exclude weekends (Saturday = 6, Sunday = 7)
+    if (day.weekday == DateTime.saturday || day.weekday == DateTime.sunday) {
+      return [];
+    }
 
-  // Function to delete an ausencia
-  void deleteAusencia(AusenciaObject ausencia) async {
-    print("Deleting $ausencia");
-    // Add your delete functionality here
-  }
+    // Define the start and end of the day in local time.
+    final dayStart = DateTime(day.year, day.month, day.day, 0, 0, 0);
+    final dayEnd = DateTime(day.year, day.month, day.day, 23, 59, 59);
 
-  // Function to show info of an ausencia
-  void showInfo(AusenciaObject ausencia) async {
-    print("Showing info for ausencia with id: ${ausencia.id}");
+    return unasignedAusencias.where((ausencia) {
+      // Convert the absence times (stored in UTC) to local time.
+      final eventStart = ausencia.startTime.toLocal();
+      final eventEnd = ausencia.endTime.toLocal();
 
-    // Fetch the user data asynchronously
-    UserObject user = await SupabaseManager.instance.getUserObjectById(
-      ausencia.missingTeacherId,
-    );
-
-    if (!mounted) return;
-
-    // Show the AlertDialog
-    showDialog(
-      context: context, // The BuildContext to show the dialog in
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Información de Ausencia'),
-          content: Column(
-            mainAxisSize:
-                MainAxisSize.min, // This makes the dialog content fit its size
-            children: [
-              Text('ID: ${ausencia.id}'),
-              Text(
-                'Profesor Ausente: ${user.id} ${user.firstName} ${user.lastName}',
-              ), // Display the user's first and last name
-              Text('Aula: ${ausencia.classCode}'),
-              Text('Tarea: ${ausencia.tasks}'),
-              Text('Estado: ${ausencia.status}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
+      // Check if the event overlaps the day.
+      return eventStart.isBefore(dayEnd) && eventEnd.isAfter(dayStart);
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Menú profesor")),
+      appBar: AppBar(
+        title: const Text(
+          "Profesor: {Nombre}",
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: const [
+          Icon(Icons.account_circle, size: 30, color: Colors.white),
+          SizedBox(width: 10),
+        ],
+        backgroundColor: Colors.blueAccent,
+      ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Display a loading indicator while fetching data
-          if (ausencias.isEmpty) Center(child: CircularProgressIndicator()),
+          const SizedBox(height: 20),
+          TableCalendar(
+            firstDay: DateTime.utc(2000, 1, 1),
+            lastDay: DateTime.utc(2100, 12, 31),
+            focusedDay: _focusedDay,
+            calendarFormat: _calendarFormat,
+            selectedDayPredicate:
+                (day) => _selectedDay != null && isSameDay(_selectedDay, day),
+            eventLoader:
+                _getEventsForDay, // Returns ausencias for the given day
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                if (_selectedDay != null &&
+                    isSameDay(_selectedDay, selectedDay)) {
+                  _selectedDay = null;
+                } else {
+                  _selectedDay = selectedDay;
+                }
+                _focusedDay = focusedDay;
+              });
+            },
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+            },
+            headerStyle: HeaderStyle(
+              titleTextStyle: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+              ),
+            ),
+            calendarStyle: CalendarStyle(
+              defaultDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.black12, width: 1),
+              ),
+              todayDecoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.blueAccent, width: 2),
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              // Marker decoration for days with events (ausencias)
+              markerDecoration: BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed:
+                    _selectedDay != null
+                        ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AsignarGuardia(),
+                            ),
+                          );
+                        }
+                        : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      _selectedDay != null
+                          ? Colors.blueAccent
+                          : Colors.grey[400],
+                  foregroundColor:
+                      _selectedDay != null ? Colors.black : Colors.grey[600],
+                ),
+                child: const Text("Asignar guardia"),
+              ),
+              ElevatedButton(
+                onPressed:
+                    _selectedDay != null
+                        ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      AddAusenciaPage(day: _selectedDay!),
+                            ),
+                          );
+                        }
+                        : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      _selectedDay != null
+                          ? Colors.blueAccent
+                          : Colors.grey[400],
+                  foregroundColor:
+                      _selectedDay != null ? Colors.black : Colors.grey[600],
+                ),
+                child: const Text("Añadir baja"),
+              ),
 
-          // If there are ausencias, display them in a slidable list
-          if (ausencias.isNotEmpty)
-            Expanded(
-              child: ListView.builder(
-                itemCount: ausencias.length,
-                itemBuilder: (context, index) {
-                  final ausencia = ausencias[index];
-
-                  return Slidable(
-                    // Action when swiped from the start (left)
-                    startActionPane: ActionPane(
-                      motion: const DrawerMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (context) {
-                            // Show info about the ausencia
-                            showInfo(ausencia);
-                          },
-                          backgroundColor: Colors.blue,
-                          icon: Icons.info,
-                          label: 'Info',
-                        ),
-                      ],
-                    ),
-                    // Action when swiped from the end (right)
-                    endActionPane: ActionPane(
-                      motion: const DrawerMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (context) {
-                            // Delete the ausencia
-                            deleteAusencia(ausencia);
-                          },
-                          backgroundColor: Colors.red,
-                          icon: Icons.delete,
-                          label: 'Eliminar',
-                        ),
-                      ],
-                    ),
-                    // Child is a simple Row with Text
-                    child: ListTile(
-                      title: Text("Ausencia: ${ausencia.missingTeacherId}"),
-                      subtitle: Text("Aula: ${ausencia.classCode}"),
-                      onTap: () {
-                        // You can navigate to a new screen to show details or edit
-                      },
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MisGuardias(),
                     ),
                   );
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.black,
+                ),
+                child: const Text("Ver mis guardias"),
               ),
-            ),
-          SizedBox(height: 10),
-          // The button to "Add new Ausencia"
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: ElevatedButton(
-              onPressed: gotoAddAusencia, // Trigger the same navigation
-              child: Text("Añadir Nueva Ausencia"),
-            ),
+            ],
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (_selectedDay != null) {
+                print("Selected date: $_selectedDay");
+              } else {
+                print("No date selected");
+              }
+            },
+            child: const Text("Print Selected Date"),
           ),
         ],
       ),

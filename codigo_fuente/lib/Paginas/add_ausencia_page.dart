@@ -1,46 +1,45 @@
 // ignore_for_file: avoid_print
 
 import 'package:codigo/Objetos/aula_object.dart';
-import 'package:codigo/supabase_manager.dart';
 import 'package:codigo/Objetos/user_object.dart';
+import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 
 class AddAusenciaPage extends StatefulWidget {
-  const AddAusenciaPage({super.key});
+  DateTime day;
+  AddAusenciaPage({super.key, required this.day});
 
   @override
   State<AddAusenciaPage> createState() => _AddAusenciaPageState();
 }
 
-class _AddAusenciaPageState extends State<AddAusenciaPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  String? selectedStatus = 'Pendiente';
+class _AddAusenciaPageState extends State<AddAusenciaPage> {
+  final TextEditingController comentarioController = TextEditingController();
+
+  List<UserObject> teachersToAssign = [];
+  List<AulaObject> classesToSelect = [];
   String? selectedTeacherId;
-  String? selectedAulaCode;
-  List<UserObject>? teachersToAssign;
-  List<AulaObject>? classesToAssign;
+  String? selectedClassCode; // Variable to store selected Aula (class)
 
-  // Create a controller for the Tarea TextFormField
-  final TextEditingController tareaController = TextEditingController();
-
-  // Time pickers for Start and End time
-  TimeOfDay? selectedStartTime;
-  TimeOfDay? selectedEndTime;
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
+  bool isAllDay = true;
 
   @override
   void initState() {
     super.initState();
     populateActiveUsersList();
-    populateAulasList();
-    _controller = AnimationController(vsync: this);
+    populateClasesToSelect();
   }
 
-  @override
-  void dispose() {
-    tareaController.dispose(); // Don't forget to dispose of the controller
-    _controller.dispose();
-    super.dispose();
+  Future<TimeOfDay?> pickTime(
+    BuildContext context,
+    TimeOfDay? initialTime,
+  ) async {
+    return await showTimePicker(
+      context: context,
+      initialTime: initialTime ?? TimeOfDay.now(),
+    );
   }
 
   Future<void> populateActiveUsersList() async {
@@ -51,92 +50,102 @@ class _AddAusenciaPageState extends State<AddAusenciaPage>
     });
   }
 
-  Future<void> populateAulasList() async {
-    List<AulaObject> fetchedAulas =
+  Future<void> populateClasesToSelect() async {
+    List<AulaObject> fetchedClases =
         await SupabaseManager.instance.getAllAulas();
     setState(() {
-      classesToAssign = fetchedAulas;
+      classesToSelect = fetchedClases;
     });
   }
 
   void insertAusencia() {
-    // Check if required fields are not null before proceeding
     if (selectedTeacherId == null ||
-        selectedAulaCode == null ||
-        selectedStatus == null ||
-        selectedStartTime == null ||
-        selectedEndTime == null) {
-      print("Error: All fields except Tarea must be filled.");
-      return; // Exit the function if any required field is missing
-    }
-
-    // Convert selectedTeacherId to int if it's a string
-    int teacherId = int.tryParse(selectedTeacherId!) ?? 0;
-
-    if (teacherId == 0) {
-      print("Error: Invalid teacher ID.");
+        selectedClassCode == null ||
+        (!isAllDay && (startTime == null || endTime == null))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, selecciona profesor, aula y horarios'),
+        ),
+      );
       return;
     }
 
-    // Convert TimeOfDay to DateTime
-    DateTime startDateTime = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-      selectedStartTime!.hour,
-      selectedStartTime!.minute,
-    );
+    // If "All Day" is selected, set times to 00:00 and 23:59 respectively.
+    TimeOfDay start =
+        isAllDay ? const TimeOfDay(hour: 0, minute: 0) : startTime!;
+    TimeOfDay end = isAllDay ? const TimeOfDay(hour: 23, minute: 59) : endTime!;
 
-    DateTime endDateTime = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
-      selectedEndTime!.hour,
-      selectedEndTime!.minute,
-    );
+    // Use the selected day passed via widget.day.
+    DateTime selectedDay = widget.day;
 
-    // Print the selected data
-    print("");
-    print("Selected teacher: $selectedTeacherId");
-    print("Selected classroom: $selectedAulaCode");
-    print("Selected status: $selectedStatus");
-    print("Tarea (Task): ${tareaController.text}"); // Print the Tarea value
-    print("Start time: ${startDateTime.toIso8601String()}");
-    print("End time: ${endDateTime.toIso8601String()}");
+    // Build DateTime values for the start and end times on that day,
+    // then convert them to UTC so they are stored correctly.
+    DateTime horaInicio =
+        DateTime(
+          selectedDay.year,
+          selectedDay.month,
+          selectedDay.day,
+          start.hour,
+          start.minute,
+        ).toUtc();
 
-    // Call the insert function with the correct types
+    DateTime horaFin =
+        DateTime(
+          selectedDay.year,
+          selectedDay.month,
+          selectedDay.day,
+          end.hour,
+          end.minute,
+        ).toUtc();
+
+    // Print the values for debugging (display in local time)
+    print('\nProfesor ID: $selectedTeacherId');
+    print('Aula: $selectedClassCode');
+    print('Inicio: ${start.format(context)}}');
+    print('Fin: ${end.format(context)}}');
+    print('Comentario: ${comentarioController.text}');
+
+    // Convert teacher id from string to int.
+    int teacherId = int.tryParse(selectedTeacherId!) ?? 0;
+
+    // Call the Supabase insertion method.
     SupabaseManager.instance.insertAusencia(
-      teacherId, // Pass the int value for teacherId
-      selectedAulaCode!,
-      selectedStatus!,
-      tareaController.text,
-      startDateTime,
-      endDateTime,
+      teacherId,
+      selectedClassCode!,
+      "Pendiente",
+      comentarioController.text,
+      horaInicio,
+      horaFin,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Añadir ausencia")),
+      appBar: AppBar(title: const Text('Añadir Ausencia')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: ListView(
           children: [
-            // USER TO SET AS MISSING
+            // Label for professor missing
+            const Text(
+              'Profesor Ausente:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            // Dropdown for teacher selection
             DropdownButtonFormField<String>(
               value: selectedTeacherId,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: "Seleccionar profesor",
                 border: OutlineInputBorder(),
               ),
               items:
-                  (teachersToAssign ?? [])
+                  teachersToAssign
                       .map(
                         (teacher) => DropdownMenuItem(
                           value: teacher.id.toString(),
                           child: Text(
-                            "${teacher.firstName} ${teacher.lastName}",
+                            "${teacher.firstName} ${teacher.lastName} ${teacher.secondLastName} ${teacher.id}",
                           ),
                         ),
                       )
@@ -147,113 +156,167 @@ class _AddAusenciaPageState extends State<AddAusenciaPage>
                 });
               },
             ),
-            SizedBox(height: 16),
-
-            // CLASSROOM SELECTION (NEW)
+            const SizedBox(height: 20),
+            // Dropdown for aula (class) selection
+            const Text(
+              'Seleccionar aula:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: selectedAulaCode,
-              decoration: InputDecoration(
+              value: selectedClassCode,
+              decoration: const InputDecoration(
                 hintText: "Seleccionar aula",
                 border: OutlineInputBorder(),
               ),
               items:
-                  (classesToAssign ?? [])
+                  classesToSelect
                       .map(
                         (aula) => DropdownMenuItem(
                           value: aula.classcode,
                           child: Text(
-                            "${aula.classcode} - ${aula.floor} ${aula.wing}",
+                            "Grupo: ${aula.group} Planta: ${aula.floor.isEmpty ? 'N/A' : aula.floor} Ala: ${aula.wing.isEmpty ? 'N/A' : aula.floor} Codigo: ${aula.classcode}",
                           ),
                         ),
                       )
                       .toList(),
               onChanged: (value) {
                 setState(() {
-                  selectedAulaCode = value;
+                  selectedClassCode = value;
                 });
               },
             ),
-            SizedBox(height: 16),
-
-            // STATUS OF THE AUSENCIA (by default Pendiente)
-            DropdownButtonFormField<String>(
-              value: selectedStatus,
-              decoration: InputDecoration(
-                hintText: "Estado",
+            const SizedBox(height: 20),
+            // All-Day Checkbox
+            Row(
+              children: [
+                Checkbox(
+                  value: isAllDay,
+                  onChanged: (value) {
+                    setState(() {
+                      isAllDay = value!;
+                      if (isAllDay) {
+                        startTime = const TimeOfDay(hour: 0, minute: 0);
+                        endTime = const TimeOfDay(hour: 23, minute: 59);
+                      }
+                    });
+                  },
+                ),
+                const Text('Todo el día', style: TextStyle(fontSize: 16)),
+              ],
+            ),
+            // Row for start & end time pickers if not all-day
+            if (!isAllDay)
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Hora de inicio:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            hintText:
+                                startTime != null
+                                    ? startTime!.format(context)
+                                    : 'Seleccionar hora',
+                            border: const OutlineInputBorder(),
+                            suffixIcon: const Icon(Icons.access_time),
+                          ),
+                          onTap: () async {
+                            TimeOfDay? picked = await pickTime(
+                              context,
+                              startTime,
+                            );
+                            if (picked != null) {
+                              setState(() => startTime = picked);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Hora de finalización:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            hintText:
+                                endTime != null
+                                    ? endTime!.format(context)
+                                    : 'Seleccionar hora',
+                            border: const OutlineInputBorder(),
+                            suffixIcon: const Icon(Icons.access_time),
+                          ),
+                          onTap: () async {
+                            TimeOfDay? picked = await pickTime(
+                              context,
+                              endTime,
+                            );
+                            if (picked != null) {
+                              setState(() => endTime = picked);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            const SizedBox(height: 20),
+            // Comentario Text Field
+            const Text(
+              'Comentario:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextField(
+              controller: comentarioController,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                labelText: 'Comentarios (tarea, detalles, etc.)',
                 border: OutlineInputBorder(),
               ),
-              items:
-                  ["Pendiente", "Asignada"]
-                      .map(
-                        (status) => DropdownMenuItem(
-                          value: status,
-                          child: Text(status),
-                        ),
-                      )
-                      .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedStatus = value;
-                });
-              },
             ),
-            SizedBox(height: 16),
-
-            // TAREA (Task) - Attach the controller here
-            TextFormField(
-              controller: tareaController, // Use the controller here
-              decoration: InputDecoration(hintText: "Tarea"),
+            const SizedBox(height: 30),
+            // Buttons
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: insertAusencia,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.only(left: 60, right: 60),
+                  ),
+                  child: const Text('Guardar Baja'),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.only(left: 60, right: 60),
+                  ),
+                  child: const Text('Volver'),
+                ),
+                const SizedBox(height: 50),
+              ],
             ),
-            SizedBox(height: 10),
-
-            // Start Time Picker
-            TextFormField(
-              decoration: InputDecoration(hintText: "Hora de inicio"),
-              onTap: () async {
-                TimeOfDay? pickedStartTime = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.now(),
-                );
-                if (pickedStartTime != null) {
-                  setState(() {
-                    selectedStartTime = pickedStartTime;
-                  });
-                }
-              },
-              controller: TextEditingController(
-                text:
-                    selectedStartTime != null
-                        ? selectedStartTime!.format(context)
-                        : '',
-              ),
-            ),
-            SizedBox(height: 10),
-
-            // End Time Picker
-            TextFormField(
-              decoration: InputDecoration(hintText: "Hora de fin"),
-              onTap: () async {
-                TimeOfDay? pickedEndTime = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.now(),
-                );
-                if (pickedEndTime != null) {
-                  setState(() {
-                    selectedEndTime = pickedEndTime;
-                  });
-                }
-              },
-              controller: TextEditingController(
-                text:
-                    selectedEndTime != null
-                        ? selectedEndTime!.format(context)
-                        : '',
-              ),
-            ),
-            SizedBox(height: 10),
-
-            // BUTTON TO INSERT AUSENCIA
-            ElevatedButton(onPressed: insertAusencia, child: Text("Confirmar")),
           ],
         ),
       ),

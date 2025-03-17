@@ -9,7 +9,8 @@ class AsignarGuardia extends StatefulWidget {
 
 class _AsignarGuardiaState extends State<AsignarGuardia> {
   int? selectedRow; // Fila seleccionada
-  List<List<TextEditingController>> controllers = []; // Controladores para cada celda
+  List<List<TextEditingController>> controllers =
+      []; // Controladores para cada celda
 
   @override
   void initState() {
@@ -39,7 +40,10 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profesor: {Nombre}', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Profesor: {Nombre}',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.blueAccent,
         actions: const [
           Icon(Icons.account_circle, size: 30, color: Colors.white),
@@ -54,16 +58,26 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
               padding: EdgeInsets.all(8.0),
               child: Text(
                 'Asignar Guardia',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Center( // Aquí agregamos el Center para centrar la tabla
+                child: Center(
+                  // Aquí agregamos el Center para centrar la tabla
                   child: DataTable(
-                    headingRowColor: MaterialStateProperty.all(Colors.blueAccent.withOpacity(0.3)),
-                    columns: List.generate(7, (index) => DataColumn(label: Text('Sesión ${index + 1}'))),
+                    headingRowColor: MaterialStateProperty.all(
+                      Colors.blueAccent.withOpacity(0.3),
+                    ),
+                    columns: List.generate(
+                      7,
+                      (index) => DataColumn(label: Text('Sesión ${index + 1}')),
+                    ),
                     rows: List.generate(8, (rowIndex) {
                       return DataRow(
                         selected: selectedRow == rowIndex,
@@ -80,7 +94,9 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
                           return DataCell(
                             TextField(
                               controller: controllers[rowIndex][colIndex],
-                              decoration: const InputDecoration(border: InputBorder.none),
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                              ),
                               style: const TextStyle(fontSize: 14),
                               enabled: true,
                             ),
@@ -102,7 +118,9 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
                       onPressed: () {
                         // Acciones al coger guardia
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Guardia asignada correctamente")),
+                          const SnackBar(
+                            content: Text("Guardia asignada correctamente"),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(

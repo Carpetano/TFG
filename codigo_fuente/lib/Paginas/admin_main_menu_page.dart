@@ -1,8 +1,7 @@
-import 'package:codigo/profesor_main_menu_page.dart';
-import 'package:codigo/register_user_page.dart';
-import 'package:codigo/view_Users_page.dart';
+import 'package:codigo/Paginas/profesor_main_menu_page.dart';
+import 'package:codigo/Paginas/register_user_page.dart';
+import 'package:codigo/Paginas/view_Users_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class AdminMainMenuPage extends StatefulWidget {
   const AdminMainMenuPage({super.key});
@@ -63,7 +62,6 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage>
             children: [
               ElevatedButton(
                 onPressed: () {
-                  print("thing2");
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -81,7 +79,6 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage>
             children: [
               ElevatedButton(
                 onPressed: () {
-                  print("thing2");
                   Navigator.push(
                     context,
                     MaterialPageRoute(

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'screens/asignar_guardia.dart';
-import 'screens/anadir_baja.dart';
-import 'screens/mis_guardias.dart';
-
+import 'package:codigo/Paginas/asignar_guardia.dart';
+import 'package:codigo/Paginas/anadir_baja.dart';
+import 'package:codigo/Paginas/mis_guardias.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -13,7 +12,7 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  CalendarFormat _calendarFormat = CalendarFormat.month;
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime? _selectedDay;
   DateTime _focusedDay = DateTime.now();
 
@@ -21,7 +20,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profesor: {Nombre}", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Profesor: {Nombre}",
+          style: TextStyle(color: Colors.white),
+        ),
         actions: const [
           Icon(Icons.account_circle, size: 30, color: Colors.white),
           SizedBox(width: 10),
@@ -37,10 +39,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
             lastDay: DateTime.utc(2100, 12, 31),
             focusedDay: _focusedDay,
             calendarFormat: _calendarFormat,
-            selectedDayPredicate: (day) => _selectedDay != null && isSameDay(_selectedDay, day),
+            selectedDayPredicate:
+                (day) => _selectedDay != null && isSameDay(_selectedDay, day),
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
-                if (_selectedDay != null && isSameDay(_selectedDay, selectedDay)) {
+                if (_selectedDay != null &&
+                    isSameDay(_selectedDay, selectedDay)) {
                   _selectedDay = null;
                 } else {
                   _selectedDay = selectedDay;
@@ -52,7 +56,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
               _focusedDay = focusedDay;
             },
             headerStyle: HeaderStyle(
-              titleTextStyle: const TextStyle(color: Colors.black, fontSize: 18),
+              titleTextStyle: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+              ),
             ),
             calendarStyle: CalendarStyle(
               defaultDecoration: BoxDecoration(
@@ -75,32 +82,46 @@ class _CalendarScreenState extends State<CalendarScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                onPressed: _selectedDay != null
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AsignarGuardia()),
-                        );
-                      }
-                    : null,
+                onPressed:
+                    _selectedDay != null
+                        ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AsignarGuardia(),
+                            ),
+                          );
+                        }
+                        : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _selectedDay != null ? Colors.blueAccent : Colors.grey[400],
-                  foregroundColor: _selectedDay != null ? Colors.black : Colors.grey[600],
+                  backgroundColor:
+                      _selectedDay != null
+                          ? Colors.blueAccent
+                          : Colors.grey[400],
+                  foregroundColor:
+                      _selectedDay != null ? Colors.black : Colors.grey[600],
                 ),
                 child: const Text("Asignar guardia"),
               ),
               ElevatedButton(
-                onPressed: _selectedDay != null
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AnadirBaja()),
-                        );
-                      }
-                    : null,
+                onPressed:
+                    _selectedDay != null
+                        ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AnadirBaja(),
+                            ),
+                          );
+                        }
+                        : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _selectedDay != null ? Colors.blueAccent : Colors.grey[400],
-                  foregroundColor: _selectedDay != null ? Colors.black : Colors.grey[600],
+                  backgroundColor:
+                      _selectedDay != null
+                          ? Colors.blueAccent
+                          : Colors.grey[400],
+                  foregroundColor:
+                      _selectedDay != null ? Colors.black : Colors.grey[600],
                 ),
                 child: const Text("Añadir baja"),
               ),
@@ -108,7 +129,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const MisGuardias()),
+                    MaterialPageRoute(
+                      builder: (context) => const MisGuardias(),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(

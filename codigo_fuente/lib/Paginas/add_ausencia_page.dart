@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_print
 
-import 'package:codigo/aula_object.dart';
+import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/supabase_manager.dart';
-import 'package:codigo/user_object.dart';
+import 'package:codigo/Objetos/user_object.dart';
 import 'package:flutter/material.dart';
 
 class AddAusenciaPage extends StatefulWidget {

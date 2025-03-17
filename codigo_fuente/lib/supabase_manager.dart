@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_print
 
-import 'package:codigo/aula_object.dart';
-import 'package:codigo/ausencia_object.dart';
-import 'package:codigo/user_object.dart';
+import 'package:codigo/Objetos/aula_object.dart';
+import 'package:codigo/Objetos/ausencia_object.dart';
+import 'package:codigo/Objetos/user_object.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseManager {

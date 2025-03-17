@@ -2,10 +2,10 @@
 
 import 'dart:math';
 
+import 'package:codigo/Objetos/user_object.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:codigo/supabase_manager.dart'; // Adjust the import path as needed
-import 'package:codigo/user_object.dart';
 
 class ViewUsersPage extends StatefulWidget {
   const ViewUsersPage({super.key});

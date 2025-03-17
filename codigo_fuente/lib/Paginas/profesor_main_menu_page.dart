@@ -1,12 +1,11 @@
 // ignore_for_file: avoid_print
 
-import 'package:codigo/add_ausencia_page.dart';
+import 'package:codigo/Objetos/ausencia_object.dart';
+import 'package:codigo/Objetos/user_object.dart';
+import 'package:codigo/Paginas/add_ausencia_page.dart';
 import 'package:codigo/supabase_manager.dart';
-import 'package:codigo/ausencia_object.dart'; // Your model for 'ausencias'
-import 'package:codigo/user_object.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Import the slidable package
 
 class ProfesorMainMenuPage extends StatefulWidget {
   const ProfesorMainMenuPage({super.key});

@@ -18,32 +18,61 @@ class AppEasyTheme {
       theme: ThemeData(
         // Define the main color scheme for the application (light mode)
         colorScheme: ColorScheme(
-          primary: Colors.black,
-          secondary: Colors.blue,
-          surface: Colors.white,
-          error: Colors.red,
-          onPrimary: Colors.white,
-          onSecondary: Colors.white,
-          onSurface: Colors.black,
-          onSurfaceVariant: Colors.grey[400],
-          onError: Colors.white,
-          brightness: Brightness.light,
+          primary: Color(
+            0xFF4A90E2,
+          ), // A soft blue for accents (primary actions like buttons)
+          secondary: Color(
+            0xFFB8B8B8,
+          ), // A muted gray for secondary actions (links, secondary buttons)
+          surface:
+              Colors
+                  .white, // Light surface background color (for cards, containers)
+          error: Colors.redAccent, // A soft red for error indications
+          onPrimary:
+              Colors
+                  .white, // Text color on primary-colored elements (light text on blue buttons)
+          onSecondary:
+              Colors
+                  .black, // Text color on secondary-colored elements (dark text on secondary elements)
+          onSurface:
+              Colors
+                  .black87, // Text color on surface-colored elements (soft black text)
+          onSurfaceVariant:
+              Colors
+                  .grey[600]!, // Text color for secondary surfaces or variant elements
+          onError:
+              Colors
+                  .white, // Text color for error-related elements (white text on red)
+          brightness:
+              Brightness
+                  .light, // Specifies the brightness of the theme (light mode)
         ),
-        scaffoldBackgroundColor: Colors.grey[100],
+        scaffoldBackgroundColor: Color(
+          0xFFF5F5F5,
+        ), // Light background color for the entire app (off-white)
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
+          backgroundColor: Color(0xFF4A90E2), // App bar color (primary blue)
+          foregroundColor:
+              Colors.white, // App bar text (foreground) color (white text)
         ),
         buttonTheme: ButtonThemeData(
-          buttonColor: Colors.blue,
-          textTheme: ButtonTextTheme.primary,
+          buttonColor: Color(0xFF4A90E2), // Button color (primary blue)
+          textTheme:
+              ButtonTextTheme
+                  .primary, // Text color for buttons, uses primary color theme
         ),
         textTheme: TextTheme(
-          bodySmall: TextStyle(color: Colors.black, fontFamily: 'Roboto'),
-          bodyMedium: TextStyle(color: Colors.grey[700], fontFamily: 'Roboto'),
+          bodySmall: TextStyle(
+            color: Colors.black87,
+            fontFamily: 'Roboto',
+          ), // Smaller body text color
+          bodyMedium: TextStyle(
+            color: Colors.black54,
+            fontFamily: 'Roboto',
+          ), // Medium body text color
           bodyLarge: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+            color: Colors.black, // Large body text color (main content)
+            fontWeight: FontWeight.w400, // Regular weight for normal text
             fontFamily: 'Roboto',
           ),
         ),
@@ -51,32 +80,63 @@ class AppEasyTheme {
       darkTheme: ThemeData(
         // Define the main color scheme for the application (dark mode)
         colorScheme: ColorScheme(
-          primary: Colors.white,
-          secondary: Colors.blue,
-          surface: Colors.black,
-          error: Colors.red,
-          onPrimary: Colors.black,
-          onSecondary: Colors.black,
-          onSurface: Colors.white,
-          onSurfaceVariant: Colors.black54,
-          onError: Colors.black,
-          brightness: Brightness.dark,
+          primary: Color(
+            0xFF4A90E2,
+          ), // A soft blue for accents (same for both modes)
+          secondary: Color(
+            0xFFB8B8B8,
+          ), // A muted gray for secondary actions (same for both modes)
+          surface: Color(
+            0xFF2E2E2E,
+          ), // Dark surface background color (for cards, containers)
+          error:
+              Colors
+                  .redAccent, // Soft red for error indications (same for both modes)
+          onPrimary:
+              Colors
+                  .black, // Text color on primary-colored elements (black text on blue)
+          onSecondary:
+              Colors
+                  .white, // Text color on secondary-colored elements (white text on gray)
+          onSurface:
+              Colors
+                  .white70, // Text color on surface-colored elements (light text on dark backgrounds)
+          onSurfaceVariant:
+              Colors
+                  .grey[400]!, // Text color for secondary surfaces or variant elements
+          onError:
+              Colors
+                  .white, // Text color for error-related elements (white text on red)
+          brightness:
+              Brightness
+                  .dark, // Specifies the brightness of the theme (dark mode)
         ),
-        scaffoldBackgroundColor: Colors.grey[900],
+        scaffoldBackgroundColor: Color(
+          0xFF1C1C1C,
+        ), // Dark background color for the entire app (dark gray)
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
+          backgroundColor: Color(0xFF4A90E2), // App bar color (primary blue)
+          foregroundColor:
+              Colors.white, // App bar text (foreground) color (white text)
         ),
         buttonTheme: ButtonThemeData(
-          buttonColor: Colors.blue,
-          textTheme: ButtonTextTheme.primary,
+          buttonColor: Color(0xFF4A90E2), // Button color (primary blue)
+          textTheme:
+              ButtonTextTheme
+                  .primary, // Text color for buttons, uses primary color theme
         ),
         textTheme: TextTheme(
-          bodySmall: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-          bodyMedium: TextStyle(color: Colors.grey[400], fontFamily: 'Roboto'),
+          bodySmall: TextStyle(
+            color: Colors.white70,
+            fontFamily: 'Roboto',
+          ), // Smaller body text color (light gray)
+          bodyMedium: TextStyle(
+            color: Colors.white54,
+            fontFamily: 'Roboto',
+          ), // Medium body text color (lighter gray)
           bodyLarge: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+            color: Colors.white, // Large body text color (main content)
+            fontWeight: FontWeight.w400, // Regular weight for normal text
             fontFamily: 'Roboto',
           ),
         ),

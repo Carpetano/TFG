@@ -177,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor:
             Theme.of(
               context,
-            ).colorScheme.secondary, // Call the theme toggle function
+            ).colorScheme.primary, // Call the theme toggle function
         child: Icon(Icons.brightness_6), // Accent color for the button
       ),
     );
@@ -214,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           color:
                               Theme.of(
                                 context,
-                              ).colorScheme.secondary, // Shadow color
+                              ).colorScheme.primary, // Shadow color
                           offset: Offset(5.0, 5.0), // Shadow offset (x, y)
                         ),
                       ],
@@ -245,16 +245,16 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           // Vertical Divider (Bar) between the two sections
           VerticalDivider(
-            thickness: 1, // Thickness of the divider
-            width: 1, // Width of the divider
-            color:
-                Theme.of(context).colorScheme.onSurfaceVariant, // Divider color
+            thickness: 3, // Thickness of the divider
+            width: 3, // Width of the divider
+            color: Colors.grey[500], // Divider color
           ),
           // Video Section (40% width)
           Expanded(
             flex: 2, // 40% of the screen
             child: Container(
               padding: EdgeInsets.all(20),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               child: Center(
                 child:
                     _videoController.value.isInitialized
@@ -292,7 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
+          SizedBox(
             width: screenWidth * 0.8,
             child: TextFormField(
               controller: _emailController,
@@ -300,7 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           SizedBox(height: 10),
-          Container(
+          SizedBox(
             width: screenWidth * 0.8,
             child: TextFormField(
               obscureText: true,

@@ -80,6 +80,9 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          //
+          //
+          // CALENDAR
           const SizedBox(height: 20),
           TableCalendar(
             firstDay: DateTime.utc(2000, 1, 1),
@@ -105,15 +108,36 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
               _focusedDay = focusedDay;
             },
             headerStyle: HeaderStyle(
-              titleTextStyle: const TextStyle(
-                color: Colors.black,
+              titleTextStyle: TextStyle(
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
                 fontSize: 18,
               ),
             ),
             calendarStyle: CalendarStyle(
+              defaultTextStyle: TextStyle(
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white70
+                        : Colors.black87,
+              ),
+              weekendTextStyle: TextStyle(
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.orangeAccent
+                        : Colors.red,
+              ),
+              outsideTextStyle: TextStyle(
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey
+                        : Colors.black38,
+              ),
               defaultDecoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: Colors.black12, width: 1),
+                border: Border.all(color: Colors.grey, width: 1),
               ),
               todayDecoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondary,
@@ -124,13 +148,32 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
                 color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(5),
               ),
-              // Marker decoration for days with events (ausencias)
-              markerDecoration: BoxDecoration(
-                color: Colors.redAccent,
-                shape: BoxShape.circle,
-              ),
+              // Remove markerDecoration to avoid the conflict with borderRadius.
+            ),
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, date, events) {
+                if (events.isNotEmpty) {
+                  // Draw a small red circular marker at the bottom-center of the cell.
+                  return Positioned(
+                    bottom: 1,
+                    child: Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox();
+              },
             ),
           ),
+
+          //
+          //
+          // BOTTOM BUTTONS
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

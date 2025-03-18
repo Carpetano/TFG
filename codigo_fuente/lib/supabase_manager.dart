@@ -297,15 +297,18 @@ class SupabaseManager {
       List fullResponse = [];
 
       for (var guardia in guardiasToInsert) {
-        final response = await Supabase.instance.client
-            .from('guardias')
-            .insert({
-              'id_profesor_ausente': guardia.missingTeacherId,
-              'id_ausencia': guardia.ausenciaId,
-              'observaciones': guardia.observations,
-              'estado': 'Pendiente',
-              'tramo_horario': guardia.tramoHorario,
-            });
+        final response = await Supabase.instance.client.from('guardias').insert(
+          {
+            'id_profesor_ausente': guardia.missingTeacherId,
+            'id_ausencia': guardia.ausenciaId,
+            'observaciones': guardia.observations,
+            'estado': 'Pendiente',
+            'tramo_horario': guardia.tramoHorario,
+            'dia':
+                guardia.day
+                    .toIso8601String(), // Convert DateTime to ISO-8601 string
+          },
+        );
 
         // Add the response to the fullResponse list
         fullResponse.add(response);
@@ -314,6 +317,61 @@ class SupabaseManager {
       print("FULL RESPONSE: $fullResponse");
     } catch (e) {
       print("Error inserting guardias: $e");
+    }
+  }
+
+  Future<List<GuardiaObject>> getUnasignedGuardias() async {
+    try {
+      // Query Supabase for 'Guardia' objects
+      final response =
+          await Supabase.instance.client
+              .from('guardias') // Your Supabase table name
+              .select();
+
+      // Manually map the response data into a list of GuardiaObject
+      List<GuardiaObject> guardias = [];
+      for (var data in response) {
+        // Manually handle each field
+        int id = data['id_guardia'] as int;
+        int? missingTeacherId =
+            data['id_profesor_ausente'] != null
+                ? data['id_profesor_ausente'] as int
+                : null;
+        int? ausenciaId =
+            data['id_ausencia'] != null ? data['id_ausencia'] as int : null;
+        int? tramoHorario =
+            data['tramo_horario'] != null ? data['tramo_horario'] as int : null;
+        int? substituteTeacherId =
+            data['id_profesor_sustituto'] != null
+                ? data['id_profesor_sustituto'] as int
+                : null;
+        String observations = data['observaciones'] as String;
+        String status = data['estado'] as String;
+        DateTime day = DateTime.parse(
+          data['dia'] as String,
+        ); // Assuming 'dia' is a valid date string
+
+        // Create the GuardiaObject manually
+        GuardiaObject guardia = GuardiaObject(
+          id: id,
+          missingTeacherId: missingTeacherId,
+          ausenciaId: ausenciaId,
+          tramoHorario: tramoHorario,
+          substituteTeacherId: substituteTeacherId,
+          observations: observations,
+          status: status,
+          day: day,
+        );
+
+        // Add the guardia to the list
+        guardias.add(guardia);
+      }
+
+      return guardias;
+    } catch (e) {
+      // Handle any unexpected errors
+      print('Unexpected error: $e');
+      return [];
     }
   }
 
@@ -398,38 +456,6 @@ class SupabaseManager {
     }
   }
 
-  /// Retrieves all unassigned ausencias with a pending status
-  ///
-  /// This function fetches all unassigned absence records from the 'ausencias' table where the status is 'Pendiente'
-  /// It maps the fetched data to a list of AusenciaObject
-  ///
-  /// Returns: A list of AusenciaObject representing unassigned absences
-  Future<List<AusenciaObject>> getAllUnasignedAusencias() async {
-    try {
-      // Fetch all unassigned absences from the 'ausencias' table
-      final response = await Supabase.instance.client
-          .from('ausencias')
-          .select()
-          .like('estado', 'Pendiente'); // Filter for pending ausencias
-
-      // Map the response to a list of AusenciaObject
-      List<AusenciaObject> ausencias =
-          (response as List).map((ausenciaData) {
-            return AusenciaObject(
-              id: ausenciaData['id_ausencia'] ?? 0,
-              missingTeacherId: ausenciaData['profesor_ausente'] ?? 0,
-              classCode: ausenciaData['aula'] ?? '',
-            );
-          }).toList();
-
-      return ausencias;
-    } catch (e) {
-      // Log error if fetching unassigned absences fails
-      print("[DEBUG]: Error getting all unassigned ausencias: $e");
-      return []; // Return empty list in case of error
-    }
-  }
-
   /// Retrieves a UserObject by its ID from the 'usuarios' table
   ///
   /// This function fetches user details based on the provided user ID and maps it to a UserObject
@@ -491,6 +517,7 @@ class SupabaseManager {
             substituteTeacherId: data['id_profesor_sustituto'] ?? 0,
             observations: data['observaciones'] ?? '',
             status: data['estado'],
+            day: data['dia'],
           ),
         )
         .toList();

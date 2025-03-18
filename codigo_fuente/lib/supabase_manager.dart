@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:codigo/Objetos/Guardia_object.dart';
 import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
@@ -53,7 +54,7 @@ class SupabaseManager {
       }
 
       // If user is null, log a debug message and return null
-      print("[DEBUG]: Login failed, user is null.");
+      print("[DEBUG]: Login failed, user is null");
       return null;
     } catch (e) {
       // If an error occurs during login, log the error for debugging purposes
@@ -118,7 +119,7 @@ class SupabaseManager {
         // Check if the user data was inserted successfully
         if (insertResponse.isEmpty) {
           // Log a debug message if no data was inserted into the 'usuarios' table
-          print("[DEBUG]: No data inserted into 'usuarios'.");
+          print("[DEBUG]: No data inserted into 'usuarios'");
           return null;
         }
 
@@ -130,7 +131,7 @@ class SupabaseManager {
       }
 
       // If user is null, log a debug message indicating registration failure
-      print("[DEBUG]: Error: Registration failed, user is null.");
+      print("[DEBUG]: Error: Registration failed, user is null");
       return null;
     } catch (e) {
       // If an error occurs during registration, log the error for debugging purposes
@@ -142,7 +143,7 @@ class SupabaseManager {
   /// Maps Supabase User to LoggedInUser object
   ///
   /// This function fetches additional user details from the 'usuarios' table using the user ID,
-  /// then maps it to a custom UserObject with the necessary fields.
+  /// then maps it to a custom UserObject with the necessary fields
   ///
   /// - [user]: The Supabase User object to map
   ///
@@ -179,8 +180,8 @@ class SupabaseManager {
 
   /// Sets a user as inactive in the 'usuarios' table
   ///
-  /// This function updates the 'estado' field of the user to 'Inactivo' based on the user ID.
-  /// If an error occurs or the user update fails, an exception is thrown.
+  /// This function updates the 'estado' field of the user to 'Inactivo' based on the user ID
+  /// If an error occurs or the user update fails, an exception is thrown
   ///
   /// - [userId]: The ID of the user to update
   Future<void> setUserAsInactive(int userId) async {
@@ -213,7 +214,7 @@ class SupabaseManager {
 
   /// Retrieves all users from the 'usuarios' table
   ///
-  /// This function fetches all users from the 'usuarios' table and maps them to a list of UserObject.
+  /// This function fetches all users from the 'usuarios' table and maps them to a list of UserObject
   /// If an error occurs or no users are found, an empty list is returned.
   ///
   /// Returns: A list of UserObject containing all users
@@ -224,7 +225,7 @@ class SupabaseManager {
 
       // Check if the response is empty
       if ((response.isEmpty)) {
-        print("[DEBUG]:  No users found in the 'usuarios' table.");
+        print("[DEBUG]: No users found in the 'usuarios' table");
         return []; // Return an empty list if no data is found
       }
 
@@ -258,50 +259,43 @@ class SupabaseManager {
     }
   }
 
-  /// Inserts a new ausencia (absence) record into the 'ausencias' table
-  ///
-  /// This function inserts a record into the 'ausencias' table with the provided details.
-  /// Optionally, an assigned teacher (assignedTeacherId) can be provided.
-  ///
-  /// - [missingTeacherId]: The ID of the missing teacher
-  /// - [classCode]: The class code where the absence occurred
-  /// - [status]: The status of the absence
-  /// - [task]: The task assigned for the class
-  /// - [horaInicio]: The start time of the absence
-  /// - [horaFin]: The end time of the absence
-  /// - [assignedTeacherId]: Optional ID of the teacher assigned to cover the absence
-  Future<void> insertAusencia(
+  /// TODO COMMENT
+  Future<AusenciaObject?> insertAusencia(
     int missingTeacherId,
     String classCode,
-    String status,
-    String task,
-    DateTime horaInicio,
-    DateTime horaFin, {
-    int? assignedTeacherId, // Optional: assigned teacher (profesor_asignado)
-  }) async {
+  ) async {
     try {
-      // Insert a new ausencia record into the 'ausencias' table
-      final response = await Supabase.instance.client.from('ausencias').insert({
-        'profesor_ausente': missingTeacherId,
-        'profesor_asignado': assignedTeacherId,
-        'aula': classCode,
-        'tarea': task,
-        'estado': status,
-        'hora_inicio': horaInicio.toIso8601String(),
-        'hora_fin': horaFin.toIso8601String(),
-      });
-      // Log the response after inserting the record
-      print("[DEBUG]: Inserted Ausencia: $response");
+      // Execute the insert and retrieve the inserted data, including 'id_ausencia', 'profesor_ausente', and 'aula'
+      final response = await Supabase.instance.client
+          .from('ausencias')
+          .insert({'profesor_ausente': missingTeacherId, 'aula': classCode})
+          .select(
+            'id_ausencia, profesor_ausente, aula',
+          ); // Select the fields you need
+
+      // Print the response for debugging
+      print(response);
+
+      // If data exists in the response, map it to an AusenciaObject
+      if (response.isNotEmpty) {
+        final data =
+            response[0]; // Since it's an insert, we expect only one row
+        return AusenciaObject.fromMap(data);
+      } else {
+        print("No data returned after insertion.");
+        return null;
+      }
     } catch (e) {
-      // Log error if inserting ausencia fails
-      print("[DEBUG]: Error inserting ausencia: $e");
+      // Log any error that occurs during the insertion process
+      print("Error inserting ausencia: $e");
+      return null;
     }
   }
 
   /// Retrieves all active users from the 'usuarios' table
   ///
-  /// This function fetches all active users from the 'usuarios' table, based on the 'estado' field.
-  /// The status field is checked using a case-insensitive match for 'activo'.
+  /// This function fetches all active users from the 'usuarios' table, based on the 'estado' field
+  /// The status field is checked using a case-insensitive match for 'activo'
   ///
   /// Returns: A list of active UserObject
   Future<List<UserObject>> getActiveUsers() async {
@@ -317,7 +311,7 @@ class SupabaseManager {
 
       // Check if response is empty
       if (response.isEmpty) {
-        print("[DEBUG]: No active users found.");
+        print("[DEBUG]: No active users found");
         return [];
       }
 
@@ -350,7 +344,7 @@ class SupabaseManager {
 
   /// Retrieves all aulas (classrooms) from the 'aulas' table
   ///
-  /// This function fetches all classrooms from the 'aulas' table and maps them to a list of AulaObject.
+  /// This function fetches all classrooms from the 'aulas' table and maps them to a list of AulaObject
   ///
   /// Returns: A list of AulaObject representing all classrooms
   Future<List<AulaObject>> getAllAulas() async {
@@ -381,8 +375,8 @@ class SupabaseManager {
 
   /// Retrieves all unassigned ausencias with a pending status
   ///
-  /// This function fetches all unassigned absence records from the 'ausencias' table where the status is 'Pendiente'.
-  /// It maps the fetched data to a list of AusenciaObject.
+  /// This function fetches all unassigned absence records from the 'ausencias' table where the status is 'Pendiente'
+  /// It maps the fetched data to a list of AusenciaObject
   ///
   /// Returns: A list of AusenciaObject representing unassigned absences
   Future<List<AusenciaObject>> getAllUnasignedAusencias() async {
@@ -399,12 +393,7 @@ class SupabaseManager {
             return AusenciaObject(
               id: ausenciaData['id_ausencia'] ?? 0,
               missingTeacherId: ausenciaData['profesor_ausente'] ?? 0,
-              assignedTeacherId: ausenciaData['profesor_asignado'] as int?,
               classCode: ausenciaData['aula'] ?? '',
-              tasks: ausenciaData['tarea'] ?? '',
-              status: ausenciaData['estado'] ?? '',
-              startTime: DateTime.parse(ausenciaData['hora_inicio']),
-              endTime: DateTime.parse(ausenciaData['hora_fin']),
             );
           }).toList();
 
@@ -418,7 +407,7 @@ class SupabaseManager {
 
   /// Retrieves a UserObject by its ID from the 'usuarios' table
   ///
-  /// This function fetches user details based on the provided user ID and maps it to a UserObject.
+  /// This function fetches user details based on the provided user ID and maps it to a UserObject
   ///
   /// - [id]: The ID of the user to fetch
   ///
@@ -453,5 +442,32 @@ class SupabaseManager {
       print("[DEBUG]: Error getting user object: $e");
       rethrow; // Re-throw the exception so you can handle it higher up
     }
+  }
+
+  Future<List<GuardiaObject>> getAllUnasignedGuardias() async {
+    final response = await Supabase.instance.client
+        .from('guardias')
+        .select()
+        .like('estado', 'pendiente');
+
+    print("RESPONSE: $response");
+
+    if (response == null || response.isEmpty) {
+      return [];
+    }
+
+    return response
+        .map(
+          (data) => GuardiaObject(
+            id: data['id_guardia'],
+            missingTeacherId: data['id_profesor_ausente'],
+            ausenciaId: data['id_ausencia'],
+            tramoHorario: data['tramo_horario'],
+            substituteTeacherId: data['id_profesor_sustituto'] ?? 0,
+            observations: data['observaciones'] ?? '',
+            status: data['estado'],
+          ),
+        )
+        .toList();
   }
 }

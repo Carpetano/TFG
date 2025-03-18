@@ -6,4 +6,9 @@ class AulaObject {
     required this.wing,
     required this.group,
   });
+
+  @override
+  String toString() {
+    return 'AulaObject(classcode: $classcode, floor: $floor, wing: $wing, group: $group)';
+  }
 }

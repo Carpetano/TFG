@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:codigo/Objetos/ausencia_object.dart';
+import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -33,14 +34,6 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
     setState(() {
       unasignedAusencias = response;
     });
-    // Debug print each ausencia
-    for (var ausencia in response) {
-      print(
-        "ID: ${ausencia.id}, Teacher ID: ${ausencia.missingTeacherId}, "
-        "Class: ${ausencia.classCode}, Task: ${ausencia.tasks}, "
-        "Status: ${ausencia.status}, From: ${ausencia.startTime}, Until: ${ausencia.endTime}",
-      );
-    }
   }
 
   List<AusenciaObject> _getEventsForDay(DateTime day) {
@@ -67,10 +60,11 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Profesor: {Nombre}",
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          "Profesor: ${MyApp.loggedInUser?.firstName ?? 'Desconocido'}",
+          style: const TextStyle(color: Colors.white),
         ),
+
         actions: const [
           Icon(Icons.account_circle, size: 30, color: Colors.white),
           SizedBox(width: 10),

@@ -1,11 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'dart:math';
-
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:codigo/supabase_manager.dart'; // Adjust the import path as needed
+import 'package:codigo/supabase_manager.dart';
 
 class ViewUsersPage extends StatefulWidget {
   const ViewUsersPage({super.key});
@@ -15,113 +14,68 @@ class ViewUsersPage extends StatefulWidget {
 }
 
 class _ViewUsersPageState extends State<ViewUsersPage> {
-  // List of all users fetched from Supabase
   List<UserObject> users = [];
-  // List of users that match the current search query
   List<UserObject> filteredUsers = [];
-  // Controller for the search text field
   final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Fetch the users when the widget is initialized
     fetchUsers();
-    // Listen for changes in the search box to update the filtered list
     searchController.addListener(_filterUsers);
   }
 
-  // Dispose the controller when the widget is disposed to free resources
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
   }
 
-  /// Fetch all users from the Supabase 'usuarios' table.
   Future<void> fetchUsers() async {
-    // Retrieve the list of users using the SupabaseManager
-    List<UserObject> fetchedUsers =
-        await SupabaseManager.instance.getAllUsers();
-    // Update both the full users list and the filtered list
+    List<UserObject> fetchedUsers = await SupabaseManager.instance.getAllUsers();
     setState(() {
       users = fetchedUsers;
       filteredUsers = fetchedUsers;
     });
   }
 
-  /// Filter users based on the search query.
   void _filterUsers() {
     String query = searchController.text.toLowerCase();
     setState(() {
-      filteredUsers =
-          users.where((user) {
-            // Filter by first name, last name, or role (ignoring case)
-            return user.firstName.toLowerCase().contains(query) ||
-                user.lastName.toLowerCase().contains(query) ||
-                user.role.toLowerCase().contains(query.replaceAll(' ', '_'));
-          }).toList();
+      filteredUsers = users.where((user) {
+        return user.firstName.toLowerCase().contains(query) ||
+            user.lastName.toLowerCase().contains(query) ||
+            user.role.toLowerCase().contains(query.replaceAll(' ', '_'));
+      }).toList();
     });
   }
 
-  /// Function to generate a random password
-  String generateRandomPassword({int length = 10}) {
-    const String chars =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#\$%^&*';
-    final Random random = Random();
-
-    return List.generate(
-      length,
-      (index) => chars[random.nextInt(chars.length)],
-    ).join();
-  }
-
-  void showSnackBar(String message, Color textColor, Color bgColor) {
-    var snackBar = SnackBar(
-      content: DefaultTextStyle(
-        style: TextStyle(color: textColor),
-        child: Text(message),
-      ),
-      backgroundColor: bgColor,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  /// Deletes the user and re-fetches the list of users after deletion.
   void deactivateUser(UserObject user) async {
     print("Deactivating user: ${user.id}");
     SupabaseManager.instance.setUserAsInactive(user.id);
+    fetchUsers();
   }
 
-  /// Navigate to the appropriate edit page based on the user.
-  void editUser(UserObject user) {
-    // If you need to differentiate the edit page based on the current user, adjust here.
-  }
-
-  /// Display a confirmation dialog to reset the user's password
   void resetPassword(UserObject user) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Reset Password"),
+          title: const Text("Resetear Contraseña"),
           content: Text(
-            "Are you sure you want to reset the password for ${user.firstName} ${user.lastName}?",
+            "¿Estás seguro de que quieres resetear la contraseña de ${user.firstName} ${user.lastName}?",
           ),
           actions: [
-            // Cancel button to dismiss the dialog
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancel"),
+              child: const Text("Cancelar"),
             ),
-            // Confirm button to trigger password reset
             TextButton(
               onPressed: () async {
-                Navigator.of(context).pop(); // Close the dialog
-
-                print("Reset password for user: ${user.id}");
+                Navigator.of(context).pop();
+                print("Contraseña reseteada para el usuario: ${user.id}");
               },
-              child: const Text("Confirm", style: TextStyle(color: Colors.red)),
+              child: const Text("Confirmar", style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -129,46 +83,47 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
     );
   }
 
-  /// Build the main UI including the search bar and the list of slidable users.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Usuarios Registrados"),
-        // Add a search bar below the app bar title
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
+          preferredSize: const Size.fromHeight(60.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 8.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: 'Search users...',
+                hintText: 'Buscar usuarios...',
                 filled: true,
                 fillColor: Colors.white,
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide.none,
                 ),
-                suffixIcon: const Icon(Icons.search),
               ),
             ),
           ),
         ),
       ),
-      // If no users are found, show a progress indicator; otherwise, display the list
-      body:
-          filteredUsers.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                itemCount: filteredUsers.length,
-                itemBuilder: (context, index) {
-                  UserObject user = filteredUsers[index];
-                  // Each user item is wrapped in a Slidable widget for slide actions
-                  return Slidable(
-                    // Action pane when swiped from the start (left)
+      body: filteredUsers.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: filteredUsers.length,
+              itemBuilder: (context, index) {
+                UserObject user = filteredUsers[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                  child: Slidable(
                     startActionPane: ActionPane(
                       motion: const DrawerMotion(),
                       children: [
@@ -176,19 +131,18 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                           onPressed: (context) => resetPassword(user),
                           backgroundColor: Colors.orange,
                           icon: Icons.lock_reset,
-                          label: 'Reset Password',
+                          label: 'Resetear',
                         ),
                       ],
                     ),
-                    // Action pane when swiped from the end (right)
                     endActionPane: ActionPane(
                       motion: const DrawerMotion(),
                       children: [
                         SlidableAction(
-                          onPressed: (context) => editUser(user),
+                          onPressed: (context) {}, // Implementar editar usuario
                           backgroundColor: Colors.blue,
                           icon: Icons.edit,
-                          label: 'Edit',
+                          label: 'Editar',
                         ),
                         SlidableAction(
                           onPressed: (context) => deactivateUser(user),
@@ -199,14 +153,20 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                       ],
                     ),
                     child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
                       title: Text(
-                        "${user.firstName} ${user.lastName} ${user.status.toLowerCase() == 'activo' ? "" : "[INACTIVO]"}",
+                        "${user.firstName} ${user.lastName}",
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       subtitle: Text(user.role.replaceAll("_", " ")),
+                      trailing: user.status.toLowerCase() == 'activo'
+                          ? const Icon(Icons.check_circle, color: Colors.green)
+                          : const Icon(Icons.cancel, color: Colors.red),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }

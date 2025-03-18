@@ -306,7 +306,7 @@ class SupabaseManager {
             'tramo_horario': guardia.tramoHorario,
             'dia':
                 guardia.day
-                    .toIso8601String(), // Convert DateTime to ISO-8601 string
+                    ?.toIso8601String(), // Convert DateTime to ISO-8601 string
           },
         );
 
@@ -351,13 +351,12 @@ class SupabaseManager {
           data['dia'] as String,
         ); // Assuming 'dia' is a valid date string
 
-        // Create the GuardiaObject manually
         GuardiaObject guardia = GuardiaObject(
           id: id,
-          missingTeacherId: missingTeacherId,
-          ausenciaId: ausenciaId,
-          tramoHorario: tramoHorario,
-          substituteTeacherId: substituteTeacherId,
+          missingTeacherId: missingTeacherId ?? 0, // Default value if null
+          ausenciaId: ausenciaId ?? 0, // Same here
+          tramoHorario: tramoHorario ?? 0, // Handle null case
+          substituteTeacherId: substituteTeacherId ?? 0, // Handle null case
           observations: observations,
           status: status,
           day: day,

@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'package:codigo/Objetos/guardia_object.dart';
+import 'package:codigo/Objetos/guardia_object.dart'; // Ensure this import is correct
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +39,12 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
     });
   }
 
-  // Make this a synchronous function to be compatible with eventLoader
   List<GuardiaObject> _getEventsForDay(DateTime day) {
     // Filter the guardias that match the selected day
     return unasignedGuardias
-        .where((guardia) => isSameDay(guardia.day, day))
+        .where(
+          (guardia) => guardia.day != null && isSameDay(guardia.day!, day),
+        ) // Safely access day!
         .toList();
   }
 

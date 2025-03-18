@@ -1,28 +1,27 @@
 class GuardiaObject {
   final int id;
-  final int? missingTeacherId; // Nullable if the field can be null
-  final int? ausenciaId; // Nullable if the field can be null
-  final int? tramoHorario; // Nullable if the field can be null
-  final int? substituteTeacherId; // Nullable if the field can be null
+  final int? missingTeacherId;
+  final int? ausenciaId;
+  final int? tramoHorario;
+  final int? substituteTeacherId;
   final String observations;
   final String status;
-  final DateTime day; // Changed from String to DateTime
+  final DateTime? day; // Nullable DateTime field for day
 
   GuardiaObject({
     required this.id,
-    this.missingTeacherId, // Nullable field
-    this.ausenciaId, // Nullable field
-    this.tramoHorario, // Nullable field
-    this.substituteTeacherId, // Nullable field
+    this.missingTeacherId,
+    this.ausenciaId,
+    this.tramoHorario,
+    this.substituteTeacherId,
     required this.observations,
     required this.status,
-    required this.day,
+    this.day,
   });
 
-  // Factory constructor to create a GuardiaObject from a map (e.g., Supabase response)
   factory GuardiaObject.fromMap(Map<String, dynamic> data) {
     return GuardiaObject(
-      id: data['id'] as int, // Assuming 'id' field is always present
+      id: data['id'] as int,
       missingTeacherId:
           data['id_profesor_ausente'] != null
               ? data['id_profesor_ausente'] as int
@@ -35,9 +34,10 @@ class GuardiaObject {
           data['id_substituto'] != null ? data['id_substituto'] as int : null,
       observations: data['observaciones'] as String,
       status: data['estado'] as String,
-      day: DateTime.parse(
-        data['dia'] as String,
-      ), // Assuming 'dia' is a valid date string
+      day:
+          data['dia'] != null
+              ? DateTime.parse(data['dia']) // Parse the 'dia' field to DateTime
+              : null,
     );
   }
 

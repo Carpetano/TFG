@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'package:codigo/Objetos/Guardia_object.dart';
+import 'package:codigo/Objetos/guardia_object.dart'; // Correct the file name here
 import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
@@ -289,6 +289,31 @@ class SupabaseManager {
       // Log any error that occurs during the insertion process
       print("Error inserting ausencia: $e");
       return null;
+    }
+  }
+
+  Future<void> insertGuardias(List<GuardiaObject> guardiasToInsert) async {
+    try {
+      List fullResponse = [];
+
+      for (var guardia in guardiasToInsert) {
+        final response = await Supabase.instance.client
+            .from('guardias')
+            .insert({
+              'id_profesor_ausente': guardia.missingTeacherId,
+              'id_ausencia': guardia.ausenciaId,
+              'observaciones': guardia.observations,
+              'estado': 'Pendiente',
+              'tramo_horario': guardia.tramoHorario,
+            });
+
+        // Add the response to the fullResponse list
+        fullResponse.add(response);
+      }
+
+      print("FULL RESPONSE: $fullResponse");
+    } catch (e) {
+      print("Error inserting guardias: $e");
     }
   }
 

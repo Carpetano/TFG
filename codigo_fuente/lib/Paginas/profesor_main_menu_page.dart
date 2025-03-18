@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
-import 'package:codigo/Objetos/Guardia_object.dart';
+import 'package:codigo/Objetos/guardia_object.dart'; // Correct the file name here
+
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';

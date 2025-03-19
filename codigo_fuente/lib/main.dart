@@ -214,133 +214,118 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
-    return SizedBox(
-      height: screenHeight, // Full vertical space
-      child: Row(
-        children: [
-          // Form Fields Section (60% width)
-          Expanded(
-            flex: 3, // 60% of the screen
-            child: Container(
-              color: Theme.of(context).colorScheme.surface,
-              padding: EdgeInsets.all(40),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // TITLE
-                  Text(
-                    "Guardias Calderón",
-                    style: TextStyle(
-                      fontSize: 48, // Font size of 48
-                      fontWeight: FontWeight.bold, // Make the text bold
-                      fontStyle: FontStyle.italic, // Make the text italic
-                      color:
-                          Theme.of(context)
-                              .colorScheme
-                              .primary, // Use the primary color from the theme
-                      shadows: [
-                        Shadow(
-                          blurRadius: 30.0, // Blur radius of the shadow
-                          color:
-                              Theme.of(
-                                context,
-                              ).colorScheme.primary, // Shadow color
-                          offset: Offset(5.0, 5.0), // Shadow offset (x, y)
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 50),
-                  // EMAIL FIELD
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(hintText: "Correo"),
-                  ),
-                  SizedBox(height: 20),
-                  // PASSWORD FIELD
-                  TextFormField(
-                    obscureText: true,
-                    controller: _passwordController,
-                    decoration: InputDecoration(hintText: "Contraseña"),
-                  ),
-                  SizedBox(height: 40),
-                  // LOGIN BUTTON
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
+  return Stack(
+    children: [
+      // Video de fondo que ocupa toda la pantalla
+      Positioned.fill(
+        child: _videoController.value.isInitialized
+            ? FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _videoController.value.size.width,
+                  height: _videoController.value.size.height,
+                  child: VideoPlayer(_videoController),
+                ),
+              )
+            : const Center(child: CircularProgressIndicator()),
+      ),
+      // Contenido centrado en el contenedor responsivo
+      Center(
+        child: Container(
+          width: screenWidth > 600 ? screenWidth * 0.6 : screenWidth * 1,
+          padding: EdgeInsets.all(30),
+          decoration: BoxDecoration(
+            color:Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Guardias Calderón",
+                style: TextStyle(
+                  fontSize: 48, // Font size of 48
+                  fontWeight: FontWeight.bold, // Make the text bold
+                  fontStyle: FontStyle.italic, // Make the text italic
+                  color:
+                    Theme.of(context)
+                      .colorScheme
+                      .primary, // Use the primary color from the theme
+                    shadows: [
+                      Shadow(
+                        blurRadius: 30.0, // Blur radius of the shadow
+                        color:
                           Theme.of(
                             context,
-                          ).colorScheme.primary, // Background color
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onPrimary, // Text color
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ), // Button padding
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          8,
-                        ), // Rounded corners
-                        side: BorderSide(
-                          color:
-                              Theme.of(
-                                context,
-                              ).colorScheme.secondary, // Border color
-                          width: 2, // Border thickness
-                        ),
+                          ).colorScheme.primary, // Shadow color
+                        offset: Offset(5.0, 5.0), // Shadow offset (x, y)
                       ),
-                    ),
-                    onPressed: supabaseLogin,
-                    child: Text("Iniciar Sesión"),
+                    ],
+                ),
+              ),
+              SizedBox(height: 30),
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  hintText: "Correo",
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondary, // Cambia el color del texto
                   ),
-                ],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color:Theme.of(context).colorScheme.onSecondary),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.onPrimary,
+
+                ),
               ),
-            ),
-          ),
-          // Vertical Divider (Bar) between the two sections
-          VerticalDivider(
-            thickness: 3, // Thickness of the divider
-            width: 3, // Width of the divider
-            color: Colors.grey[500], // Divider color
-          ),
-          // Video Section (40% width)
-          Expanded(
-            flex: 2, // 40% of the screen
-            child: Container(
-              padding: EdgeInsets.all(20),
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              child: Center(
-                child:
-                    _videoController.value.isInitialized
-                        ? ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            10,
-                          ), // Rounded corners
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.primary, // Border color
-                                width: 3, // Border width
-                              ),
-                            ),
-                            child: AspectRatio(
-                              aspectRatio: _videoController.value.aspectRatio,
-                              child: VideoPlayer(_videoController),
-                            ),
-                          ),
-                        )
-                        : CircularProgressIndicator(),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Contraseña",
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondary, 
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color:Theme.of(context).colorScheme.onSecondary),
+                  ),
+                  filled: true,
+                  fillColor:Theme.of(context).colorScheme.onPrimary,
+                  
+                ),
               ),
-            ),
+              SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: supabaseLogin,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text("Iniciar Sesión"),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    );
-  }
+    ],
+  );
+}
 
   Widget buildMobileLayout(double screenWidth) {
     return Center(
@@ -354,9 +339,7 @@ class _MyHomePageState extends State<MyHomePage> {
               fontWeight: FontWeight.bold, // Make the text bold
               fontStyle: FontStyle.italic, // Make the text italic
               color:
-                  Theme.of(
-                    context,
-                  ).colorScheme.primary, // Use the primary color from the theme
+                  Theme.of(context).colorScheme.primary, // Use the primary color from the theme
               shadows: [
                 Shadow(
                   blurRadius: 30.0, // Blur radius of the shadow
@@ -370,18 +353,42 @@ class _MyHomePageState extends State<MyHomePage> {
           SizedBox(
             width: screenWidth * 0.8,
             child: TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(hintText: "Correo"),
-            ),
+                controller: _emailController,
+                decoration: InputDecoration(
+                  hintText: "Correo",
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondary, // Cambia el color del texto
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color:Theme.of(context).colorScheme.onSecondary),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.onPrimary,
+
+                ),
+              ),
           ),
           SizedBox(height: 10),
           SizedBox(
             width: screenWidth * 0.8,
             child: TextFormField(
-              obscureText: true,
-              controller: _passwordController,
-              decoration: InputDecoration(hintText: "Contraseña"),
-            ),
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Contraseña",
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondary, 
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color:Theme.of(context).colorScheme.onSecondary),
+                  ),
+                  filled: true,
+                  fillColor:Theme.of(context).colorScheme.onPrimary,
+                  
+                ),
+              ),
           ),
           SizedBox(height: 20),
           ElevatedButton(
@@ -398,7 +405,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 borderRadius: BorderRadius.circular(8), // Rounded corners
                 side: BorderSide(
                   color:
-                      Theme.of(context).colorScheme.secondary, // Border color
+                      Theme.of(context).colorScheme.primary, // Border color
                   width: 2, // Border thickness
                 ),
               ),

@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:codigo/Objetos/guardia_object.dart'; // Correct the file name here
 import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
@@ -53,7 +54,7 @@ class SupabaseManager {
       }
 
       // If user is null, log a debug message and return null
-      print("[DEBUG]: Login failed, user is null.");
+      print("[DEBUG]: Login failed, user is null");
       return null;
     } catch (e) {
       // If an error occurs during login, log the error for debugging purposes
@@ -81,60 +82,45 @@ class SupabaseManager {
     String lastName,
     String secondLastName,
     String phone,
+    String role, // 🔹 Agregado para recibir el rol seleccionado
   ) async {
     try {
-      // Attempt to sign up the user with Supabase using the provided email and password
       final AuthResponse response = await Supabase.instance.client.auth.signUp(
         email: email,
         password: password,
       );
 
-      // Check if the response contains a valid user object
       if (response.user != null) {
-        // Log a debug message indicating that the registration email was sent
-        print("[DEBUG]: Registration mail Sent to: $email");
-
-        // Retrieve user details
         final userId = response.user!.id;
-        final userEmail = response.user!.email;
 
-        // Insert the user's data into the 'usuarios' table in Supabase
         final insertResponse =
             await Supabase.instance.client
                 .from('usuarios')
                 .insert({
                   'id_auth': userId,
-                  'rol': 'Sala_de_Profesores', // Default role
-                  'estado': 'Inactivo', // Default status
-                  'nombre': name, // NULL values allowed
+                  'rol': role, // 🔹 Guardamos el rol correctamente
+                  'estado': 'Inactivo',
+                  'nombre': name,
                   'apellido1': lastName,
                   'apellido2': secondLastName,
                   'telefono': phone,
-                  'email': userEmail,
+                  'email': email,
                 })
                 .select()
                 .single();
 
-        // Check if the user data was inserted successfully
         if (insertResponse.isEmpty) {
-          // Log a debug message if no data was inserted into the 'usuarios' table
-          print("[DEBUG]: No data inserted into 'usuarios'.");
+          print("[DEBUG]: No se insertó el usuario");
           return null;
         }
 
-        // Log the inserted user data for debugging purposes
-        print("[DEBUG]:  User inserted into 'usuarios': $insertResponse");
-
-        // Return the mapped UserObject if the registration was successful
         return await mapUser(response.user!);
       }
 
-      // If user is null, log a debug message indicating registration failure
-      print("[DEBUG]: Error: Registration failed, user is null.");
+      print("[DEBUG]: Error: Registro fallido, usuario es null");
       return null;
     } catch (e) {
-      // If an error occurs during registration, log the error for debugging purposes
-      print("[DEBUG]: Error during registration: $e");
+      print("[DEBUG]: Error al registrar usuario: $e");
       return null;
     }
   }
@@ -142,7 +128,7 @@ class SupabaseManager {
   /// Maps Supabase User to LoggedInUser object
   ///
   /// This function fetches additional user details from the 'usuarios' table using the user ID,
-  /// then maps it to a custom UserObject with the necessary fields.
+  /// then maps it to a custom UserObject with the necessary fields
   ///
   /// - [user]: The Supabase User object to map
   ///
@@ -157,19 +143,25 @@ class SupabaseManager {
               .eq('id_auth', user.id)
               .single();
 
-      // Return the mapped UserObject
-      return UserObject(
-        id: response['id_usuario'],
-        authId: user.id,
-        firstName: response['nombre'] ?? '',
-        lastName: response['apellido1'] ?? '',
-        secondLastName: response['apellido2'] ?? '',
-        role: response['rol'] ?? 'Inactivo',
-        email: response['email'] ?? user.email ?? '',
-        phone: response['telefono'] ?? '',
-        registrationDate: DateTime.tryParse(user.createdAt) ?? DateTime.now(),
-        status: response['estado'],
-      );
+      // If the response is empty or null, return null
+      if (response.isEmpty) {
+        return null;
+      }
+
+      // Use the fromMap constructor to map the response into a UserObject
+      return UserObject.fromMap({
+        'id': response['id_usuario'],
+        'auth_id': user.id,
+        'first_name': response['nombre'] ?? '',
+        'last_name': response['apellido1'] ?? '',
+        'second_last_name': response['apellido2'] ?? '',
+        'role': response['rol'] ?? 'Inactivo',
+        'email': response['email'] ?? user.email ?? '',
+        'phone': response['telefono'] ?? '',
+        'registration_date':
+            user.createdAt, // Assuming createdAt is a valid string
+        'status': response['estado'],
+      });
     } catch (e) {
       // Log error if mapping fails
       print("[DEBUG]:  Error mapping user: $e");
@@ -179,8 +171,8 @@ class SupabaseManager {
 
   /// Sets a user as inactive in the 'usuarios' table
   ///
-  /// This function updates the 'estado' field of the user to 'Inactivo' based on the user ID.
-  /// If an error occurs or the user update fails, an exception is thrown.
+  /// This function updates the 'estado' field of the user to 'Inactivo' based on the user ID
+  /// If an error occurs or the user update fails, an exception is thrown
   ///
   /// - [userId]: The ID of the user to update
   Future<void> setUserAsInactive(int userId) async {
@@ -213,7 +205,7 @@ class SupabaseManager {
 
   /// Retrieves all users from the 'usuarios' table
   ///
-  /// This function fetches all users from the 'usuarios' table and maps them to a list of UserObject.
+  /// This function fetches all users from the 'usuarios' table and maps them to a list of UserObject
   /// If an error occurs or no users are found, an empty list is returned.
   ///
   /// Returns: A list of UserObject containing all users
@@ -224,7 +216,7 @@ class SupabaseManager {
 
       // Check if the response is empty
       if ((response.isEmpty)) {
-        print("[DEBUG]:  No users found in the 'usuarios' table.");
+        print("[DEBUG]: No users found in the 'usuarios' table");
         return []; // Return an empty list if no data is found
       }
 
@@ -258,50 +250,114 @@ class SupabaseManager {
     }
   }
 
-  /// Inserts a new ausencia (absence) record into the 'ausencias' table
-  ///
-  /// This function inserts a record into the 'ausencias' table with the provided details.
-  /// Optionally, an assigned teacher (assignedTeacherId) can be provided.
-  ///
-  /// - [missingTeacherId]: The ID of the missing teacher
-  /// - [classCode]: The class code where the absence occurred
-  /// - [status]: The status of the absence
-  /// - [task]: The task assigned for the class
-  /// - [horaInicio]: The start time of the absence
-  /// - [horaFin]: The end time of the absence
-  /// - [assignedTeacherId]: Optional ID of the teacher assigned to cover the absence
-  Future<void> insertAusencia(
+  /// TODO COMMENT
+  Future<AusenciaObject?> insertAusencia(
     int missingTeacherId,
     String classCode,
-    String status,
-    String task,
-    DateTime horaInicio,
-    DateTime horaFin, {
-    int? assignedTeacherId, // Optional: assigned teacher (profesor_asignado)
-  }) async {
+    DateTime day,
+  ) async {
     try {
-      // Insert a new ausencia record into the 'ausencias' table
-      final response = await Supabase.instance.client.from('ausencias').insert({
-        'profesor_ausente': missingTeacherId,
-        'profesor_asignado': assignedTeacherId,
-        'aula': classCode,
-        'tarea': task,
-        'estado': status,
-        'hora_inicio': horaInicio.toIso8601String(),
-        'hora_fin': horaFin.toIso8601String(),
-      });
-      // Log the response after inserting the record
-      print("[DEBUG]: Inserted Ausencia: $response");
+      final response =
+          await Supabase.instance.client
+              .from('ausencias')
+              .insert({'profesor_ausente': missingTeacherId, 'aula': classCode})
+              .select('id_ausencia, profesor_ausente, aula')
+              .single();
+
+      print("Inserted Ausencia Response: $response");
+      return AusenciaObject.fromMap(response);
     } catch (e) {
-      // Log error if inserting ausencia fails
-      print("[DEBUG]: Error inserting ausencia: $e");
+      print("Error inserting ausencia: $e");
+      return null;
+    }
+  }
+
+  Future<void> insertGuardias(List<GuardiaObject> guardiasToInsert) async {
+    try {
+      List fullResponse = [];
+
+      for (var guardia in guardiasToInsert) {
+        final response = await Supabase.instance.client.from('guardias').insert(
+          {
+            'id_profesor_ausente': guardia.missingTeacherId,
+            'id_ausencia': guardia.ausenciaId,
+            'observaciones': guardia.observations,
+            'estado': 'Pendiente',
+            'tramo_horario': guardia.tramoHorario,
+            'dia':
+                guardia.day.toIso8601String(), // Convert DateTime to ISO format
+          },
+        );
+
+        // Add the response to the fullResponse list
+        fullResponse.add(response);
+      }
+
+      print("FULL RESPONSE: $fullResponse");
+    } catch (e) {
+      print("Error inserting guardias: $e");
+    }
+  }
+
+  Future<List<GuardiaObject>> getUnasignedGuardias() async {
+    try {
+      // Query Supabase for 'Guardia' objects
+      final response =
+          await Supabase.instance.client
+              .from('guardias') // Your Supabase table name
+              .select();
+
+      // Manually map the response data into a list of GuardiaObject
+      List<GuardiaObject> guardias = [];
+      for (var data in response) {
+        // Manually handle each field
+        int id = data['id_guardia'] as int;
+        int? missingTeacherId =
+            data['id_profesor_ausente'] != null
+                ? data['id_profesor_ausente'] as int
+                : null;
+        int? ausenciaId =
+            data['id_ausencia'] != null ? data['id_ausencia'] as int : null;
+        int? tramoHorario =
+            data['tramo_horario'] != null ? data['tramo_horario'] as int : null;
+        int? substituteTeacherId =
+            data['id_profesor_sustituto'] != null
+                ? data['id_profesor_sustituto'] as int
+                : null;
+        String observations = data['observaciones'] as String;
+        String status = data['estado'] as String;
+        DateTime day = DateTime.parse(
+          data['dia'] as String,
+        ); // Assuming 'dia' is a valid date string
+
+        // Create the GuardiaObject manually
+        GuardiaObject guardia = GuardiaObject(
+          id: id,
+          missingTeacherId: missingTeacherId,
+          ausenciaId: ausenciaId,
+          tramoHorario: tramoHorario,
+          substituteTeacherId: substituteTeacherId,
+          observations: observations,
+          status: status,
+          day: day,
+        );
+
+        // Add the guardia to the list
+        guardias.add(guardia);
+      }
+
+      return guardias;
+    } catch (e) {
+      // Handle any unexpected errors
+      print('Unexpected error: $e');
+      return [];
     }
   }
 
   /// Retrieves all active users from the 'usuarios' table
   ///
-  /// This function fetches all active users from the 'usuarios' table, based on the 'estado' field.
-  /// The status field is checked using a case-insensitive match for 'activo'.
+  /// This function fetches all active users from the 'usuarios' table, based on the 'estado' field
+  /// The status field is checked using a case-insensitive match for 'activo'
   ///
   /// Returns: A list of active UserObject
   Future<List<UserObject>> getActiveUsers() async {
@@ -317,7 +373,7 @@ class SupabaseManager {
 
       // Check if response is empty
       if (response.isEmpty) {
-        print("[DEBUG]: No active users found.");
+        print("[DEBUG]: No active users found");
         return [];
       }
 
@@ -350,7 +406,7 @@ class SupabaseManager {
 
   /// Retrieves all aulas (classrooms) from the 'aulas' table
   ///
-  /// This function fetches all classrooms from the 'aulas' table and maps them to a list of AulaObject.
+  /// This function fetches all classrooms from the 'aulas' table and maps them to a list of AulaObject
   ///
   /// Returns: A list of AulaObject representing all classrooms
   Future<List<AulaObject>> getAllAulas() async {
@@ -379,46 +435,9 @@ class SupabaseManager {
     }
   }
 
-  /// Retrieves all unassigned ausencias with a pending status
-  ///
-  /// This function fetches all unassigned absence records from the 'ausencias' table where the status is 'Pendiente'.
-  /// It maps the fetched data to a list of AusenciaObject.
-  ///
-  /// Returns: A list of AusenciaObject representing unassigned absences
-  Future<List<AusenciaObject>> getAllUnasignedAusencias() async {
-    try {
-      // Fetch all unassigned absences from the 'ausencias' table
-      final response = await Supabase.instance.client
-          .from('ausencias')
-          .select()
-          .like('estado', 'Pendiente'); // Filter for pending ausencias
-
-      // Map the response to a list of AusenciaObject
-      List<AusenciaObject> ausencias =
-          (response as List).map((ausenciaData) {
-            return AusenciaObject(
-              id: ausenciaData['id_ausencia'] ?? 0,
-              missingTeacherId: ausenciaData['profesor_ausente'] ?? 0,
-              assignedTeacherId: ausenciaData['profesor_asignado'] as int?,
-              classCode: ausenciaData['aula'] ?? '',
-              tasks: ausenciaData['tarea'] ?? '',
-              status: ausenciaData['estado'] ?? '',
-              startTime: DateTime.parse(ausenciaData['hora_inicio']),
-              endTime: DateTime.parse(ausenciaData['hora_fin']),
-            );
-          }).toList();
-
-      return ausencias;
-    } catch (e) {
-      // Log error if fetching unassigned absences fails
-      print("[DEBUG]: Error getting all unassigned ausencias: $e");
-      return []; // Return empty list in case of error
-    }
-  }
-
   /// Retrieves a UserObject by its ID from the 'usuarios' table
   ///
-  /// This function fetches user details based on the provided user ID and maps it to a UserObject.
+  /// This function fetches user details based on the provided user ID and maps it to a UserObject
   ///
   /// - [id]: The ID of the user to fetch
   ///
@@ -452,6 +471,227 @@ class SupabaseManager {
       // Log error if fetching user object fails
       print("[DEBUG]: Error getting user object: $e");
       rethrow; // Re-throw the exception so you can handle it higher up
+    }
+  }
+
+  Future<List<GuardiaObject>> getAllGuardiasByDay(DateTime day) async {
+    final response = await Supabase.instance.client
+        .from('guardias')
+        .select()
+        .eq('dia', day.toIso8601String().split('T')[0]); // Filter by date
+
+    print("RESPONSE: $response");
+
+    if (response.isEmpty) {
+      return [];
+    }
+
+    return response
+        .map(
+          (data) => GuardiaObject(
+            id: data['id_guardia'],
+            missingTeacherId: data['id_profesor_ausente'],
+            ausenciaId: data['id_ausencia'],
+            tramoHorario: data['tramo_horario'],
+            substituteTeacherId: data['id_profesor_sustituto'] ?? 0,
+            observations: data['observaciones'] ?? '',
+            status: data['estado'],
+            day: DateTime.parse(data['dia']), // Ensure it's a DateTime object
+          ),
+        )
+        .toList();
+  }
+
+  Future<List<GuardiaObject>> getAllUnasignedGuardias() async {
+    final response = await Supabase.instance.client
+        .from('guardias')
+        .select()
+        .like('estado', 'pendiente');
+
+    print("RESPONSE: $response");
+
+    if (response.isEmpty) {
+      return [];
+    }
+
+    return response
+        .map(
+          (data) => GuardiaObject(
+            id: data['id_guardia'],
+            missingTeacherId: data['id_profesor_ausente'],
+            ausenciaId: data['id_ausencia'],
+            tramoHorario: data['tramo_horario'],
+            substituteTeacherId: data['id_profesor_sustituto'] ?? 0,
+            observations: data['observaciones'] ?? '',
+            status: data['estado'],
+            day: data['dia'],
+          ),
+        )
+        .toList();
+  }
+
+  Future<void> assignGuardiaToUser(
+    int idGuardia,
+    int idSubstituteTeacher,
+  ) async {
+    final response = await Supabase.instance.client
+        .from('guardias')
+        .update({
+          'id_profesor_sustituto': idSubstituteTeacher,
+          'estado': 'Asignada',
+        })
+        .eq(
+          'id_guardia',
+          idGuardia,
+        ); // Add a filter to select which record to update (you need to specify which "guardia" you're updating)
+
+    if (response.error != null) {
+      print("Error assigning guardia: ${response.error!.message}");
+    } else {
+      print("Guardia assigned successfully");
+    }
+  }
+
+  Future<GuardiaObject?> getGuardiaById(int id) async {
+    try {
+      final response =
+          await Supabase.instance.client
+              .from('guardias')
+              .select()
+              .eq('id_guardia', id)
+              .single();
+
+      print(response);
+
+      // Use the mapFromResponse method to map the response into GuardiaObject
+      List<GuardiaObject> guardias = GuardiaObject.mapFromResponse([response]);
+
+      print(guardias[0]);
+
+      // Return the first item if it's not empty
+      return guardias.isNotEmpty ? guardias[0] : null;
+    } catch (e) {
+      print("Error getting Guardia: $e");
+      return null;
+    }
+  }
+
+  Future<List<GuardiaObject>> getAllGuardiasByUserId(int userId) async {
+    try {
+      // Query the 'guardias' table, filtering by 'userId'
+      final response = await Supabase.instance.client
+          .from('guardias')
+          .select()
+          .eq(
+            'id_profesor_ausente',
+            userId,
+          ) // Assuming the 'id_profesor_ausente' is the column for userId
+          .order('dia', ascending: true); // Optionally order by date ('dia')
+
+      // Check if response is not empty
+      if (response.isEmpty) {
+        return []; // Return an empty list if no results are found
+      }
+
+      // Map the response into a list of GuardiaObject
+      List<GuardiaObject> guardias = GuardiaObject.mapFromResponse(response);
+
+      // Return the list of GuardiaObject
+      return guardias;
+    } catch (e) {
+      print("Error getting Guardia by userId: $e");
+      return []; // Return an empty list in case of an error
+    }
+  }
+
+  Future<List<GuardiaObject>> getAllGuardiasDoneByUser(int userId) async {
+    try {
+      // Fetch all guardias assigned to the user
+      final response = await SupabaseManager.instance.getAllGuardiasByUserId(
+        userId,
+      );
+
+      // Filter the response to include only those guardias where the 'id_profesor_sustituto' matches the userId
+      List<GuardiaObject> guardiasDone =
+          response
+              .where(
+                (guardia) => guardia.substituteTeacherId == userId,
+              ) // Filter by matching 'id_profesor_sustituto'
+              .toList();
+
+      return guardiasDone;
+    } catch (e) {
+      print("Error fetching guardias done by user: $e");
+      return []; // Return an empty list in case of error
+    }
+  }
+
+  Future<bool> updateUser(UserObject user) async {
+    try {
+      final response =
+          await Supabase.instance.client
+              .from('usuarios')
+              .update({
+                'nombre': user.firstName,
+                'apellido1': user.lastName,
+                'apellido2': user.secondLastName,
+                'rol': user.role,
+                'email': user.email,
+                'telefono': user.phone,
+                'estado': user.status,
+              })
+              .eq('id_usuario', user.id)
+              .select()
+              .single();
+
+      if (response.isEmpty) {
+        print("[DEBUG]: No se pudo actualizar el usuario con ID ${user.id}");
+        return false;
+      }
+
+      print("[DEBUG]: Usuario actualizado correctamente: ${user.id}");
+      return true;
+    } catch (e) {
+      print("[DEBUG]: Error al actualizar usuario: $e");
+      return false;
+    }
+  }
+
+  Future<bool> changeUserPassword(String newPassword) async {
+    try {
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+
+      print("[DEBUG]: Contraseña actualizada correctamente");
+      return true;
+    } catch (e) {
+      print("[DEBUG]: Error al cambiar la contraseña: $e");
+      return false;
+    }
+  }
+
+  Future<bool> changeUserPasswordByAdmin(int userId, String newPassword) async {
+    try {
+      final response = await Supabase.instance.client
+          .from(
+            'auth.users',
+          ) // ⚠ IMPORTANTE: Requiere permisos de administrador en Supabase
+          .update({'password': newPassword})
+          .eq('id', userId);
+
+      if (response.error != null) {
+        print(
+          "[DEBUG]: Error al cambiar contraseña: ${response.error!.message}",
+        );
+        return false;
+      }
+
+      print("[DEBUG]: Contraseña actualizada para el usuario con ID $userId");
+      return true;
+    } catch (e) {
+      print("[DEBUG]: Error al cambiar contraseña: $e");
+      return false;
     }
   }
 }

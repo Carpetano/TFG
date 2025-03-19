@@ -8,7 +8,7 @@ class EditUserPage extends StatefulWidget {
   final UserObject userToEdit;
 
   // Constructor
-  const EditUserPage({Key? key, required this.userToEdit}) : super(key: key);
+  const EditUserPage({super.key, required this.userToEdit});
 
   @override
   State<EditUserPage> createState() => _MyWidgetState();
@@ -125,7 +125,7 @@ class _MyWidgetState extends State<EditUserPage>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // First TextFormField for 'Nombre'
-                Container(
+                SizedBox(
                   width: screenWidth * 0.25,
                   child: TextFormField(
                     controller: _firstNameController, // Link controller
@@ -134,7 +134,7 @@ class _MyWidgetState extends State<EditUserPage>
                 ),
                 SizedBox(width: 8), // Spacer
                 // Second TextFormField for 'Primer apellido'
-                Container(
+                SizedBox(
                   width: screenWidth * 0.25,
                   child: TextFormField(
                     controller: _lastNameController, // Link controller
@@ -143,7 +143,7 @@ class _MyWidgetState extends State<EditUserPage>
                 ),
                 SizedBox(width: 8), // Spacer
                 // Third TextFormField for 'Segundo apellido'
-                Container(
+                SizedBox(
                   width: screenWidth * 0.25,
                   child: TextFormField(
                     controller: _secondLastNameController, // Link controller
@@ -159,7 +159,7 @@ class _MyWidgetState extends State<EditUserPage>
           // EMAIL TEXTFIELD
           Align(
             alignment: Alignment.center,
-            child: Container(
+            child: SizedBox(
               width: screenWidth * scalingFactor,
               child: TextFormField(
                 controller: _emailController, // Link controller
@@ -173,7 +173,7 @@ class _MyWidgetState extends State<EditUserPage>
           // PHONE TEXTFIELD
           Align(
             alignment: Alignment.center,
-            child: Container(
+            child: SizedBox(
               width: screenWidth * scalingFactor,
               child: TextFormField(
                 controller: _phoneController, // Link controller
@@ -187,7 +187,7 @@ class _MyWidgetState extends State<EditUserPage>
           // ROLE DROPDOWN SELECTION
           Align(
             alignment: Alignment.center,
-            child: Container(
+            child: SizedBox(
               width: screenWidth * scalingFactor,
               child: DropdownButton<String>(
                 value: selectedRole, // This is the currently selected role
@@ -216,7 +216,7 @@ class _MyWidgetState extends State<EditUserPage>
           // REGISTER BUTTON
           Align(
             alignment: Alignment.center,
-            child: Container(
+            child: SizedBox(
               width: screenWidth * scalingFactor,
               child: ElevatedButton(
                 onPressed: editUserById,

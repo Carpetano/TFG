@@ -1,50 +1,35 @@
 class AusenciaObject {
   final int id;
   final int missingTeacherId;
-  final int?
-  assignedTeacherId; // Nullable if a substitute is not always assigned
   final String classCode;
-  final String tasks;
-  final String status;
-  final DateTime startTime;
-  final DateTime endTime;
 
   AusenciaObject({
     required this.id,
     required this.missingTeacherId,
-    this.assignedTeacherId,
     required this.classCode,
-    required this.tasks,
-    required this.status,
-    required this.startTime,
-    required this.endTime,
   });
 
-  /// Factory constructor to create an `AusenciaObject` from a Supabase query result.
+  // Factory constructor to create an AusenciaObject from a map
   factory AusenciaObject.fromMap(Map<String, dynamic> data) {
     return AusenciaObject(
-      id: data['id_ausencia'] as int,
-      missingTeacherId: data['profesor_ausente'] as int,
-      assignedTeacherId: data['profesor_asignado'] as int?, // Nullable
-      classCode: data['aula'] as String,
-      tasks: data['tarea'] as String,
-      status: data['estado'] as String,
-      startTime: DateTime.parse(data['hora_inicio'] as String),
-      endTime: DateTime.parse(data['hora_fin'] as String),
+      id: data['id'] ?? 0, // Default to 0 if the ID is missing
+      missingTeacherId:
+          data['missing_teacher_id'] ?? 0, // Default to 0 if missing
+      classCode: data['class_code'] ?? '', // Default to empty string if missing
     );
   }
 
-  /// Converts the object into a map for inserting/updating in Supabase.
-  Map<String, dynamic> toMap() {
-    return {
-      'id_ausencia': id,
-      'profesor_ausente': missingTeacherId,
-      'profesor_asignado': assignedTeacherId,
-      'aula': classCode,
-      'tarea': tasks,
-      'estado': status,
-      'hora_inicio': startTime.toIso8601String(),
-      'hora_fin': endTime.toIso8601String(),
-    };
+  // Static method to map a list of maps (e.g., database response) to a list of AusenciaObject instances
+  static List<AusenciaObject> mapFromResponse(List<dynamic>? response) {
+    if (response == null || response.isEmpty) {
+      return [];
+    }
+    // Map each entry in the response list to an AusenciaObject using the fromMap factory constructor
+    return response.map((data) => AusenciaObject.fromMap(data)).toList();
+  }
+
+  @override
+  String toString() {
+    return 'AusenciaObject(id: $id, missingTeacherId: $missingTeacherId, classCode: $classCode)';
   }
 }

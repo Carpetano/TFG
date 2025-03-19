@@ -9,17 +9,23 @@ class AsignarGuardia extends StatefulWidget {
 
 class _AsignarGuardiaState extends State<AsignarGuardia> {
   int? selectedRow; // Fila seleccionada
-  List<List<TextEditingController>> controllers =
+  List<List<List<TextEditingController>>> controllers =
       []; // Controladores para cada celda
+
+  Future<void> claimGuardia() async {}
 
   @override
   void initState() {
     super.initState();
-    // Inicializar controladores (8 filas x 7 sesiones por ejemplo)
+    // Inicializar controladores (8 filas x 7 sesiones x 3 columnas)
     for (int i = 0; i < 8; i++) {
-      List<TextEditingController> rowControllers = [];
+      List<List<TextEditingController>> rowControllers = [];
       for (int j = 0; j < 7; j++) {
-        rowControllers.add(TextEditingController());
+        List<TextEditingController> sessionControllers = [];
+        for (int k = 0; k < 3; k++) {
+          sessionControllers.add(TextEditingController());
+        }
+        rowControllers.add(sessionControllers);
       }
       controllers.add(rowControllers);
     }
@@ -29,8 +35,10 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
   void dispose() {
     // Liberar controladores al cerrar la pantalla
     for (var row in controllers) {
-      for (var controller in row) {
-        controller.dispose();
+      for (var session in row) {
+        for (var controller in session) {
+          controller.dispose();
+        }
       }
     }
     super.dispose();
@@ -66,44 +74,83 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Center(
-                  // Aquí agregamos el Center para centrar la tabla
-                  child: DataTable(
-                    headingRowColor: MaterialStateProperty.all(
-                      Colors.blueAccent.withOpacity(0.3),
-                    ),
-                    columns: List.generate(
-                      7,
-                      (index) => DataColumn(label: Text('Sesión ${index + 1}')),
-                    ),
-                    rows: List.generate(8, (rowIndex) {
-                      return DataRow(
-                        selected: selectedRow == rowIndex,
-                        onSelectChanged: (selected) {
-                          setState(() {
-                            if (selected == true) {
-                              selectedRow = rowIndex;
-                            } else {
-                              selectedRow = null;
-                            }
-                          });
-                        },
-                        cells: List.generate(7, (colIndex) {
-                          return DataCell(
-                            TextField(
-                              controller: controllers[rowIndex][colIndex],
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width, // Ocupa todo el ancho
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      headingRowColor: WidgetStateProperty.all(
+                        Colors.blueAccent.withOpacity(0.3),
+                      ),
+                      columns: const [
+                        DataColumn(label: Text('Sesión 1')),
+                        DataColumn(label: Text('Sesión 2')),
+                        DataColumn(label: Text('Sesión 3')),
+                        DataColumn(label: Text('Recreo')),
+                        DataColumn(label: Text('Sesión 4')),
+                        DataColumn(label: Text('Sesión 5')),
+                        DataColumn(label: Text('Sesión 6')),
+                      ],
+                      rows: List.generate(8, (rowIndex) {
+                        return DataRow(
+                          selected: selectedRow == rowIndex,
+                          onSelectChanged: (selected) {
+                            setState(() {
+                              if (selected == true) {
+                                selectedRow = rowIndex;
+                              } else {
+                                selectedRow = null;
+                              }
+                            });
+                          },
+                          cells: List.generate(7, (colIndex) {
+                            return DataCell(
+                              SizedBox(
+                                width: 200, // Ancho fijo para cada celda
+                                height: 150, // Altura fija para cada celda
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      TextField(
+                                        controller:
+                                            controllers[rowIndex][colIndex][0],
+                                        decoration: const InputDecoration(
+                                          labelText: 'Profesor',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      TextField(
+                                        controller:
+                                            controllers[rowIndex][colIndex][1],
+                                        decoration: const InputDecoration(
+                                          labelText: 'Asignación',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      TextField(
+                                        controller:
+                                            controllers[rowIndex][colIndex][2],
+                                        decoration: const InputDecoration(
+                                          labelText: 'Comentarios',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              style: const TextStyle(fontSize: 14),
-                              enabled: true,
-                            ),
-                          );
-                        }),
-                      );
-                    }),
+                            );
+                          }),
+                        );
+                      }),
+                    ),
                   ),
                 ),
               ),
@@ -132,8 +179,10 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
                     ElevatedButton(
                       onPressed: () {
                         // Limpiar datos de la fila seleccionada
-                        for (var controller in controllers[selectedRow!]) {
-                          controller.clear();
+                        for (var session in controllers[selectedRow!]) {
+                          for (var controller in session) {
+                            controller.clear();
+                          }
                         }
                         setState(() {
                           selectedRow = null;

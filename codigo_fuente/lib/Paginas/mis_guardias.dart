@@ -37,28 +37,41 @@ class _MisGuardiasState extends State<MisGuardias> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text('Guardias Realizadas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const Text(
+              'Guardias Realizadas',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
             const SizedBox(height: 10),
             Expanded(
               child: Container(
-                decoration: BoxDecoration(border: Border.all(color: Colors.greenAccent)),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.greenAccent),
+                ),
                 child: ListView.builder(
                   itemCount: guardiasRealizadas.length,
                   itemBuilder: (context, index) {
                     return ListTile(
                       title: Text(guardiasRealizadas[index]),
-                      leading: const Icon(Icons.check_circle, color: Colors.green),
+                      leading: const Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                      ),
                     );
                   },
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Guardias Pendientes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const Text(
+              'Guardias Pendientes',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
             const SizedBox(height: 10),
             Expanded(
               child: Container(
-                decoration: BoxDecoration(border: Border.all(color: Colors.orangeAccent)),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.orangeAccent),
+                ),
                 child: ListView.builder(
                   itemCount: guardiasPendientes.length,
                   itemBuilder: (context, index) {
@@ -68,12 +81,16 @@ class _MisGuardiasState extends State<MisGuardias> {
                         guardiaSeleccionada == guardiasPendientes[index]
                             ? Icons.radio_button_checked
                             : Icons.radio_button_unchecked,
-                        color: guardiaSeleccionada == guardiasPendientes[index] ? Colors.blue : null,
+                        color:
+                            guardiaSeleccionada == guardiasPendientes[index]
+                                ? Colors.blue
+                                : null,
                       ),
                       onTap: () {
                         setState(() {
                           // Si la misma guardia ya está seleccionada, deseleccionamos
-                          if (guardiaSeleccionada == guardiasPendientes[index]) {
+                          if (guardiaSeleccionada ==
+                              guardiasPendientes[index]) {
                             guardiaSeleccionada = null;
                           } else {
                             guardiaSeleccionada = guardiasPendientes[index];

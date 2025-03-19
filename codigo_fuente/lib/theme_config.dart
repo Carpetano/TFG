@@ -1,6 +1,7 @@
 // Inside AppEasyTheme class
-import 'package:codigo/main.dart';
+
 import 'package:flutter/material.dart';
+import 'package:codigo/main.dart';
 
 class AppEasyTheme {
   /// Returns a [MaterialApp] with a theme based on the passed argument.

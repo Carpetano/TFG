@@ -10,10 +10,10 @@ class AdminMenu extends StatefulWidget {
 
   // Constructor
   const AdminMenu({
-    Key? key,
+    super.key,
     required this.dbManager,
     required this.loggedAsUser,
-  }) : super(key: key);
+  });
 
   @override
   State<AdminMenu> createState() => _AdminMenuState();

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:codigo/Paginas/asignar_guardia.dart';
 import 'package:codigo/Paginas/add_ausencia_page.dart';
-import 'package:codigo/Paginas/mis_guardias.dart';
+import 'package:codigo/Paginas/view_my_guardias_page.dart';
 import 'package:codigo/Paginas/perfil_page.dart';
 import 'package:codigo/Paginas/ajustes_page.dart';
 import 'package:codigo/Paginas/register_user_page.dart';
@@ -196,7 +196,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const MisGuardias(),
+                      builder: (context) => VerMisGuardiasPage(),
                     ),
                   );
                 },

@@ -90,7 +90,7 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Guardia Information'),
+          title: Text('Información sobre la guardia'),
           content: Text(message),
           actions: <Widget>[
             TextButton(
@@ -133,6 +133,7 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
         ),
       ),
       body: ListView(
+        padding: EdgeInsets.only(top: 20, bottom: 20),
         children: [
           // Display pendientes section
           pendienteGuardias.isEmpty
@@ -176,7 +177,6 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
                   }).toList(),
                 ],
               ),
-
           // Display asignadas section
           asignadaGuardias.isEmpty
               ? const Center(child: Text("No hay guardias asignadas"))
@@ -216,7 +216,7 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
                         subtitle: Text("Tramo: ${guardia.tramoHorario}"),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
         ],

@@ -602,4 +602,54 @@ class SupabaseManager {
       return null;
     }
   }
+
+  Future<List<GuardiaObject>> getAllGuardiasByUserId(int userId) async {
+    try {
+      // Query the 'guardias' table, filtering by 'userId'
+      final response = await Supabase.instance.client
+          .from('guardias')
+          .select()
+          .eq(
+            'id_profesor_ausente',
+            userId,
+          ) // Assuming the 'id_profesor_ausente' is the column for userId
+          .order('dia', ascending: true); // Optionally order by date ('dia')
+
+      // Check if response is not empty
+      if (response.isEmpty) {
+        return []; // Return an empty list if no results are found
+      }
+
+      // Map the response into a list of GuardiaObject
+      List<GuardiaObject> guardias = GuardiaObject.mapFromResponse(response);
+
+      // Return the list of GuardiaObject
+      return guardias;
+    } catch (e) {
+      print("Error getting Guardia by userId: $e");
+      return []; // Return an empty list in case of an error
+    }
+  }
+
+  Future<List<GuardiaObject>> getAllGuardiasDoneByUser(int userId) async {
+    try {
+      // Fetch all guardias assigned to the user
+      final response = await SupabaseManager.instance.getAllGuardiasByUserId(
+        userId,
+      );
+
+      // Filter the response to include only those guardias where the 'id_profesor_sustituto' matches the userId
+      List<GuardiaObject> guardiasDone =
+          response
+              .where(
+                (guardia) => guardia.substituteTeacherId == userId,
+              ) // Filter by matching 'id_profesor_sustituto'
+              .toList();
+
+      return guardiasDone;
+    } catch (e) {
+      print("Error fetching guardias done by user: $e");
+      return []; // Return an empty list in case of error
+    }
+  }
 }

@@ -1,10 +1,11 @@
+import 'package:codigo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/Paginas/change_password_page.dart';
+import 'package:codigo/theme_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
-  final Function(Locale)?
-  onLanguageChanged; // Optional, if you want language switching
-  const SettingsPage({Key? key, this.onLanguageChanged}) : super(key: key);
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -15,14 +16,13 @@ class _SettingsPageState extends State<SettingsPage> {
   String idioma = "Español";
   bool temaOscuro = false;
 
-  // Simple translations map for demonstration purposes.
+  // Simple translations map for demonstration.
   final Map<String, Map<String, String>> translations = {
     'Español': {
       'title': 'Ajustes',
       'personalization': 'Personalización',
       'darkMode': 'Modo oscuro',
-      'darkModeSubtitle':
-          'Cambia entre el tema claro y oscuro (solo en esta página)',
+      'darkModeSubtitle': 'Cambia entre el tema claro y oscuro',
       'language': 'Idioma',
       'languageSubtitle': 'Selecciona el idioma de la aplicación',
       'notifications': 'Recibir notificaciones',
@@ -33,8 +33,7 @@ class _SettingsPageState extends State<SettingsPage> {
       'title': 'Settings',
       'personalization': 'Personalization',
       'darkMode': 'Dark Mode',
-      'darkModeSubtitle':
-          'Switch between light and dark themes (this page only)',
+      'darkModeSubtitle': 'Switch between light and dark themes',
       'language': 'Language',
       'languageSubtitle': 'Select the app language',
       'notifications': 'Receive Notifications',
@@ -45,8 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
       'title': 'Paramètres',
       'personalization': 'Personnalisation',
       'darkMode': 'Mode sombre',
-      'darkModeSubtitle':
-          'Changer entre les thèmes clair et sombre (cette page uniquement)',
+      'darkModeSubtitle': 'Changer entre les thèmes clair et sombre',
       'language': 'Langue',
       'languageSubtitle': 'Sélectionnez la langue de l\'application',
       'notifications': 'Recevoir des notifications',
@@ -55,8 +53,29 @@ class _SettingsPageState extends State<SettingsPage> {
     },
   };
 
-  // Shortcut to get current translations.
+  // Shortcut getter for current translations.
   Map<String, String> get t => translations[idioma]!;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemePreference();
+  }
+
+  // Load the stored theme preference
+  void _loadThemePreference() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool savedTheme = prefs.getBool('temaOscuro') ?? false;
+    setState(() {
+      temaOscuro = savedTheme;
+    });
+  }
+
+  // Save the theme preference
+  void _saveThemePreference(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('temaOscuro', value);
+  }
 
   // Navigate to change password page.
   void goToChangePassword() async {
@@ -75,118 +94,95 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  // Build a light theme for this page.
-  ThemeData _buildLightTheme() {
-    return ThemeData(
-      brightness: Brightness.light,
-      primaryColor: Colors.blueAccent,
-      scaffoldBackgroundColor: Colors.white,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
-      ),
-    );
-  }
+  // Toggle the theme for the entire app by rebuilding with the new theme.
+  void toggleTheme(bool value) {
+    setState(() {
+      temaOscuro = value;
+    });
+    _saveThemePreference(temaOscuro); // Save the theme preference when toggled.
 
-  // Build a dark theme for this page.
-  ThemeData _buildDarkTheme() {
-    return ThemeData(
-      brightness: Brightness.dark,
-      primaryColor: Colors.blueAccent,
-      scaffoldBackgroundColor: Colors.grey[900],
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
+    // Rebuild the app with the new theme using AppEasyTheme.
+    runApp(
+      AppEasyTheme().buildAppWithTheme(
+        isDarkMode: temaOscuro,
+        title: "Test", // You can change this title as needed.
+        onThemeToggle: () {}, // Passing this function again.
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Create a local theme based on the toggle.
-    ThemeData localTheme = temaOscuro ? _buildDarkTheme() : _buildLightTheme();
-
-    // Wrap only the SettingsPage with a local Theme widget.
-    return Theme(
-      data: localTheme,
-      child: Scaffold(
-        appBar: AppBar(title: Text(t['title']!)),
-        body: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            Text(
-              t['personalization']!,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(t['title']!),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          Text(
+            t['personalization']!,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          // Dark Mode Toggle (changes the global theme)
+          _buildSettingTile(
+            icon: Icons.dark_mode,
+            title: t['darkMode']!,
+            subtitle: t['darkModeSubtitle']!,
+            trailing: Switch(value: temaOscuro, onChanged: toggleTheme),
+          ),
+          // Language selection (local state only)
+          _buildSettingTile(
+            icon: Icons.language,
+            title: t['language']!,
+            subtitle: t['languageSubtitle']!,
+            trailing: DropdownButton<String>(
+              value: idioma,
+              onChanged: (newValue) {
+                setState(() {
+                  idioma = newValue!;
+                });
+              },
+              items:
+                  <String>['Español', 'Inglés', 'Francés']
+                      .map(
+                        (String value) =>
+                            DropdownMenuItem(value: value, child: Text(value)),
+                      )
+                      .toList(),
             ),
-            const SizedBox(height: 10),
-
-            // Dark Mode toggle (local to this page)
-            _buildSettingTile(
-              icon: Icons.dark_mode,
-              title: t['darkMode']!,
-              subtitle: t['darkModeSubtitle']!,
-              trailing: Switch(
-                value: temaOscuro,
-                onChanged: (value) => setState(() => temaOscuro = value),
-              ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            t['notifications']!,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          // Notifications toggle (local)
+          _buildSettingTile(
+            icon: Icons.notifications_active,
+            title: t['notifications']!,
+            subtitle: t['notificationsSubtitle']!,
+            trailing: Switch(
+              value: notificaciones,
+              onChanged: (value) => setState(() => notificaciones = value),
             ),
-
-            // Language selection
-            _buildSettingTile(
-              icon: Icons.language,
-              title: t['language']!,
-              subtitle: t['languageSubtitle']!,
-              trailing: DropdownButton<String>(
-                value: idioma,
-                onChanged: (newValue) {
-                  setState(() {
-                    idioma = newValue!;
-                  });
-                },
-                items:
-                    <String>['Español', 'Inglés', 'Francés']
-                        .map(
-                          (String value) => DropdownMenuItem(
-                            value: value,
-                            child: Text(value),
-                          ),
-                        )
-                        .toList(),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            Text(
-              t['notifications']!,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            // Notifications toggle
-            _buildSettingTile(
-              icon: Icons.notifications_active,
-              title: t['notifications']!,
-              subtitle: t['notificationsSubtitle']!,
-              trailing: Switch(
-                value: notificaciones,
-                onChanged: (value) => setState(() => notificaciones = value),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            // Change Password Button
-            ElevatedButton(
-              onPressed: goToChangePassword,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: Text(t['changePassword']!),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          // Change Password Button
+          ElevatedButton(
+            onPressed: goToChangePassword,
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(t['changePassword']!),
+          ),
+        ],
       ),
     );
   }
 
-  // Helper widget to build setting tiles.
+  // Helper widget to build each setting tile.
   Widget _buildSettingTile({
     required IconData icon,
     required String title,

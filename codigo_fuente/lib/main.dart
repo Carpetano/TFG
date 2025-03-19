@@ -43,7 +43,9 @@ class _MyAppState extends State<MyApp> {
     return AppEasyTheme().buildAppWithTheme(
       isDarkMode: _themeMode == ThemeMode.dark, // Pass the correct theme mode
       title: "Test",
-      onThemeToggle: _toggleTheme, // Pass the theme toggle function
+      onThemeToggle:
+          () =>
+              _toggleTheme(), // Pass the theme toggle function wrapped in a closure
     );
   }
 }
@@ -202,130 +204,128 @@ class _MyHomePageState extends State<MyHomePage> {
           screenWidth > maxPhoneWidth
               ? buildDesktopLayout(screenWidth, screenHeight)
               : buildMobileLayout(screenWidth),
-      floatingActionButton: FloatingActionButton(
-        onPressed: widget.onThemeToggle,
-        backgroundColor:
-            Theme.of(
-              context,
-            ).colorScheme.primary, // Call the theme toggle function
-        child: Icon(Icons.brightness_6), // Accent color for the button
-      ),
     );
   }
 
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
-  return Stack(
-    children: [
-      // Video de fondo que ocupa toda la pantalla
-      Positioned.fill(
-        child: _videoController.value.isInitialized
-            ? FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: _videoController.value.size.width,
-                  height: _videoController.value.size.height,
-                  child: VideoPlayer(_videoController),
+    return Stack(
+      children: [
+        // Video de fondo que ocupa toda la pantalla
+        Positioned.fill(
+          child:
+              _videoController.value.isInitialized
+                  ? FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _videoController.value.size.width,
+                      height: _videoController.value.size.height,
+                      child: VideoPlayer(_videoController),
+                    ),
+                  )
+                  : const Center(child: CircularProgressIndicator()),
+        ),
+        // Contenido centrado en el contenedor responsivo
+        Center(
+          child: Container(
+            width: screenWidth > 600 ? screenWidth * 0.6 : screenWidth * 1,
+            padding: EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
                 ),
-              )
-            : const Center(child: CircularProgressIndicator()),
-      ),
-      // Contenido centrado en el contenedor responsivo
-      Center(
-        child: Container(
-          width: screenWidth > 600 ? screenWidth * 0.6 : screenWidth * 1,
-          padding: EdgeInsets.all(30),
-          decoration: BoxDecoration(
-            color:Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Guardias Calderón",
-                style: TextStyle(
-                  fontSize: 48, // Font size of 48
-                  fontWeight: FontWeight.bold, // Make the text bold
-                  fontStyle: FontStyle.italic, // Make the text italic
-                  color:
-                    Theme.of(context)
-                      .colorScheme
-                      .primary, // Use the primary color from the theme
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Guardias Calderón",
+                  style: TextStyle(
+                    fontSize: 48, // Font size of 48
+                    fontWeight: FontWeight.bold, // Make the text bold
+                    fontStyle: FontStyle.italic, // Make the text italic
+                    color:
+                        Theme.of(context)
+                            .colorScheme
+                            .primary, // Use the primary color from the theme
                     shadows: [
                       Shadow(
                         blurRadius: 30.0, // Blur radius of the shadow
                         color:
-                          Theme.of(
-                            context,
-                          ).colorScheme.primary, // Shadow color
+                            Theme.of(
+                              context,
+                            ).colorScheme.primary, // Shadow color
                         offset: Offset(5.0, 5.0), // Shadow offset (x, y)
                       ),
                     ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 30),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  hintText: "Correo",
-                  hintStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondary, // Cambia el color del texto
+                SizedBox(height: 30),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    hintText: "Correo",
+                    hintStyle: TextStyle(
+                      color:
+                          Theme.of(context)
+                              .colorScheme
+                              .onSecondary, // Cambia el color del texto
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.onPrimary,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color:Theme.of(context).colorScheme.onSecondary),
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.onPrimary,
-
                 ),
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: "Contraseña",
-                  hintStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondary, 
+                SizedBox(height: 20),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: "Contraseña",
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.onSecondary,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.onPrimary,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color:Theme.of(context).colorScheme.onSecondary),
-                  ),
-                  filled: true,
-                  fillColor:Theme.of(context).colorScheme.onPrimary,
-                  
                 ),
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: supabaseLogin,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: supabaseLogin,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
                   ),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  child: Text("Iniciar Sesión"),
                 ),
-                child: Text("Iniciar Sesión"),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   Widget buildMobileLayout(double screenWidth) {
     return Center(
@@ -339,7 +339,9 @@ class _MyHomePageState extends State<MyHomePage> {
               fontWeight: FontWeight.bold, // Make the text bold
               fontStyle: FontStyle.italic, // Make the text italic
               color:
-                  Theme.of(context).colorScheme.primary, // Use the primary color from the theme
+                  Theme.of(
+                    context,
+                  ).colorScheme.primary, // Use the primary color from the theme
               shadows: [
                 Shadow(
                   blurRadius: 30.0, // Blur radius of the shadow
@@ -353,42 +355,47 @@ class _MyHomePageState extends State<MyHomePage> {
           SizedBox(
             width: screenWidth * 0.8,
             child: TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  hintText: "Correo",
-                  hintStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondary, // Cambia el color del texto
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color:Theme.of(context).colorScheme.onSecondary),
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.onPrimary,
-
+              controller: _emailController,
+              decoration: InputDecoration(
+                hintText: "Correo",
+                hintStyle: TextStyle(
+                  color:
+                      Theme.of(
+                        context,
+                      ).colorScheme.onSecondary, // Cambia el color del texto
                 ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                ),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.onPrimary,
               ),
+            ),
           ),
           SizedBox(height: 10),
           SizedBox(
             width: screenWidth * 0.8,
             child: TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: "Contraseña",
-                  hintStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondary, 
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color:Theme.of(context).colorScheme.onSecondary),
-                  ),
-                  filled: true,
-                  fillColor:Theme.of(context).colorScheme.onPrimary,
-                  
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: "Contraseña",
+                hintStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                ),
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.onPrimary,
               ),
+            ),
           ),
           SizedBox(height: 20),
           ElevatedButton(
@@ -404,8 +411,7 @@ class _MyHomePageState extends State<MyHomePage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8), // Rounded corners
                 side: BorderSide(
-                  color:
-                      Theme.of(context).colorScheme.primary, // Border color
+                  color: Theme.of(context).colorScheme.primary, // Border color
                   width: 2, // Border thickness
                 ),
               ),

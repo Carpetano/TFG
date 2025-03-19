@@ -76,66 +76,46 @@ class SupabaseManager {
   ///
   /// Returns: A UserObject if registration is successful, null otherwise
   Future<UserObject?> register(
-    String email,
-    String password,
-    String name,
-    String lastName,
-    String secondLastName,
-    String phone,
-  ) async {
-    try {
-      // Attempt to sign up the user with Supabase using the provided email and password
-      final AuthResponse response = await Supabase.instance.client.auth.signUp(
-        email: email,
-        password: password,
-      );
+  String email,
+  String password,
+  String name,
+  String lastName,
+  String secondLastName,
+  String phone,
+  String role, // 🔹 Agregado para recibir el rol seleccionado
+) async {
+  try {
+    final AuthResponse response = await Supabase.instance.client.auth.signUp(
+      email: email,
+      password: password,
+    );
 
-      // Check if the response contains a valid user object
-      if (response.user != null) {
-        // Log a debug message indicating that the registration email was sent
-        print("[DEBUG]: Registration mail Sent to: $email");
+    if (response.user != null) {
+      final userId = response.user!.id;
 
-        // Retrieve user details
-        final userId = response.user!.id;
-        final userEmail = response.user!.email;
+      final insertResponse = await Supabase.instance.client.from('usuarios').insert({
+        'id_auth': userId,
+        'rol': role, // 🔹 Guardamos el rol correctamente
+        'estado': 'Inactivo',
+        'nombre': name,
+        'apellido1': lastName,
+        'apellido2': secondLastName,
+        'telefono': phone,
+        'email': email,
+      }).select().single();
 
-        // Insert the user's data into the 'usuarios' table in Supabase
-        final insertResponse =
-            await Supabase.instance.client
-                .from('usuarios')
-                .insert({
-                  'id_auth': userId,
-                  'rol': 'Sala_de_Profesores', // Default role
-                  'estado': 'Inactivo', // Default status
-                  'nombre': name, // NULL values allowed
-                  'apellido1': lastName,
-                  'apellido2': secondLastName,
-                  'telefono': phone,
-                  'email': userEmail,
-                })
-                .select()
-                .single();
-
-        // Check if the user data was inserted successfully
         if (insertResponse.isEmpty) {
-          // Log a debug message if no data was inserted into the 'usuarios' table
-          print("[DEBUG]: No data inserted into 'usuarios'");
+          print("[DEBUG]: No se insertó el usuario");
           return null;
         }
 
-        // Log the inserted user data for debugging purposes
-        print("[DEBUG]:  User inserted into 'usuarios': $insertResponse");
-
-        // Return the mapped UserObject if the registration was successful
         return await mapUser(response.user!);
       }
 
-      // If user is null, log a debug message indicating registration failure
-      print("[DEBUG]: Error: Registration failed, user is null");
+      print("[DEBUG]: Error: Registro fallido, usuario es null");
       return null;
     } catch (e) {
-      // If an error occurs during registration, log the error for debugging purposes
-      print("[DEBUG]: Error during registration: $e");
+      print("[DEBUG]: Error al registrar usuario: $e");
       return null;
     }
   }
@@ -652,4 +632,76 @@ class SupabaseManager {
       return []; // Return an empty list in case of error
     }
   }
+
+
+
+    Future<bool> updateUser(UserObject user) async {
+    try {
+        final response = await Supabase.instance.client
+            .from('usuarios')
+            .update({
+              'nombre': user.firstName,
+              'apellido1': user.lastName,
+              'apellido2': user.secondLastName,
+              'rol': user.role,
+              'email': user.email,
+              'telefono': user.phone,
+              'estado': user.status,
+            })
+            .eq('id_usuario', user.id)
+            .select()
+            .single();
+
+        if (response.isEmpty) {
+          print("[DEBUG]: No se pudo actualizar el usuario con ID ${user.id}");
+          return false;
+        }
+
+        print("[DEBUG]: Usuario actualizado correctamente: ${user.id}");
+        return true;
+      } catch (e) {
+        print("[DEBUG]: Error al actualizar usuario: $e");
+        return false;
+      }
+    }
+
+
+    Future<bool> changeUserPassword(String newPassword) async {
+      try {
+        await Supabase.instance.client.auth.updateUser(
+          UserAttributes(password: newPassword),
+        );
+
+          print("[DEBUG]: Contraseña actualizada correctamente");
+          return true;
+        } catch (e) {
+          print("[DEBUG]: Error al cambiar la contraseña: $e");
+          return false;
+        }
+    }
+
+    Future<bool> changeUserPasswordByAdmin(int userId, String newPassword) async {
+      try {
+        final response = await Supabase.instance.client
+            .from('auth.users') // ⚠ IMPORTANTE: Requiere permisos de administrador en Supabase
+            .update({'password': newPassword})
+            .eq('id', userId);
+
+        if (response.error != null) {
+          print("[DEBUG]: Error al cambiar contraseña: ${response.error!.message}");
+          return false;
+        }
+
+        print("[DEBUG]: Contraseña actualizada para el usuario con ID $userId");
+        return true;
+      } catch (e) {
+        print("[DEBUG]: Error al cambiar contraseña: $e");
+        return false;
+      }
+    }
+
 }
+
+
+
+

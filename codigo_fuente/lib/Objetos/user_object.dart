@@ -25,6 +25,33 @@ class UserObject {
     required this.status,
   });
 
+  // 🔹 Agregar copyWith para poder modificar valores específicos
+  UserObject copyWith({
+    int? id,
+    String? authId,
+    String? role,
+    String? firstName,
+    String? lastName,
+    String? secondLastName,
+    String? phone,
+    String? email,
+    DateTime? registrationDate,
+    String? status,
+  }) {
+    return UserObject(
+      id: id ?? this.id,
+      authId: authId ?? this.authId,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      secondLastName: secondLastName ?? this.secondLastName,
+      role: role ?? this.role,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      registrationDate: registrationDate ?? this.registrationDate,
+      status: status ?? this.status,
+    );
+  }
+
   // Factory constructor to create a UserObject from a map
   factory UserObject.fromMap(Map<String, dynamic> data) {
     return UserObject(

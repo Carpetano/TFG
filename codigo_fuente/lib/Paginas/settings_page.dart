@@ -1,5 +1,5 @@
-import 'package:codigo/theme_config.dart';
 import 'package:flutter/material.dart';
+import 'package:codigo/Paginas/change_password_page.dart'; // Asegúrate de importar ChangePasswordPage
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -12,6 +12,22 @@ class _SettingsPageState extends State<SettingsPage> {
   bool notificaciones = true;
   String idioma = "Español";
   bool temaOscuro = false;
+
+  // Navegar a la página de cambio de contraseña
+  void goToChangePassword() async {
+    // Navegar a la página de cambio de contraseña y esperar el resultado
+    bool? passwordChanged = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+    );
+
+    // Si la contraseña se cambió correctamente, regresamos a la página de ajustes
+    if (passwordChanged == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Contraseña cambiada con éxito. Regresando a ajustes...")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +72,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   idioma = newValue!;
                 });
               },
-              items:
-                  <String>['Español', 'Inglés', 'Francés']
-                      .map<DropdownMenuItem<String>>(
-                        (String value) =>
-                            DropdownMenuItem(value: value, child: Text(value)),
-                      )
-                      .toList(),
+              items: <String>['Español', 'Inglés', 'Francés']
+                  .map<DropdownMenuItem<String>>(
+                    (String value) => DropdownMenuItem(value: value, child: Text(value)),
+                  )
+                  .toList(),
             ),
           ),
 
@@ -86,6 +100,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 });
               },
             ),
+          ),
+
+          const SizedBox(height: 20),
+          
+          // Botón para cambiar la contraseña
+          ElevatedButton(
+            onPressed: goToChangePassword,
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Cambiar Contraseña"),
           ),
         ],
       ),

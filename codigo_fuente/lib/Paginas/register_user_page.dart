@@ -20,23 +20,24 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String? selectedRole = 'Profesor';
 
   void registerIntoDB() {
-    String firstName = _firstNameController.text;
-    String lastName = _lastNameController.text;
-    String secondLastName = _secondLastNameController.text;
-    String email = _emailController.text;
-    String password = _passwordController.text;
-    String phone = _phoneController.text;
-    String selectedRoleText = selectedRole!.replaceAll(' ', '_');
+  String firstName = _firstNameController.text;
+  String lastName = _lastNameController.text;
+  String secondLastName = _secondLastNameController.text;
+  String email = _emailController.text;
+  String password = _passwordController.text;
+  String phone = _phoneController.text;
+  String selectedRoleText = selectedRole!.replaceAll(' ', '_');
 
-    SupabaseManager.instance.register(
-      email,
-      password,
-      firstName,
-      lastName,
-      secondLastName,
-      phone,
-    );
-  }
+  SupabaseManager.instance.register(
+    email,
+    password,
+    firstName,
+    lastName,
+    secondLastName,
+    phone,
+    selectedRoleText,
+  );
+}
 
   @override
   Widget build(BuildContext context) {

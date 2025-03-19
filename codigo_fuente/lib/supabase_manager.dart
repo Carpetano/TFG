@@ -250,6 +250,7 @@ class SupabaseManager {
     }
   }
 
+  // Gud
   /// TODO COMMENT
   Future<AusenciaObject?> insertAusencia(
     int missingTeacherId,
@@ -260,18 +261,32 @@ class SupabaseManager {
       final response =
           await Supabase.instance.client
               .from('ausencias')
-              .insert({'profesor_ausente': missingTeacherId, 'aula': classCode})
-              .select('id_ausencia, profesor_ausente, aula')
+              .insert({
+                'profesor_ausente': missingTeacherId,
+                'aula': classCode,
+                // Removed 'dia' field here as it's not needed
+              })
+              .select(
+                'id_ausencia, profesor_ausente, aula',
+              ) // No need to select 'dia'
               .single();
 
-      print("Inserted Ausencia Response: $response");
-      return AusenciaObject.fromMap(response);
+      print("---- Inserted Ausencia Response: $response");
+
+      // Map the response to AusenciaObject
+      return AusenciaObject(
+        id: response['id_ausencia'], // Use the id_ausencia field from the response
+        missingTeacherId:
+            response['profesor_ausente'], // Map to missingTeacherId
+        classCode: response['aula'], // Map to classCode
+      );
     } catch (e) {
       print("Error inserting ausencia: $e");
       return null;
     }
   }
 
+  // Gud
   Future<void> insertGuardias(List<GuardiaObject> guardiasToInsert) async {
     try {
       List fullResponse = [];

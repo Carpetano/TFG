@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:codigo/Paginas/profesor_main_menu_page.dart';
 import 'package:codigo/Paginas/register_user_page.dart';
-import 'package:codigo/Paginas/view_Users_page.dart';
+import 'package:codigo/Paginas/view_users_page.dart';
 
 class AdminMainMenuPage extends StatefulWidget {
   const AdminMainMenuPage({super.key});
@@ -27,35 +27,43 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
               if (value == 'perfil') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const RegistrationPage(),
+                  ),
                 );
               } else if (value == 'ajustes') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ViewUsersPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const ViewUsersPage(),
+                  ),
                 );
               } else if (value == 'salir') {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProfesorMainMenuPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const ProfesorMainMenuPage(),
+                  ),
                 );
               }
             },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: 'perfil',
-                child: Text('Ver Perfil'),
-              ),
-              const PopupMenuItem(
-                value: 'ajustes',
-                child: Text('Ajustes'),
-              ),
-              const PopupMenuItem(
-                value: 'salir',
-                child: Text('Cerrar Sesión'),
-              ),
-            ],
-            icon: const Icon(Icons.account_circle, size: 30, color: Colors.white),
+            itemBuilder:
+                (BuildContext context) => [
+                  const PopupMenuItem(
+                    value: 'perfil',
+                    child: Text('Ver Perfil'),
+                  ),
+                  const PopupMenuItem(value: 'ajustes', child: Text('Ajustes')),
+                  const PopupMenuItem(
+                    value: 'salir',
+                    child: Text('Cerrar Sesión'),
+                  ),
+                ],
+            icon: const Icon(
+              Icons.account_circle,
+              size: 30,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(width: 10),
         ],
@@ -88,7 +96,11 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
     );
   }
 
-  Widget _buildMenuButton({required IconData icon, required String text, required VoidCallback onTap}) {
+  Widget _buildMenuButton({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.blueAccent,
@@ -112,9 +124,6 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
   }
 
   void _navigateTo(Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => page),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }
 }

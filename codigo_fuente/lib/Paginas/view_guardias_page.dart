@@ -45,6 +45,66 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
     );
   }
 
+  Future<void> showGuardiaInfo(int guardiaId, BuildContext context) async {
+    try {
+      // Fetch GuardiaObject by ID
+      GuardiaObject? guardia = await SupabaseManager.instance.getGuardiaById(
+        guardiaId,
+      );
+
+      print(guardia);
+
+      if (guardia == null) {
+        // Show a dialog if no data was found
+        if (context.mounted) {
+          _showAlertDialog(context, 'No data found for Guardia ID $guardiaId');
+        }
+        return;
+      }
+
+      // Prepare the text to display
+      String infoText = '''
+    Guardia ID: ${guardia.id}
+    Missing Teacher ID: ${guardia.missingTeacherId ?? 'N/A'}
+    Substitute Teacher ID: ${guardia.substituteTeacherId ?? 'N/A'}
+    Observations: ${guardia.observations}
+    Status: ${guardia.status}
+    Day: ${guardia.day.toLocal()}
+    ''';
+
+      // Show the dialog with the fetched data
+      if (context.mounted) {
+        _showAlertDialog(context, infoText);
+      }
+    } catch (e) {
+      print("Error getting Guardia info: $e");
+      if (context.mounted) {
+        _showAlertDialog(context, 'Error fetching Guardia info');
+      }
+    }
+  }
+
+  // Helper function to show the AlertDialog
+  void _showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Guardia Information'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -101,7 +161,7 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
                               print("Pendiente action for ${guardia.id}");
                               claimGuardia(guardia.id);
                             },
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                             icon: Icons.check,
                             label: 'Asignar',
@@ -142,11 +202,12 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
                             onPressed: (context) {
                               // Handle action for asignada
                               print("Asignada action for ${guardia.id}");
+                              showGuardiaInfo(guardia.id, context);
                             },
-                            backgroundColor: Colors.green,
+                            backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
-                            icon: Icons.check_circle,
-                            label: 'Finalizar',
+                            icon: Icons.info,
+                            label: 'Información',
                           ),
                         ],
                       ),

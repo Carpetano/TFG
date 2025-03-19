@@ -42,10 +42,12 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
 
   // Make this a synchronous function to be compatible with eventLoader
   List<GuardiaObject> _getEventsForDay(DateTime day) {
-    // Filter the guardias that match the selected day
-    return unasignedGuardias
-        .where((guardia) => isSameDay(guardia.day, day))
-        .toList();
+    // Filter guardias that match the selected day and are unassigned (status "pendiente")
+    return unasignedGuardias.where((guardia) {
+      // Convert status to lowercase for case-insensitive comparison
+      return isSameDay(guardia.day, day) &&
+          guardia.status.toLowerCase() == 'pendiente';
+    }).toList();
   }
 
   @override

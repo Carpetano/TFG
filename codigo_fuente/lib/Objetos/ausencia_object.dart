@@ -9,22 +9,23 @@ class AusenciaObject {
     required this.classCode,
   });
 
-  /// Factory constructor to create an `AusenciaObject` from a Supabase query result.
+  // Factory constructor to create an AusenciaObject from a map
   factory AusenciaObject.fromMap(Map<String, dynamic> data) {
     return AusenciaObject(
-      id: data['id_ausencia'] as int,
-      missingTeacherId: data['profesor_ausente'] as int,
-      classCode: data['aula'] as String,
+      id: data['id'] ?? 0, // Default to 0 if the ID is missing
+      missingTeacherId:
+          data['missing_teacher_id'] ?? 0, // Default to 0 if missing
+      classCode: data['class_code'] ?? '', // Default to empty string if missing
     );
   }
 
-  /// Converts the object into a map for inserting/updating in Supabase.
-  Map<String, dynamic> toMap() {
-    return {
-      'id_ausencia': id,
-      'profesor_ausente': missingTeacherId,
-      'aula': classCode,
-    };
+  // Static method to map a list of maps (e.g., database response) to a list of AusenciaObject instances
+  static List<AusenciaObject> mapFromResponse(List<dynamic>? response) {
+    if (response == null || response.isEmpty) {
+      return [];
+    }
+    // Map each entry in the response list to an AusenciaObject using the fromMap factory constructor
+    return response.map((data) => AusenciaObject.fromMap(data)).toList();
   }
 
   @override

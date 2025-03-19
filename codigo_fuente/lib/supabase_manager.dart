@@ -158,19 +158,25 @@ class SupabaseManager {
               .eq('id_auth', user.id)
               .single();
 
-      // Return the mapped UserObject
-      return UserObject(
-        id: response['id_usuario'],
-        authId: user.id,
-        firstName: response['nombre'] ?? '',
-        lastName: response['apellido1'] ?? '',
-        secondLastName: response['apellido2'] ?? '',
-        role: response['rol'] ?? 'Inactivo',
-        email: response['email'] ?? user.email ?? '',
-        phone: response['telefono'] ?? '',
-        registrationDate: DateTime.tryParse(user.createdAt) ?? DateTime.now(),
-        status: response['estado'],
-      );
+      // If the response is empty or null, return null
+      if (response.isEmpty) {
+        return null;
+      }
+
+      // Use the fromMap constructor to map the response into a UserObject
+      return UserObject.fromMap({
+        'id': response['id_usuario'],
+        'auth_id': user.id,
+        'first_name': response['nombre'] ?? '',
+        'last_name': response['apellido1'] ?? '',
+        'second_last_name': response['apellido2'] ?? '',
+        'role': response['rol'] ?? 'Inactivo',
+        'email': response['email'] ?? user.email ?? '',
+        'phone': response['telefono'] ?? '',
+        'registration_date':
+            user.createdAt, // Assuming createdAt is a valid string
+        'status': response['estado'],
+      });
     } catch (e) {
       // Log error if mapping fails
       print("[DEBUG]:  Error mapping user: $e");
@@ -503,7 +509,7 @@ class SupabaseManager {
 
     print("RESPONSE: $response");
 
-    if (response == null || response.isEmpty) {
+    if (response.isEmpty) {
       return [];
     }
 
@@ -531,7 +537,7 @@ class SupabaseManager {
 
     print("RESPONSE: $response");
 
-    if (response == null || response.isEmpty) {
+    if (response.isEmpty) {
       return [];
     }
 
@@ -570,6 +576,30 @@ class SupabaseManager {
       print("Error assigning guardia: ${response.error!.message}");
     } else {
       print("Guardia assigned successfully");
+    }
+  }
+
+  Future<GuardiaObject?> getGuardiaById(int id) async {
+    try {
+      final response =
+          await Supabase.instance.client
+              .from('guardias')
+              .select()
+              .eq('id_guardia', id)
+              .single();
+
+      print(response);
+
+      // Use the mapFromResponse method to map the response into GuardiaObject
+      List<GuardiaObject> guardias = GuardiaObject.mapFromResponse([response]);
+
+      print(guardias[0]);
+
+      // Return the first item if it's not empty
+      return guardias.isNotEmpty ? guardias[0] : null;
+    } catch (e) {
+      print("Error getting Guardia: $e");
+      return null;
     }
   }
 }

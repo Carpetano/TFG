@@ -1,13 +1,14 @@
+import 'package:codigo/theme_config.dart';
 import 'package:flutter/material.dart';
 
-class AjustesPage extends StatefulWidget {
-  const AjustesPage({super.key});
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
 
   @override
-  _AjustesPageState createState() => _AjustesPageState();
+  _SettingsPageState createState() => _SettingsPageState();
 }
 
-class _AjustesPageState extends State<AjustesPage> {
+class _SettingsPageState extends State<SettingsPage> {
   bool notificaciones = true;
   String idioma = "Español";
   bool temaOscuro = false;
@@ -55,12 +56,13 @@ class _AjustesPageState extends State<AjustesPage> {
                   idioma = newValue!;
                 });
               },
-              items: <String>['Español', 'Inglés', 'Francés']
-                  .map<DropdownMenuItem<String>>((String value) => DropdownMenuItem(
-                        value: value,
-                        child: Text(value),
-                      ))
-                  .toList(),
+              items:
+                  <String>['Español', 'Inglés', 'Francés']
+                      .map<DropdownMenuItem<String>>(
+                        (String value) =>
+                            DropdownMenuItem(value: value, child: Text(value)),
+                      )
+                      .toList(),
             ),
           ),
 

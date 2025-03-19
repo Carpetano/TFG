@@ -10,7 +10,7 @@ import 'package:codigo/Paginas/asignar_guardia.dart';
 import 'package:codigo/Paginas/add_ausencia_page.dart';
 import 'package:codigo/Paginas/view_my_guardias_page.dart';
 import 'package:codigo/Paginas/perfil_page.dart';
-import 'package:codigo/Paginas/ajustes_page.dart';
+import 'package:codigo/Paginas/settings_page.dart';
 import 'package:codigo/Paginas/register_user_page.dart';
 
 class ProfesorMainMenuPage extends StatefulWidget {
@@ -69,7 +69,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
               } else if (value == 'ajustes') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AjustesPage()),
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
                 );
               } else if (value == 'salir') {
                 Navigator.pushReplacement(

@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:codigo/Objetos/guardia_object.dart';
+import 'package:codigo/Paginas/view_guardias_page.dart';
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +120,14 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
                   _selectedDay = null;
                 } else {
                   _selectedDay = selectedDay;
+
+                  // Check if there are unassigned guardias for the selected day
+                  List<GuardiaObject> events = _getEventsForDay(selectedDay);
+                  if (events.isNotEmpty) {
+                    print(
+                      "Selected date has ${events.length} unassigned guardias.",
+                    );
+                  }
                 }
                 _focusedDay = focusedDay;
               });
@@ -181,26 +190,19 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                onPressed:
-                    _selectedDay != null
-                        ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AsignarGuardia(),
-                            ),
-                          );
-                        }
-                        : null,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MisGuardias(),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _selectedDay != null
-                          ? Colors.blueAccent
-                          : Colors.grey[400],
-                  foregroundColor:
-                      _selectedDay != null ? Colors.black : Colors.grey[600],
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.black,
                 ),
-                child: const Text("Asignar guardia"),
+                child: const Text("Ver mis guardias"),
               ),
               ElevatedButton(
                 onPressed:
@@ -227,29 +229,28 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
                 child: const Text("Añadir Ausencia"),
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MisGuardias(),
-                    ),
-                  );
-                },
+                onPressed:
+                    _selectedDay != null
+                        ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      ViewGuardiasPage(day: _selectedDay!),
+                            ),
+                          );
+                        }
+                        : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.black,
+                  backgroundColor:
+                      _selectedDay != null
+                          ? Colors.blueAccent
+                          : Colors.grey[400],
+                  foregroundColor:
+                      _selectedDay != null ? Colors.black : Colors.grey[600],
                 ),
-                child: const Text("Ver mis guardias"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  fetchUnasignedGuardias();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.black,
-                ),
-                child: const Text("Test"),
+                child: const Text("Ver Ausencias"),
               ),
             ],
           ),

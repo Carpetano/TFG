@@ -495,6 +495,34 @@ class SupabaseManager {
     }
   }
 
+  Future<List<GuardiaObject>> getAllGuardiasByDay(DateTime day) async {
+    final response = await Supabase.instance.client
+        .from('guardias')
+        .select()
+        .eq('dia', day.toIso8601String().split('T')[0]); // Filter by date
+
+    print("RESPONSE: $response");
+
+    if (response == null || response.isEmpty) {
+      return [];
+    }
+
+    return response
+        .map(
+          (data) => GuardiaObject(
+            id: data['id_guardia'],
+            missingTeacherId: data['id_profesor_ausente'],
+            ausenciaId: data['id_ausencia'],
+            tramoHorario: data['tramo_horario'],
+            substituteTeacherId: data['id_profesor_sustituto'] ?? 0,
+            observations: data['observaciones'] ?? '',
+            status: data['estado'],
+            day: DateTime.parse(data['dia']), // Ensure it's a DateTime object
+          ),
+        )
+        .toList();
+  }
+
   Future<List<GuardiaObject>> getAllUnasignedGuardias() async {
     final response = await Supabase.instance.client
         .from('guardias')
@@ -521,5 +549,27 @@ class SupabaseManager {
           ),
         )
         .toList();
+  }
+
+  Future<void> assignGuardiaToUser(
+    int idGuardia,
+    int idSubstituteTeacher,
+  ) async {
+    final response = await Supabase.instance.client
+        .from('guardias')
+        .update({
+          'id_profesor_sustituto': idSubstituteTeacher,
+          'estado': 'Asignada',
+        })
+        .eq(
+          'id_guardia',
+          idGuardia,
+        ); // Add a filter to select which record to update (you need to specify which "guardia" you're updating)
+
+    if (response.error != null) {
+      print("Error assigning guardia: ${response.error!.message}");
+    } else {
+      print("Guardia assigned successfully");
+    }
   }
 }

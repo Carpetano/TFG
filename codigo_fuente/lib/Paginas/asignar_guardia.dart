@@ -12,6 +12,8 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
   List<List<List<TextEditingController>>> controllers =
       []; // Controladores para cada celda
 
+  Future<void> claimGuardia() async {}
+
   @override
   void initState() {
     super.initState();
@@ -112,7 +114,8 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
                                   child: Column(
                                     children: [
                                       TextField(
-                                        controller: controllers[rowIndex][colIndex][0],
+                                        controller:
+                                            controllers[rowIndex][colIndex][0],
                                         decoration: const InputDecoration(
                                           labelText: 'Profesor',
                                           border: OutlineInputBorder(),
@@ -121,7 +124,8 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
                                       ),
                                       const SizedBox(height: 5),
                                       TextField(
-                                        controller: controllers[rowIndex][colIndex][1],
+                                        controller:
+                                            controllers[rowIndex][colIndex][1],
                                         decoration: const InputDecoration(
                                           labelText: 'Asignación',
                                           border: OutlineInputBorder(),
@@ -130,7 +134,8 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
                                       ),
                                       const SizedBox(height: 5),
                                       TextField(
-                                        controller: controllers[rowIndex][colIndex][2],
+                                        controller:
+                                            controllers[rowIndex][colIndex][2],
                                         decoration: const InputDecoration(
                                           labelText: 'Comentarios',
                                           border: OutlineInputBorder(),

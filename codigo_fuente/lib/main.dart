@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+// Translated
 import 'package:codigo/Paginas/admin_main_menu_page.dart';
 import 'package:codigo/Paginas/profesor_main_menu_page.dart';
 import 'package:codigo/global_settings.dart';
@@ -7,15 +8,43 @@ import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:io';
 
 /// Main function for the entire app
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure initialization
+  WidgetsFlutterBinding.ensureInitialized();
   await SupabaseManager.instance.initialize();
   await GlobalSettings.initialize();
-  GlobalSettings.setLanguage(AppLanguage.espanol); // Set the language
+
+  // Load the default language from file
+  GlobalSettings.setLanguage(await getDefaultLanguage());
   print("[DEBUG]: Display lang: ${GlobalSettings.language.value.name}");
+
   runApp(const MyApp());
+}
+
+Future<AppLanguage> getDefaultLanguage() async {
+  final file = File('default_lang.txt');
+  try {
+    if (!await file.exists()) {
+      // If the file doesn't exist, create it and set default to 'es'
+      await file.writeAsString('es');
+      print("[INFO] default_lang.txt not found. Created and set to 'es'.");
+    }
+
+    String langCode = await file.readAsString();
+    print('LANG FROM FILE: $langCode');
+
+    switch (langCode.toLowerCase()) {
+      case 'en':
+        return AppLanguage.english;
+    }
+  } catch (e) {
+    print("[ERROR] Failed to read/write default language: $e");
+  }
+
+  // Fallback language
+  return AppLanguage.espanol;
 }
 
 class MyApp extends StatefulWidget {
@@ -265,10 +294,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    hintText: Translations.translate(
-                      'email',
-                      GlobalSettings.language.value.code,
-                    ),
+                    hintText: Translations.translate('email'),
                     hintStyle: TextStyle(
                       color: Theme.of(context).colorScheme.onSecondary,
                     ),
@@ -287,10 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
-                    hintText: Translations.translate(
-                      'password',
-                      GlobalSettings.language.value.code,
-                    ),
+                    hintText: Translations.translate('password'),
                     hintStyle: TextStyle(
                       color: Theme.of(context).colorScheme.onSecondary,
                     ),
@@ -315,12 +338,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text(
-                    Translations.translate(
-                      'login',
-                      GlobalSettings.language.value.code,
-                    ),
-                  ),
+                  child: Text(Translations.translate('login')),
                 ),
               ],
             ),
@@ -336,7 +354,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            Translations.translate('hello', GlobalSettings.language.value.code),
+            Translations.translate('hello'),
             style: TextStyle(
               fontSize: 48,
               fontWeight: FontWeight.bold,
@@ -363,10 +381,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         context,
                       ).colorScheme.onSecondary, // Cambia el color del texto
                 ),
-                hintText: Translations.translate(
-                  'email',
-                  GlobalSettings.language.value.code,
-                ),
+                hintText: Translations.translate('email'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -388,10 +403,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 hintStyle: TextStyle(
                   color: Theme.of(context).colorScheme.onSecondary,
                 ),
-                hintText: Translations.translate(
-                  'password',
-                  GlobalSettings.language.value.code,
-                ),
+                hintText: Translations.translate('password'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -418,12 +430,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             onPressed: supabaseLogin,
-            child: Text(
-              Translations.translate(
-                'login',
-                GlobalSettings.language.value.code,
-              ),
-            ),
+            child: Text(Translations.translate('login')),
           ),
         ],
       ),

@@ -1,11 +1,12 @@
 // ignore_for_file: avoid_print
 
+// Translated
 import 'package:codigo/Objetos/guardia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
+import 'package:codigo/global_settings.dart';
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class VerMisGuardiasPage extends StatefulWidget {
   final int userId = MyApp.loggedInUser!.id;
@@ -78,8 +79,8 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text(
-              'Guardias Realizadas',
+            Text(
+              Translations.translate('guardiasDone'),
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 10),
@@ -121,11 +122,8 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                         }
 
                         if (snapshot.hasError) {
-                          print("Error in fetching teacher: ${snapshot.error}");
                           return ListTile(
-                            title: Text(
-                              'Fecha: $formattedDate - Profesor: Error',
-                            ),
+                            title: Text('$formattedDate - Profesor: N/A'),
                             leading: const Icon(
                               Icons.check_circle,
                               color: Colors.green,
@@ -134,9 +132,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                         }
 
                         return ListTile(
-                          title: Text(
-                            'Fecha: $formattedDate - Profesor: No disponible',
-                          ),
+                          title: Text('$formattedDate - Profesor: N/A'),
                           leading: const Icon(
                             Icons.check_circle,
                             color: Colors.green,
@@ -149,8 +145,8 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Guardias Pendientes',
+            Text(
+              Translations.translate('pendingGuardias'),
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 10),
@@ -164,7 +160,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                   itemBuilder: (context, index) {
                     final guardia = guardiasUnasigned[index];
                     String guardiaInfo =
-                        'Fecha: ${guardia.day.day}/${guardia.day.month}/${guardia.day.year} - Tramo horario: ${guardia.tramoHorario}';
+                        '${guardia.day.day}/${guardia.day.month}/${guardia.day.year} - Tramo horario: ${guardia.tramoHorario}';
                     bool isSelected = selectedGuardias.contains(guardia);
 
                     return ListTile(
@@ -193,7 +189,6 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    print("-------- $selectedGuardias");
                     for (var guardia in selectedGuardias) {
                       await deleteUnasignedGuardia(guardia.id);
                       // After deleting, remove from the list
@@ -206,12 +201,12 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                       selectedGuardias.clear();
                     });
                   },
-                  child: const Text('Eliminar Guardia Seleccionadas'),
+                  child: Text(Translations.translate('deleteGuardia')),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                  child: const Text('Volver'),
+                  child: Text(Translations.translate('goback')),
                 ),
               ],
             ),

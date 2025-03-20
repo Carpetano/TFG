@@ -75,12 +75,16 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
     });
     if (unasignedGuardias.isNotEmpty) {
       showSnackBar(
-        "Hay ${unasignedGuardias.length} guardia sin asignar",
+        "${Translations.translate('unasignedGuardiasSnackBar')} ${unasignedGuardias.length}",
         Colors.white,
         Colors.black,
       );
     } else {
-      showSnackBar("No hay guardias sin asignar", Colors.white, Colors.black);
+      showSnackBar(
+        Translations.translate('noUnasignedGuardiasSnackBar'),
+        Colors.white,
+        Colors.black,
+      );
     }
   }
 
@@ -111,7 +115,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
     return unasignedGuardias.where((guardia) {
       // Convert status to lowercase for case-insensitive comparison
       return isSameDay(guardia.day, day) &&
-          guardia.status.toLowerCase() == 'pendiente';
+          guardia.status.toLowerCase() == 'pendiente'; // NO TRANSLATE
     }).toList();
   }
 
@@ -133,23 +137,26 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Profesor: ${MyApp.loggedInUser?.firstName ?? 'Desconocido'}",
+          "${Translations.translate('professor')}: ${MyApp.loggedInUser?.firstName ?? 'Desconocido'}",
           style: const TextStyle(color: Colors.white),
         ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'perfil') {
+                // NO TRANSLATE
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PerfilPage()),
                 );
               } else if (value == 'ajustes') {
+                // NO TRANSLATE
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SettingsPage()),
                 );
               } else if (value == 'salir') {
+                // NO TRANSLATE
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -162,30 +169,15 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                 (BuildContext context) => [
                   PopupMenuItem(
                     value: 'perfil',
-                    child: Text(
-                      Translations.translate(
-                        'profile',
-                        GlobalSettings.language.value.code,
-                      ),
-                    ),
+                    child: Text(Translations.translate('profile')),
                   ),
                   PopupMenuItem(
                     value: 'ajustes',
-                    child: Text(
-                      Translations.translate(
-                        'settings',
-                        GlobalSettings.language.value.code,
-                      ),
-                    ),
+                    child: Text(Translations.translate('settings')),
                   ),
                   PopupMenuItem(
                     value: 'salir',
-                    child: Text(
-                      Translations.translate(
-                        'logout',
-                        GlobalSettings.language.value.code,
-                      ),
-                    ),
+                    child: Text(Translations.translate('logout')),
                   ),
                 ],
             icon: const Icon(
@@ -308,12 +300,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                         'Language Code: $languageCode',
                       ); // Check the current language code
                       print("Test???");
-                      return Text(
-                        Translations.translate(
-                          'viewMySupervisions',
-                          languageCode,
-                        ),
-                      );
+                      return Text(Translations.translate('viewMySupervisions'));
                     },
                   ),
                 ),
@@ -340,12 +327,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                         _selectedDay != null ? Colors.black : Colors.grey[600],
                     minimumSize: const Size(150, 50),
                   ),
-                  child: Text(
-                    Translations.translate(
-                      'addAusencia',
-                      GlobalSettings.language.value.code,
-                    ),
-                  ),
+                  child: Text(Translations.translate('addAusencia')),
                 ),
                 ElevatedButton(
                   onPressed:
@@ -370,12 +352,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                         _selectedDay != null ? Colors.black : Colors.grey[600],
                     minimumSize: const Size(150, 50),
                   ),
-                  child: Text(
-                    Translations.translate(
-                      'viewGuardias',
-                      GlobalSettings.language.value.code,
-                    ),
-                  ),
+                  child: Text(Translations.translate('viewGuardias')),
                 ),
               ],
             ),
@@ -399,7 +376,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                 color: Theme.of(context).colorScheme.primary,
               ),
               child: Text(
-                'Menú Administrador',
+                Translations.translate('adminMenu'),
                 style: TextStyle(
                   fontSize: textSize,
                   fontWeight: FontWeight.bold,
@@ -426,7 +403,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
               title: Text(
-                'Ajustes',
+                Translations.translate('settings'),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -439,7 +416,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
               title: Text(
-                'Cerrar Sesión',
+                Translations.translate('logout'),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -459,7 +436,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    "Menú Profesor",
+                    Translations.translate('professorMenu'),
                     style: TextStyle(
                       fontSize: textSize,
                       fontWeight: FontWeight.bold,
@@ -489,7 +466,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                           color: Colors.white,
                         ),
                         label: Text(
-                          'Ver perfil',
+                          Translations.translate('viewProfile'),
                           style: TextStyle(
                             fontSize: textSize,
                             color: Theme.of(context).colorScheme.onPrimary,
@@ -508,7 +485,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                           color: Colors.white,
                         ),
                         label: Text(
-                          'Ajustes',
+                          Translations.translate('settings'),
                           style: TextStyle(
                             fontSize: textSize,
                             color: Theme.of(context).colorScheme.onPrimary,
@@ -527,7 +504,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                           color: Colors.white,
                         ),
                         label: Text(
-                          'Cerrar Sesión',
+                          Translations.translate('logout'),
                           style: TextStyle(
                             fontSize: textSize,
                             color: Theme.of(context).colorScheme.onPrimary,
@@ -587,10 +564,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                             });
                           },
                           child: Text(
-                            Translations.translate(
-                              'viewMySupervisions',
-                              GlobalSettings.language.value.code,
-                            ),
+                            Translations.translate('viewMySupervisions'),
                           ),
                         ),
                         ElevatedButton(
@@ -608,12 +582,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                                     );
                                   }
                                   : null,
-                          child: Text(
-                            Translations.translate(
-                              'addAusencia',
-                              GlobalSettings.language.value.code,
-                            ),
-                          ),
+                          child: Text(Translations.translate('addAusencia')),
                         ),
                         ElevatedButton(
                           onPressed:
@@ -630,12 +599,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                                     );
                                   }
                                   : null,
-                          child: Text(
-                            Translations.translate(
-                              'viewGuardias',
-                              GlobalSettings.language.value.code,
-                            ),
-                          ),
+                          child: Text(Translations.translate('viewGuardias')),
                         ),
                       ],
                     ),

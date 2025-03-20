@@ -4,6 +4,7 @@ import 'package:codigo/Objetos/guardia_object.dart'; // Correct the file name he
 import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
+import 'package:codigo/global_settings.dart';
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -63,15 +64,13 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
   }
 
   Future<void> insertAusencia() async {
-    // Add print statements to debug the values of the form fields
-    print("selectedClassCode: $selectedClassCode");
-    print("selectedTurno: $selectedTurno");
-
     if (selectedClassCode == null || selectedTurno == null) {
       // Ensure a turno is selected
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, selecciona profesor, aula y turno'),
+        SnackBar(
+          content: Text(
+            Translations.translate('plsSelectTeacherClassAndShift'),
+          ),
         ),
       );
       return;
@@ -83,13 +82,6 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
             .where((entry) => entry.value)
             .map((entry) => entry.key) // Get the checkbox number (1-7)
             .toList();
-
-    // Print the values for debugging
-    print('\nProfesor ID: ${MyApp.loggedInUser?.id}');
-    print('Aula: $selectedClassCode');
-    print('Turno: $selectedTurno');
-    print('Comentario: ${comentarioController.text}');
-    print('Checkboxes seleccionados: ${selectedCheckboxes.join(", ")}');
 
     // Apply the turno offset to the selected checkboxes
     int turnoOffset = 0;
@@ -145,15 +137,15 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Añadir Ausencia')),
+      appBar: AppBar(title: Text(Translations.translate('addAusencia'))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
             const SizedBox(height: 20),
             // Dropdown for aula (class) selection
-            const Text(
-              'Seleccionar aula:',
+            Text(
+              Translations.translate('selectClass'),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),

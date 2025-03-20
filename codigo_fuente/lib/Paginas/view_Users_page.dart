@@ -1,3 +1,4 @@
+// Translated
 import 'package:codigo/global_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -61,12 +62,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          Translations.translate(
-            'registeredUsers',
-            GlobalSettings.language.value.code,
-          ),
-        ),
+        title: Text(Translations.translate('registeredUsers')),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
         bottom: PreferredSize(
@@ -79,10 +75,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: Translations.translate(
-                  'lookUpUsers',
-                  GlobalSettings.language.value.code,
-                ),
+                hintText: Translations.translate('lookUpUsers'),
                 filled: true,
                 fillColor: Colors.white,
                 prefixIcon: const Icon(Icons.search),
@@ -125,19 +118,13 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                             },
                             backgroundColor: Colors.blue,
                             icon: Icons.edit,
-                            label: Translations.translate(
-                              'edit',
-                              GlobalSettings.language.value.code,
-                            ),
+                            label: Translations.translate('edit'),
                           ),
                           SlidableAction(
                             onPressed: (context) => deactivateUser(user),
                             backgroundColor: Colors.red,
                             icon: Icons.delete,
-                            label: Translations.translate(
-                              'deactivate',
-                              GlobalSettings.language.value.code,
-                            ),
+                            label: Translations.translate('deactivate'),
                           ),
                         ],
                       ),

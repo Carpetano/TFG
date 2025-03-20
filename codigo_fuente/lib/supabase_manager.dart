@@ -5,6 +5,11 @@ import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 /// Class in charge of performing actions against the supabase database,utilize the initialize method once
 /// then access it statically using .instance to share the same instance across the entire app
@@ -59,6 +64,42 @@ class SupabaseManager {
     } catch (e) {
       // If an error occurs during login, log the error for debugging purposes
       print("[DEBUG]: Error during login: $e");
+      return null;
+    }
+  }
+
+    /// Subir imagen de perfil a Supabase Storage
+  Future<String?> uploadProfilePicture(XFile imageFile, String userId) async {
+  try {
+    final storagePath = 'avatars/$userId.png';
+
+    // 🔹 Convertir imagen a formato compatible según la plataforma
+    Uint8List fileBytes;
+    if (kIsWeb) {
+      fileBytes = await imageFile.readAsBytes(); // Web usa bytes
+    } else {
+      fileBytes = await File(imageFile.path).readAsBytes(); // Android/iOS usa File
+    }
+
+    // Subir imagen a Supabase Storage
+    await Supabase.instance.client.storage
+        .from('avatars')
+        .uploadBinary(storagePath, fileBytes, fileOptions: const FileOptions(upsert: true));
+
+    // Obtener la URL pública de la imagen
+    final publicUrl = Supabase.instance.client.storage
+        .from('avatars')
+        .getPublicUrl(storagePath);
+
+    // 📌 Actualizar la URL en la tabla 'usuarios'
+    await Supabase.instance.client
+        .from('usuarios')
+        .update({'profile_image_url': publicUrl})
+        .eq('id_auth', userId);
+
+      return publicUrl;
+    } catch (e) {
+      print("Error al subir la imagen: $e");
       return null;
     }
   }
@@ -161,6 +202,7 @@ class SupabaseManager {
         'registration_date':
             user.createdAt, // Assuming createdAt is a valid string
         'status': response['estado'],
+        'profile_image_url': response['profile_image_url'],
       });
     } catch (e) {
       // Log error if mapping fails
@@ -169,6 +211,13 @@ class SupabaseManager {
     }
   }
 
+
+  Future<UserObject?> getCurrentUser() async {
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user == null) return null;
+        return await instance.mapUser(user);
+      }
+      
   /// Sets a user as inactive in the 'usuarios' table
   ///
   /// This function updates the 'estado' field of the user to 'Inactivo' based on the user ID

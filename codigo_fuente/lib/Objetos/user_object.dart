@@ -2,15 +2,14 @@ class UserObject {
   final int id;
   final String authId;
   final String role;
-
   final String firstName;
   final String lastName;
   final String secondLastName;
-
   final String phone;
   final String email;
   final DateTime registrationDate;
   final String status;
+  final String? profileImageUrl; // 🔹 Ahora sí está bien integrada
 
   UserObject({
     required this.id,
@@ -23,9 +22,10 @@ class UserObject {
     required this.phone,
     required this.registrationDate,
     required this.status,
+    this.profileImageUrl,
   });
 
-  // 🔹 Agregar copyWith para poder modificar valores específicos
+  // 🔹 Método para copiar y actualizar propiedades específicas del usuario
   UserObject copyWith({
     int? id,
     String? authId,
@@ -37,6 +37,7 @@ class UserObject {
     String? email,
     DateTime? registrationDate,
     String? status,
+    String? profileImageUrl, // 🔹 Se añadió aquí
   }) {
     return UserObject(
       id: id ?? this.id,
@@ -49,10 +50,11 @@ class UserObject {
       phone: phone ?? this.phone,
       registrationDate: registrationDate ?? this.registrationDate,
       status: status ?? this.status,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl, // 🔹 Ahora sí se actualiza
     );
   }
 
-  // Factory constructor to create a UserObject from a map
+  // 🔹 Convertir un Map (desde Supabase) en un UserObject
   factory UserObject.fromMap(Map<String, dynamic> data) {
     return UserObject(
       id: data['id'] as int,
@@ -65,21 +67,20 @@ class UserObject {
       phone: data['phone'] as String,
       registrationDate: DateTime.parse(data['registration_date'] as String),
       status: data['status'] as String,
+      profileImageUrl: data['profile_image_url'] as String?, // 🔹 Se añadió aquí
     );
   }
 
-  // Static method to map a list of response data into a list of UserObject instances
+  // 🔹 Convertir una lista de datos de Supabase en una lista de UserObject
   static List<UserObject> mapFromResponse(List<dynamic>? response) {
     if (response == null || response.isEmpty) {
       return [];
     }
-    // Map each entry in the response list to a UserObject using the fromMap factory constructor
     return response.map((data) => UserObject.fromMap(data)).toList();
   }
 
-  // Add a toString method for better readability
   @override
   String toString() {
-    return 'UserObject(id: $id, firstName: $firstName, lastName: $lastName, secondLastName: $secondLastName, role: $role, email: $email, phone: $phone, registrationDate: $registrationDate, authId: $authId, status: $status)';
+    return 'UserObject(id: $id, firstName: $firstName, lastName: $lastName, secondLastName: $secondLastName, role: $role, email: $email, phone: $phone, registrationDate: $registrationDate, authId: $authId, status: $status, profileImageUrl: $profileImageUrl)';
   }
 }

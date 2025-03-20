@@ -2,7 +2,6 @@
 
 import 'package:codigo/Paginas/admin_main_menu_page.dart';
 import 'package:codigo/Paginas/profesor_main_menu_page.dart';
-import 'package:codigo/Paginas/sala_main_menu_page.dart';
 import 'package:codigo/global_settings.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -175,12 +174,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           );
           break;
+        // Sala role
         case "sala_de_profesores":
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SalaMainMenuPage()),
-          );
+          // Navigate to the Sala page
+          print("Click en sala de profesores");
           break;
+        // This shouldn't show up but just in case
         default:
           showSnackBar(
             "Error redirigiendo, no se ha encontrado un rol válido: ${supabaseUser.role}",
@@ -358,12 +357,15 @@ class _MyHomePageState extends State<MyHomePage> {
             child: TextFormField(
               controller: _emailController,
               decoration: InputDecoration(
+                hintStyle: TextStyle(
+                  color:
+                      Theme.of(
+                        context,
+                      ).colorScheme.onSecondary, // Cambia el color del texto
+                ),
                 hintText: Translations.translate(
                   'email',
                   GlobalSettings.language.value.code,
-                ),
-                hintStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -383,12 +385,12 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: _passwordController,
               obscureText: true,
               decoration: InputDecoration(
+                hintStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondary,
+                ),
                 hintText: Translations.translate(
                   'password',
                   GlobalSettings.language.value.code,
-                ),
-                hintStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -408,7 +410,11 @@ class _MyHomePageState extends State<MyHomePage> {
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.primary, // Border color
+                  width: 2, // Border thickness
+                ),
               ),
             ),
             onPressed: supabaseLogin,

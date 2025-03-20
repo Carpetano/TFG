@@ -300,6 +300,7 @@ class SupabaseManager {
   }
 
   // Gud
+  // Gud
   /// TODO COMMENT
   Future<AusenciaObject?> insertAusencia(
     int missingTeacherId,

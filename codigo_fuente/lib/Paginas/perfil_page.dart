@@ -31,21 +31,24 @@ class _PerfilPageState extends State<PerfilPage> {
 
   /// Seleccionar y subir una imagen
   Future<void> _pickAndUploadImage() async {
-  final picker = ImagePicker();
-  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-  if (pickedFile != null && _user != null) {
-    // Subir imagen a Supabase Storage (pasa directamente `XFile`)
-    String? imageUrl = await SupabaseManager.instance.uploadProfilePicture(pickedFile, _user!.authId);
+    if (pickedFile != null && _user != null) {
+      // Subir imagen a Supabase Storage (pasa directamente `XFile`)
+      String? imageUrl = await SupabaseManager.instance.uploadProfilePicture(
+        pickedFile,
+        _user!.authId,
+      );
 
-    if (imageUrl != null) {
-      setState(() {
-        _profileImageUrl = imageUrl; // Actualizar imagen en pantalla
-      });
-      print("Imagen subida con éxito: $imageUrl");
+      if (imageUrl != null) {
+        setState(() {
+          _profileImageUrl = imageUrl; // Actualizar imagen en pantalla
+        });
+        print("Imagen subida con éxito: $imageUrl");
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -54,61 +57,81 @@ class _PerfilPageState extends State<PerfilPage> {
         title: const Text("Perfil"),
         backgroundColor: Colors.blueAccent,
       ),
-      body: _user == null
-          ? const Center(child: CircularProgressIndicator())
-          : Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Foto de perfil con opción de cambiar
-                    GestureDetector(
-                      onTap: _pickAndUploadImage, // 📌 Al hacer clic, permite cambiar foto
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _profileImageUrl != null
-                            ? NetworkImage(_profileImageUrl!)
-                            : const AssetImage('assets/profile_placeholder.png') as ImageProvider,
+      body:
+          _user == null
+              ? const Center(child: CircularProgressIndicator())
+              : Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Foto de perfil con opción de cambiar
+                      GestureDetector(
+                        onTap:
+                            _pickAndUploadImage, // 📌 Al hacer clic, permite cambiar foto
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundImage:
+                              _profileImageUrl != null
+                                  ? NetworkImage(_profileImageUrl!)
+                                  : const AssetImage(
+                                        'assets/profile_placeholder.png',
+                                      )
+                                      as ImageProvider,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "${_user!.firstName} ${_user!.lastName} ${_user!.secondLastName}",
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _user!.email,
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          ),
-                        ],
+                      const SizedBox(height: 16),
+                      Text(
+                        "${_user!.firstName} ${_user!.lastName} ${_user!.secondLastName}",
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      child: Column(
-                        children: [
-                          _ProfileInfoRow(icon: Icons.phone, label: "Teléfono", value: _user!.phone),
-                          const Divider(),
-                          _ProfileInfoRow(icon: Icons.badge, label: "Rol", value: _user!.role),
-                        ],
+                      const SizedBox(height: 8),
+                      Text(
+                        _user!.email,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            _ProfileInfoRow(
+                              icon: Icons.phone,
+                              label: "Teléfono",
+                              value: _user!.phone,
+                            ),
+                            const Divider(),
+                            _ProfileInfoRow(
+                              icon: Icons.badge,
+                              label: "Rol",
+                              value: _user!.role,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
     );
   }
 }
@@ -118,7 +141,11 @@ class _ProfileInfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _ProfileInfoRow({required this.icon, required this.label, required this.value});
+  const _ProfileInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +155,11 @@ class _ProfileInfoRow extends StatelessWidget {
         const SizedBox(width: 10),
         Text("$label: ", style: const TextStyle(fontWeight: FontWeight.bold)),
         Expanded(
-          child: Text(value, textAlign: TextAlign.right, style: const TextStyle(color: Colors.black87)),
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: const TextStyle(color: Colors.black87),
+          ),
         ),
       ],
     );

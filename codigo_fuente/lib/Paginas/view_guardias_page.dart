@@ -166,7 +166,7 @@ Day: ${guardia.day.toLocal()}
                     horizontal: 16,
                   ),
                   title: Text(
-                    "Guardia ${guardia.id}",
+                    "Id Profesor ausente: ${guardia.missingTeacherId}",
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text("Tramo: ${guardia.tramoHorario}"),
@@ -200,7 +200,7 @@ Day: ${guardia.day.toLocal()}
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blueAccent, Colors.lightBlue],
+              colors: [Colors.blue, Colors.purpleAccent],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

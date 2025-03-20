@@ -75,6 +75,13 @@ class Translations {
       'selectClass': 'Select class',
       'supervisions': 'Guardias',
       'noPendingGuardias': 'No pending Supervisions',
+      'mySupervisions': 'My supervisions',
+      'phone': 'Phone number',
+      'role': 'Role',
+      'date': 'Date',
+      'status': 'Status',
+      'guardia': 'Supervision',
+      'tram': 'Tram',
     },
     'es': {
       'title': 'Ajustes',
@@ -118,6 +125,18 @@ class Translations {
       'pendingGuardias': 'Guardias pendientes',
       'deleteGuardia': 'Borrar guardias seleccionadas',
       'goback': 'Volver',
+      'plsSelectTeacherClassAndShift':
+          'Porfavor selecciona un profesor, un aula y un turno',
+      'selectClass': 'Select class',
+      'supervisions': 'Guardias',
+      'noPendingGuardias': 'No pending Supervisions',
+      'mySupervisions': 'Mis guardias',
+      'phone': 'Número de teléfono',
+      'role': 'Rol',
+      'date': 'Fecha',
+      'status': 'Estado',
+      'guardia': 'Guardia',
+      'tram': 'Tramo horario',
     },
   };
 

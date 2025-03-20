@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:codigo/global_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:codigo/supabase_manager.dart';
@@ -54,7 +54,7 @@ class _PerfilPageState extends State<PerfilPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Perfil"),
+        title: Text(Translations.translate('profile')),
         backgroundColor: Colors.blueAccent,
       ),
       body:
@@ -116,13 +116,13 @@ class _PerfilPageState extends State<PerfilPage> {
                           children: [
                             _ProfileInfoRow(
                               icon: Icons.phone,
-                              label: "Teléfono",
+                              label: Translations.translate('phone'),
                               value: _user!.phone,
                             ),
                             const Divider(),
                             _ProfileInfoRow(
                               icon: Icons.badge,
-                              label: "Rol",
+                              label: Translations.translate('role'),
                               value: _user!.role,
                             ),
                           ],

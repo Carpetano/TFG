@@ -838,4 +838,37 @@ class SupabaseManager {
       return false; // Return false in case of error
     }
   }
+
+  Future<List<GuardiaObject>> getTodayGuardias() async {
+    try {
+      DateTime now = DateTime.now();
+      // Format the date as YYYY-MM-DD
+      String currentDay =
+          "${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+      // Use eq for an exact match since the database field is of type date
+      final response = await Supabase.instance.client
+          .from('guardias')
+          .select()
+          .eq('dia', currentDay);
+
+      final data = response as List<dynamic>;
+      return data.map((item) {
+        return GuardiaObject(
+          id: item['id_guardia'] as int,
+          missingTeacherId: item['id_profesor_ausente'] as int?,
+          ausenciaId: item['id_ausencia'] as int?,
+          tramoHorario: item['tramo_horario'] as int?,
+          substituteTeacherId: item['id_profesor_sustituto'] as int?,
+          observations: item['observaciones'] as String,
+          status: item['estado'] as String,
+          // Parse the date string into a DateTime object.
+          day: DateTime.parse(item['dia'] as String),
+        );
+      }).toList();
+    } catch (e) {
+      print("Error getting guardias from today: $e");
+      return [];
+    }
+  }
 }

@@ -80,7 +80,7 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
     List<int> selectedCheckboxes =
         checkboxes.entries
             .where((entry) => entry.value)
-            .map((entry) => entry.key) // Get the checkbox number (1-7)
+            .map((entry) => entry.key)
             .toList();
 
     // Apply the turno offset to the selected checkboxes
@@ -118,13 +118,13 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
           shiftedCheckboxes.map((checkboxId) {
             return GuardiaObject(
               missingTeacherId: MyApp.loggedInUser!.id,
-              ausenciaId: ausencia!.id, // Should be > 0
+              ausenciaId: ausencia.id,
               observations: comentarioController.text,
               tramoHorario: checkboxId,
               substituteTeacherId: 0,
               status: 'Pendiente',
               id: 0,
-              day: widget.day, // Use the day passed to the page
+              day: widget.day,
             );
           }).toList();
 
@@ -137,142 +137,255 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(Translations.translate('addAusencia'))),
+      // Gradient AppBar for a modern look
+      appBar: AppBar(
+        title: Text(
+          Translations.translate('addAusencia'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue, Colors.purpleAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+      backgroundColor: Colors.grey[100],
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
             const SizedBox(height: 20),
-            // Dropdown for aula (class) selection
-            Text(
-              Translations.translate('selectClass'),
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: selectedClassCode,
-              decoration: const InputDecoration(
-                hintText: "Seleccionar aula",
-                border: OutlineInputBorder(),
+            // Card for Aula selection
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              items:
-                  classesToSelect
-                      .map(
-                        (aula) => DropdownMenuItem(
-                          value: aula.classcode,
-                          child: Text(
-                            "Grupo: ${aula.group} Planta: ${aula.floor.isEmpty ? 'N/A' : aula.floor} Ala: ${aula.wing.isEmpty ? 'N/A' : aula.floor} Codigo: ${aula.classcode}",
-                          ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      Translations.translate('selectClass'),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: selectedClassCode,
+                      decoration: const InputDecoration(
+                        hintText: "Seleccionar aula",
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                      )
-                      .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedClassCode = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Dropdown for Turno (Diurno, Verspertino, Nocturno)
-            const Text(
-              'Seleccionar turno:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: selectedTurno,
-              decoration: const InputDecoration(
-                hintText: "Seleccionar turno",
-                border: OutlineInputBorder(),
-              ),
-              items:
-                  ["Diurno", "Verspertino", "Nocturno"]
-                      .map(
-                        (turno) =>
-                            DropdownMenuItem(value: turno, child: Text(turno)),
-                      )
-                      .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedTurno = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-
-            // Checkbox to select all 1-7
-            Row(
-              children: [
-                Checkbox(
-                  value: selectAllCheckboxes,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      selectAllCheckboxes = value!;
-                      if (selectAllCheckboxes) {
-                        checkboxes = {
-                          1: true,
-                          2: true,
-                          3: true,
-                          4: true,
-                          5: true,
-                          6: true,
-                          7: true,
-                        };
-                      } else {
-                        checkboxes = {
-                          1: false,
-                          2: false,
-                          3: false,
-                          4: false,
-                          5: false,
-                          6: false,
-                          7: false,
-                        };
-                      }
-                    });
-                  },
+                      ),
+                      items:
+                          classesToSelect
+                              .map(
+                                (aula) => DropdownMenuItem(
+                                  value: aula.classcode,
+                                  child: Text(
+                                    "Grupo: ${aula.group}  Planta: ${aula.floor.isEmpty ? 'N/A' : aula.floor}  Ala: ${aula.wing.isEmpty ? 'N/A' : aula.wing}  Código: ${aula.classcode}",
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedClassCode = value;
+                        });
+                      },
+                    ),
+                  ],
                 ),
-                const Text('Seleccionar todos'),
-              ],
+              ),
             ),
-            // Checkboxes for 1 to 7
-            Row(
-              children: List.generate(7, (index) {
-                return Expanded(
-                  child: CheckboxListTile(
-                    title: Text((index + 1).toString()),
-                    value: checkboxes[index + 1],
-                    onChanged: (bool? value) {
-                      setState(() {
-                        checkboxes[index + 1] = value!;
-                        selectAllCheckboxes = checkboxes.values.every((e) => e);
-                      });
-                    },
-                  ),
-                );
-              }),
-            ),
-
             const SizedBox(height: 20),
-
-            // Comentario Text Field
-            const Text(
-              'Comentario:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            // Card for Turno selection
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Seleccionar turno:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: selectedTurno,
+                      decoration: const InputDecoration(
+                        hintText: "Seleccionar turno",
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                      items:
+                          ["Diurno", "Verspertino", "Nocturno"]
+                              .map(
+                                (turno) => DropdownMenuItem(
+                                  value: turno,
+                                  child: Text(turno),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedTurno = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-            TextField(
-              controller: comentarioController,
-              maxLines: 5,
-              decoration: const InputDecoration(
-                labelText: 'Comentarios (tarea, detalles, etc.)',
-                border: OutlineInputBorder(),
+            const SizedBox(height: 20),
+            // Card for checkboxes to select period slots
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: selectAllCheckboxes,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              selectAllCheckboxes = value!;
+                              if (selectAllCheckboxes) {
+                                checkboxes = {
+                                  1: true,
+                                  2: true,
+                                  3: true,
+                                  4: true,
+                                  5: true,
+                                  6: true,
+                                  7: true,
+                                };
+                              } else {
+                                checkboxes = {
+                                  1: false,
+                                  2: false,
+                                  3: false,
+                                  4: false,
+                                  5: false,
+                                  6: false,
+                                  7: false,
+                                };
+                              }
+                            });
+                          },
+                        ),
+                        const Text('Seleccionar todos'),
+                      ],
+                    ),
+                    // Display checkboxes 1 to 7 in a grid-like layout
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: List.generate(7, (index) {
+                        int checkboxNumber = index + 1;
+                        return SizedBox(
+                          width: 50,
+                          child: CheckboxListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              checkboxNumber.toString(),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            value: checkboxes[checkboxNumber],
+                            onChanged: (bool? value) {
+                              setState(() {
+                                checkboxes[checkboxNumber] = value!;
+                                selectAllCheckboxes = checkboxes.values.every(
+                                  (e) => e,
+                                );
+                              });
+                            },
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Card for Comentario input
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Comentario:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: comentarioController,
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        labelText: 'Comentarios (tarea, detalles, etc.)',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 30),
-
-            // Buttons
-            Column(
+            // Action Buttons
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
@@ -280,23 +393,37 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.only(left: 60, right: 60),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: const Text('Guardar Ausencia'),
+                  child: const Text(
+                    'Guardar Ausencia',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
-                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.only(left: 60, right: 60),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: const Text('Volver'),
+                  child: const Text('Volver', style: TextStyle(fontSize: 16)),
                 ),
-                const SizedBox(height: 50),
               ],
             ),
+            const SizedBox(height: 50),
           ],
         ),
       ),

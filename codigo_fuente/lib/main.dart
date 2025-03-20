@@ -3,6 +3,7 @@
 // Translated
 import 'package:codigo/Paginas/admin_main_menu_page.dart';
 import 'package:codigo/Paginas/profesor_main_menu_page.dart';
+import 'package:codigo/Paginas/sala_page.dart';
 import 'package:codigo/global_settings.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -206,7 +207,10 @@ class _MyHomePageState extends State<MyHomePage> {
         // Sala role
         case "sala_de_profesores":
           // Navigate to the Sala page
-          print("Click en sala de profesores");
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SalaProfesoresPage()),
+          );
           break;
         // This shouldn't show up but just in case
         default:

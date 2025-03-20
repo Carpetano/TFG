@@ -68,34 +68,39 @@ class SupabaseManager {
     }
   }
 
-    /// Subir imagen de perfil a Supabase Storage
+  /// Subir imagen de perfil a Supabase Storage
   Future<String?> uploadProfilePicture(XFile imageFile, String userId) async {
-  try {
-    final storagePath = 'avatars/$userId.png';
+    try {
+      final storagePath = 'avatars/$userId.png';
 
-    // 🔹 Convertir imagen a formato compatible según la plataforma
-    Uint8List fileBytes;
-    if (kIsWeb) {
-      fileBytes = await imageFile.readAsBytes(); // Web usa bytes
-    } else {
-      fileBytes = await File(imageFile.path).readAsBytes(); // Android/iOS usa File
-    }
+      // 🔹 Convertir imagen a formato compatible según la plataforma
+      Uint8List fileBytes;
+      if (kIsWeb) {
+        fileBytes = await imageFile.readAsBytes(); // Web usa bytes
+      } else {
+        fileBytes =
+            await File(imageFile.path).readAsBytes(); // Android/iOS usa File
+      }
 
-    // Subir imagen a Supabase Storage
-    await Supabase.instance.client.storage
-        .from('avatars')
-        .uploadBinary(storagePath, fileBytes, fileOptions: const FileOptions(upsert: true));
+      // Subir imagen a Supabase Storage
+      await Supabase.instance.client.storage
+          .from('avatars')
+          .uploadBinary(
+            storagePath,
+            fileBytes,
+            fileOptions: const FileOptions(upsert: true),
+          );
 
-    // Obtener la URL pública de la imagen
-    final publicUrl = Supabase.instance.client.storage
-        .from('avatars')
-        .getPublicUrl(storagePath);
+      // Obtener la URL pública de la imagen
+      final publicUrl = Supabase.instance.client.storage
+          .from('avatars')
+          .getPublicUrl(storagePath);
 
-    // 📌 Actualizar la URL en la tabla 'usuarios'
-    await Supabase.instance.client
-        .from('usuarios')
-        .update({'profile_image_url': publicUrl})
-        .eq('id_auth', userId);
+      // 📌 Actualizar la URL en la tabla 'usuarios'
+      await Supabase.instance.client
+          .from('usuarios')
+          .update({'profile_image_url': publicUrl})
+          .eq('id_auth', userId);
 
       return publicUrl;
     } catch (e) {
@@ -211,13 +216,12 @@ class SupabaseManager {
     }
   }
 
-
   Future<UserObject?> getCurrentUser() async {
-        final user = Supabase.instance.client.auth.currentUser;
-        if (user == null) return null;
-        return await instance.mapUser(user);
-      }
-      
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return null;
+    return await instance.mapUser(user);
+  }
+
   /// Sets a user as inactive in the 'usuarios' table
   ///
   /// This function updates the 'estado' field of the user to 'Inactivo' based on the user ID
@@ -520,11 +524,11 @@ class SupabaseManager {
       // Map the response to a UserObject
       return UserObject(
         id: response['id_usuario'] ?? 0,
-        authId: response['auth_id'] ?? '',
-        role: response['role'] ?? '',
-        firstName: response['primer_nombre'] ?? '',
-        lastName: response['apellido_paterno'] ?? '',
-        secondLastName: response['apellido_materno'] ?? '',
+        authId: response['id_auth'] ?? '',
+        role: response['rol'] ?? '',
+        firstName: response['nombre'] ?? '',
+        lastName: response['apellido1'] ?? '',
+        secondLastName: response['apellido2'] ?? '',
         phone: response['telefono'] ?? '',
         email: response['email'] ?? '',
         registrationDate: DateTime.parse(

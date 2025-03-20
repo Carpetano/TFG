@@ -1,9 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'package:codigo/Objetos/guardia_object.dart';
+import 'package:codigo/Objetos/user_object.dart';
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class VerMisGuardiasPage extends StatefulWidget {
   final int userId = MyApp.loggedInUser!.id;
@@ -14,107 +16,58 @@ class VerMisGuardiasPage extends StatefulWidget {
 }
 
 class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
-  List<String> guardiasRealizadas = [];
+  List<GuardiaObject> guardiasRealizadas = [];
   List<GuardiaObject> guardiasUnasigned = [];
   List<GuardiaObject> selectedGuardias = [];
 
-  // Function to print the ids of selected guardias when the "delete" button is pressed
-  void eliminarGuardia() async {
-    if (selectedGuardias.isNotEmpty) {
-      // Loop through all selected guardias and delete them
-      for (var guardia in selectedGuardias) {
-        print('Selected Guardia id: ${guardia.id}');
+  // Fetch unassigned guardias
+  Future<void> getAllUnasignedUserGuardias(int userId) async {
+    final response = await SupabaseManager.instance.getAllUnasignedUserGuardias(
+      userId,
+    );
+    setState(() {
+      guardiasUnasigned = response;
+    });
+  }
 
-        // Call the delete method from SupabaseManager to delete the guardia
-        bool result = await SupabaseManager.instance.deleteGuardiaById(
-          guardia.id,
-        );
-        if (result) {
-          print('Guardia ${guardia.id} deleted successfully');
-        } else {
-          print('Failed to delete Guardia ${guardia.id}');
-        }
-      }
+  // Fetch guardias done by user
+  Future<void> getAllGuardiasDoneByUser(int userId) async {
+    final response = await SupabaseManager.instance.getAllGuardiasDoneByUser(
+      userId,
+    );
+    setState(() {
+      guardiasRealizadas = response;
+    });
+  }
 
-      // Ensure `guardiasUnasigned` is not null before updating
-      setState(() {
-        // Safely remove the deleted guardias from the unasigned list
-        if (guardiasUnasigned != null) {
-          guardiasUnasigned.removeWhere(
-            (guardia) => selectedGuardias.contains(guardia),
-          );
-        }
-
-        // Clear the selected guardias list after deletion
-        selectedGuardias.clear();
-      });
-    } else {
-      print('No guardias selected for deletion.');
+  // Fetch user object by ID to get the teacher's first name
+  Future<UserObject> getUserObjectById(int userId) async {
+    try {
+      final user = await SupabaseManager.instance.getUserObjectById(userId);
+      print("Fetched user: $user"); // Debugging statement
+      return user;
+    } catch (e) {
+      print("Error fetching user: $e"); // Error if fetching fails
+      rethrow; // Propagate error if necessary
     }
   }
 
-  // Fetch the unasigned guardias for the current user
-  Future<void> fetchAllUserUnasignedGuardias() async {
+  // Delete an unassigned guardia by its ID
+  Future<void> deleteUnasignedGuardia(int id) async {
     try {
-      // Call the function from SupabaseManager that returns a List<GuardiaObject>
-      final unasigned = await SupabaseManager.instance
-          .getAllUnasignedUserGuardias(MyApp.loggedInUser!.id);
-
-      print(unasigned); // Debug print to check the fetched data
-      setState(() {
-        guardiasUnasigned = unasigned;
-      });
+      await SupabaseManager.instance.deleteGuardiaById(id);
+      print("Deleted guardia with ID: $id"); // Debugging statement
     } catch (e) {
-      print("Error fetching unasigned guardias: $e");
-    }
-  }
-
-  // Fetch all guardias (both completed and pending)
-  Future<void> fetchAllGuardias() async {
-    try {
-      final response = await SupabaseManager.instance.getAllGuardiasByUserId(
-        widget.userId,
-      );
-
-      final completedGuardias = await SupabaseManager.instance
-          .getAllGuardiasDoneByUser(widget.userId);
-
-      setState(() {
-        guardiasRealizadas.clear();
-      });
-
-      Set<String> addedGuardias = {};
-
-      // Process the response and add completed guardias to the 'guardiasRealizadas' list
-      for (var guardia in response) {
-        String guardiaInfo = 'Guardia ${guardia.id} - ${guardia.observations}';
-        if (guardia.substituteTeacherId == widget.userId) {
-          if (!addedGuardias.contains(guardiaInfo)) {
-            guardiasRealizadas.add(guardiaInfo);
-            addedGuardias.add(guardiaInfo);
-          }
-        }
-      }
-
-      // Add the completed guardias from the getAllGuardiasDoneByUser function to the list
-      for (var completedGuardia in completedGuardias) {
-        String completedGuardiaInfo =
-            'Guardia ${completedGuardia.id} - ${completedGuardia.observations}';
-        if (!addedGuardias.contains(completedGuardiaInfo)) {
-          guardiasRealizadas.add(completedGuardiaInfo);
-          addedGuardias.add(completedGuardiaInfo);
-        }
-      }
-    } catch (e) {
-      print("Error fetching guardias: $e");
+      print("Error deleting guardia: $e"); // Error if deleting fails
     }
   }
 
   @override
   void initState() {
     super.initState();
-    fetchAllGuardias();
-    fetchAllUserUnasignedGuardias();
+    // Fetch the data for both done and unassigned guardias
+    getAllGuardiasDoneByUser(widget.userId);
+    getAllUnasignedUserGuardias(widget.userId);
   }
 
   @override
@@ -125,7 +78,6 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Section for completed guardias
             const Text(
               'Guardias Realizadas',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -139,19 +91,64 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                 child: ListView.builder(
                   itemCount: guardiasRealizadas.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(guardiasRealizadas[index]),
-                      leading: const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                      ),
+                    final guardia = guardiasRealizadas[index];
+                    String formattedDate =
+                        '${guardia.day.day}/${guardia.day.month}/${guardia.day.year}';
+
+                    return FutureBuilder<UserObject>(
+                      future: getUserObjectById(guardia.missingTeacherId!),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return ListTile(
+                            title: Text(formattedDate),
+                            leading: const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                            ),
+                          );
+                        }
+
+                        if (snapshot.hasData) {
+                          // Handle null value
+                          return ListTile(
+                            title: Text(formattedDate),
+                            leading: const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                            ),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          print("Error in fetching teacher: ${snapshot.error}");
+                          return ListTile(
+                            title: Text(
+                              'Fecha: $formattedDate - Profesor: Error',
+                            ),
+                            leading: const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                            ),
+                          );
+                        }
+
+                        return ListTile(
+                          title: Text(
+                            'Fecha: $formattedDate - Profesor: No disponible',
+                          ),
+                          leading: const Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            // Section for unasigned guardias (pending)
             const Text(
               'Guardias Pendientes',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -167,8 +164,9 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                   itemBuilder: (context, index) {
                     final guardia = guardiasUnasigned[index];
                     String guardiaInfo =
-                        'Guardia ${guardia.id} - ${guardia.observations}';
+                        'Fecha: ${guardia.day.day}/${guardia.day.month}/${guardia.day.year} - Tramo horario: ${guardia.tramoHorario}';
                     bool isSelected = selectedGuardias.contains(guardia);
+
                     return ListTile(
                       title: Text(guardiaInfo),
                       leading: Icon(
@@ -179,11 +177,9 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                       ),
                       onTap: () {
                         setState(() {
-                          if (isSelected) {
-                            selectedGuardias.remove(guardia);
-                          } else {
-                            selectedGuardias.add(guardia);
-                          }
+                          isSelected
+                              ? selectedGuardias.remove(guardia)
+                              : selectedGuardias.add(guardia);
                         });
                       },
                     );
@@ -196,7 +192,20 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                  onPressed: eliminarGuardia,
+                  onPressed: () async {
+                    print("-------- $selectedGuardias");
+                    for (var guardia in selectedGuardias) {
+                      await deleteUnasignedGuardia(guardia.id);
+                      // After deleting, remove from the list
+                      setState(() {
+                        guardiasUnasigned.remove(guardia);
+                      });
+                    }
+                    setState(() {
+                      // Clear the selected guardias list after deletion
+                      selectedGuardias.clear();
+                    });
+                  },
                   child: const Text('Eliminar Guardia Seleccionadas'),
                 ),
                 ElevatedButton(
@@ -206,7 +215,6 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                 ),
               ],
             ),
-            // Added test button to print retrieved guardias
           ],
         ),
       ),

@@ -387,14 +387,8 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
   }
 
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
-    double iconSize = (screenWidth * 0.03).clamp(
-      24.0,
-      40.0,
-    ); // Tamaño entre 24px y 40px
-    double textSize = (screenWidth * 0.015).clamp(
-      14.0,
-      20.0,
-    ); // Tamaño entre 14px y 20px
+    double iconSize = (screenWidth * 0.03).clamp(24.0, 40.0);
+    double textSize = (screenWidth * 0.015).clamp(14.0, 20.0);
 
     return Scaffold(
       drawer: Drawer(
@@ -414,21 +408,42 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.assignment),
-              title: const Text('Ver perfil'),
-              textColor: Theme.of(context).colorScheme.onPrimary,
+              leading: Icon(
+                Icons.assignment,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              title: Text(
+                'Ver perfil',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
               onTap: () => _onNavigationItemSelected(0),
             ),
             ListTile(
-              leading: const Icon(Icons.add_circle),
-              title: const Text('Ajustes'),
-              textColor: Theme.of(context).colorScheme.onPrimary,
+              leading: Icon(
+                Icons.add_circle,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              title: Text(
+                'Ajustes',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
               onTap: () => _onNavigationItemSelected(1),
             ),
             ListTile(
-              leading: const Icon(Icons.view_list),
-              title: const Text('Cerrar Sesión'),
-              textColor: Theme.of(context).colorScheme.onPrimary,
+              leading: Icon(
+                Icons.view_list,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              title: Text(
+                'Cerrar Sesión',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
               onTap: () => _onNavigationItemSelected(2),
             ),
           ],
@@ -436,94 +451,87 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
       ),
       body: Row(
         children: [
-          // Contenedor para el NavigationRail con un encabezado
           Container(
-            width:
-                screenWidth *
-                0.20, // El NavigationRail ocupa el 20% de la pantalla
-            color: Theme.of(context).colorScheme.primary, // Fondo azul
+            width: screenWidth * 0.20,
+            color: Theme.of(context).colorScheme.primary,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // Encabezado con texto responsivo
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    "Menú Profesor", // Puedes cambiarlo por el nombre del usuario
+                    "Menú Profesor",
                     style: TextStyle(
-                      fontSize: textSize, // 3% del ancho de la pantalla
+                      fontSize: textSize,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const Divider(
-                  color: Colors.white54,
-                  thickness: 1,
-                ), // Línea separadora
-                // NavigationRail
+                const Divider(color: Colors.white54, thickness: 1),
                 Expanded(
                   child: NavigationRail(
-                    minWidth: screenWidth * 0.15, // Ocupa el 20% de la pantalla
+                    minWidth: screenWidth * 0.15,
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     selectedIndex: _selectedIndex,
                     onDestinationSelected: _onNavigationItemSelected,
                     labelType: NavigationRailLabelType.all,
-                    selectedLabelTextStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                    unselectedLabelTextStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                    useIndicator: false,
                     destinations: [
                       NavigationRailDestination(
                         icon: Icon(
                           Icons.account_circle,
-                          color: Theme.of(context).colorScheme.onPrimary,
                           size: iconSize,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                         selectedIcon: Icon(
                           Icons.account_circle,
-                          color: Theme.of(context).colorScheme.onPrimary,
                           size: iconSize,
+                          color: Colors.white,
                         ),
                         label: Text(
                           'Ver perfil',
-                          style: TextStyle(fontSize: textSize),
+                          style: TextStyle(
+                            fontSize: textSize,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
                       NavigationRailDestination(
                         icon: Icon(
                           Icons.tune_rounded,
-                          color: Theme.of(context).colorScheme.onPrimary,
                           size: iconSize,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                         selectedIcon: Icon(
                           Icons.tune_rounded,
-                          color: Theme.of(context).colorScheme.onPrimary,
                           size: iconSize,
+                          color: Colors.white,
                         ),
                         label: Text(
                           'Ajustes',
-                          style: TextStyle(fontSize: textSize),
+                          style: TextStyle(
+                            fontSize: textSize,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
                       NavigationRailDestination(
                         icon: Icon(
                           Icons.logout,
-                          color: Theme.of(context).colorScheme.onPrimary,
                           size: iconSize,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                         selectedIcon: Icon(
                           Icons.logout,
-                          color: Theme.of(context).colorScheme.onPrimary,
                           size: iconSize,
+                          color: Colors.white,
                         ),
                         label: Text(
                           'Cerrar Sesión',
-                          style: TextStyle(fontSize: textSize),
+                          style: TextStyle(
+                            fontSize: textSize,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -539,7 +547,6 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 20),
                     TableCalendar(
                       firstDay: DateTime.utc(2000, 1, 1),
                       lastDay: DateTime.utc(2100, 12, 31),
@@ -549,82 +556,19 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                           (day) =>
                               _selectedDay != null &&
                               isSameDay(_selectedDay, day),
-                      eventLoader:
-                          _getEventsForDay, // Use _getEventsForDay to load events
+                      eventLoader: _getEventsForDay,
                       onDaySelected: (selectedDay, focusedDay) {
                         setState(() {
-                          if (_selectedDay != null &&
-                              isSameDay(_selectedDay, selectedDay)) {
-                            _selectedDay = null;
-                          } else {
-                            _selectedDay = selectedDay;
-
-                            // Check if there are unassigned guardias for the selected day
-                            List<GuardiaObject> events = _getEventsForDay(
-                              selectedDay,
-                            );
-                            if (events.isNotEmpty) {
-                              print(
-                                "Selected date has ${events.length} unassigned guardias.",
-                              );
-                            }
-                          }
+                          _selectedDay =
+                              _selectedDay != null &&
+                                      isSameDay(_selectedDay, selectedDay)
+                                  ? null
+                                  : selectedDay;
                           _focusedDay = focusedDay;
                         });
                       },
-                      onPageChanged: (focusedDay) {
-                        _focusedDay = focusedDay;
-                      },
-                      headerStyle: HeaderStyle(
-                        titleTextStyle: TextStyle(
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
-                          fontSize: 18,
-                        ),
-                      ),
-                      calendarStyle: CalendarStyle(
-                        defaultTextStyle: TextStyle(
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white70
-                                  : Colors.black87,
-                        ),
-                        weekendTextStyle: TextStyle(
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.orangeAccent
-                                  : Colors.red,
-                        ),
-                        outsideTextStyle: TextStyle(
-                          color:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.grey
-                                  : Colors.black38,
-                        ),
-                      ),
-                      calendarBuilders: CalendarBuilders(
-                        markerBuilder: (context, date, events) {
-                          // Show a marker if events are present for the day
-                          if (events.isNotEmpty) {
-                            return Positioned(
-                              bottom: 1,
-                              child: Container(
-                                width: 7,
-                                height: 7,
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox();
-                        },
-                      ),
+                      onPageChanged: (focusedDay) => _focusedDay = focusedDay,
                     ),
-
                     const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -636,27 +580,17 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                               MaterialPageRoute(
                                 builder: (context) => VerMisGuardiasPage(),
                               ),
-                            );
+                            ).then((_) {
+                              setState(() {
+                                fetchUnasignedGuardias();
+                              });
+                            });
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            foregroundColor: Colors.black,
-                          ),
-                          child: Builder(
-                            builder: (context) {
-                              String languageCode =
-                                  GlobalSettings.language.value.code;
-                              print(
-                                'Language Code: $languageCode',
-                              ); // Check the current language code
-                              print("Test???");
-                              return Text(
-                                Translations.translate(
-                                  'viewMySupervisions',
-                                  languageCode,
-                                ),
-                              );
-                            },
+                          child: Text(
+                            Translations.translate(
+                              'viewMySupervisions',
+                              GlobalSettings.language.value.code,
+                            ),
                           ),
                         ),
                         ElevatedButton(
@@ -674,16 +608,6 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                                     );
                                   }
                                   : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                _selectedDay != null
-                                    ? Colors.blueAccent
-                                    : Colors.grey[400],
-                            foregroundColor:
-                                _selectedDay != null
-                                    ? Colors.black
-                                    : Colors.grey[600],
-                          ),
                           child: Text(
                             Translations.translate(
                               'addAusencia',
@@ -706,16 +630,6 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                                     );
                                   }
                                   : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                _selectedDay != null
-                                    ? Colors.blueAccent
-                                    : Colors.grey[400],
-                            foregroundColor:
-                                _selectedDay != null
-                                    ? Colors.black
-                                    : Colors.grey[600],
-                          ),
                           child: Text(
                             Translations.translate(
                               'viewGuardias',

@@ -709,4 +709,79 @@ class SupabaseManager {
       return false;
     }
   }
+
+  Future<List<GuardiaObject>> getAllUnasignedUserGuardias(int id) async {
+    try {
+      // Fetch data from Supabase filtering for 'Pendiente' state and matching the provided 'id_profesor_ausente'
+      final response = await Supabase.instance.client
+          .from('guardias')
+          .select()
+          .like('estado', 'Pendiente') // Only 'Pendiente' guardias
+          .eq(
+            'id_profesor_ausente',
+            id,
+          ); // Filter by the missing teacher ID (id_profesor_ausente)
+
+      // Manually map the response data to a list of GuardiaObject
+      List<GuardiaObject> guardias = [];
+
+      if (response.isNotEmpty) {
+        for (var data in response) {
+          guardias.add(
+            GuardiaObject(
+              id: data['id_guardia'] as int,
+              missingTeacherId:
+                  data['id_profesor_ausente'] != null
+                      ? data['id_profesor_ausente'] as int
+                      : null,
+              ausenciaId:
+                  data['id_ausencia'] != null
+                      ? data['id_ausencia'] as int
+                      : null,
+              tramoHorario:
+                  data['tramo_horario'] != null
+                      ? data['tramo_horario'] as int
+                      : null,
+              substituteTeacherId:
+                  data['id_profesor_sustituto'] != null
+                      ? data['id_profesor_sustituto'] as int
+                      : null,
+              observations: data['observaciones'] as String,
+              status: data['estado'] as String,
+              day: DateTime.parse(data['dia'] as String),
+            ),
+          );
+        }
+      } else {
+        print("No data found or error occurred.");
+      }
+
+      return guardias; // Return the list of GuardiaObject
+    } catch (e) {
+      print("Error getting unassigned user guardias: $e");
+      return []; // Return an empty list in case of error
+    }
+  }
+
+  Future<bool> deleteGuardiaById(int guardiaId) async {
+    try {
+      // Deleting the guardia by its ID
+      final response = await Supabase.instance.client
+          .from('guardias')
+          .delete()
+          .eq('id_guardia', guardiaId); // Delete where the guardia ID matches
+
+      // Check if the deletion was successful (Supabase returns the deleted records in response)
+      if (response.isEmpty) {
+        print("Guardia with ID $guardiaId was not found or already deleted.");
+        return false; // No rows deleted
+      }
+
+      print("Guardia with ID $guardiaId was deleted successfully.");
+      return true; // Deletion successful
+    } catch (e) {
+      print("Error deleting guardia with ID $guardiaId: $e");
+      return false; // Return false in case of error
+    }
+  }
 }

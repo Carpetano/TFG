@@ -1,3 +1,6 @@
+// ignore_for_file: avoid_print
+
+import 'package:codigo/Objetos/guardia_object.dart';
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -12,53 +15,83 @@ class VerMisGuardiasPage extends StatefulWidget {
 
 class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
   List<String> guardiasRealizadas = [];
-  List<String> guardiasUnasigned = [];
-  String? guardiaSeleccionada;
+  List<GuardiaObject> guardiasUnasigned = [];
+  List<GuardiaObject> selectedGuardias = [];
 
-  void eliminarGuardia() {
-    if (guardiaSeleccionada != null) {
+  // Function to print the ids of selected guardias when the "delete" button is pressed
+  void eliminarGuardia() async {
+    if (selectedGuardias.isNotEmpty) {
+      // Loop through all selected guardias and delete them
+      for (var guardia in selectedGuardias) {
+        print('Selected Guardia id: ${guardia.id}');
+
+        // Call the delete method from SupabaseManager to delete the guardia
+        bool result = await SupabaseManager.instance.deleteGuardiaById(
+          guardia.id,
+        );
+        if (result) {
+          print('Guardia ${guardia.id} deleted successfully');
+        } else {
+          print('Failed to delete Guardia ${guardia.id}');
+        }
+      }
+
+      // Ensure `guardiasUnasigned` is not null before updating
       setState(() {
-        guardiasUnasigned.remove(guardiaSeleccionada);
-        guardiaSeleccionada = null;
+        // Safely remove the deleted guardias from the unasigned list
+        if (guardiasUnasigned != null) {
+          guardiasUnasigned.removeWhere(
+            (guardia) => selectedGuardias.contains(guardia),
+          );
+        }
+
+        // Clear the selected guardias list after deletion
+        selectedGuardias.clear();
       });
+    } else {
+      print('No guardias selected for deletion.');
     }
   }
 
+  // Fetch the unasigned guardias for the current user
+  Future<void> fetchAllUserUnasignedGuardias() async {
+    try {
+      // Call the function from SupabaseManager that returns a List<GuardiaObject>
+      final unasigned = await SupabaseManager.instance
+          .getAllUnasignedUserGuardias(MyApp.loggedInUser!.id);
+
+      print(unasigned); // Debug print to check the fetched data
+      setState(() {
+        guardiasUnasigned = unasigned;
+      });
+    } catch (e) {
+      print("Error fetching unasigned guardias: $e");
+    }
+  }
+
+  // Fetch all guardias (both completed and pending)
   Future<void> fetchAllGuardias() async {
     try {
-      // Fetch all guardias for the user by their id
       final response = await SupabaseManager.instance.getAllGuardiasByUserId(
         widget.userId,
       );
 
-      // Fetch all completed guardias (Asignada) from the function getAllGuardiasDoneByUser
       final completedGuardias = await SupabaseManager.instance
           .getAllGuardiasDoneByUser(widget.userId);
 
-      // Clear existing lists before populating them again
       setState(() {
         guardiasRealizadas.clear();
-        guardiasUnasigned.clear();
       });
 
-      // Set to hold unique guardias to avoid duplicates
       Set<String> addedGuardias = {};
 
       // Process the response and add completed guardias to the 'guardiasRealizadas' list
       for (var guardia in response) {
         String guardiaInfo = 'Guardia ${guardia.id} - ${guardia.observations}';
-
         if (guardia.substituteTeacherId == widget.userId) {
-          // Add completed guardias to guardiasRealizadas if not already added
           if (!addedGuardias.contains(guardiaInfo)) {
             guardiasRealizadas.add(guardiaInfo);
-            addedGuardias.add(guardiaInfo); // Mark this guardia as added
-          }
-        } else {
-          // Add unassigned guardias to guardiasUnasigned if not already added
-          if (!addedGuardias.contains(guardiaInfo)) {
-            guardiasUnasigned.add(guardiaInfo);
-            addedGuardias.add(guardiaInfo); // Mark this guardia as added
+            addedGuardias.add(guardiaInfo);
           }
         }
       }
@@ -67,10 +100,9 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
       for (var completedGuardia in completedGuardias) {
         String completedGuardiaInfo =
             'Guardia ${completedGuardia.id} - ${completedGuardia.observations}';
-        // Add to guardiasRealizadas only if not already added
         if (!addedGuardias.contains(completedGuardiaInfo)) {
           guardiasRealizadas.add(completedGuardiaInfo);
-          addedGuardias.add(completedGuardiaInfo); // Mark this guardia as added
+          addedGuardias.add(completedGuardiaInfo);
         }
       }
     } catch (e) {
@@ -81,7 +113,8 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
   @override
   void initState() {
     super.initState();
-    fetchAllGuardias(); // Fetch the data when the page is initialized
+    fetchAllGuardias();
+    fetchAllUserUnasignedGuardias();
   }
 
   @override
@@ -92,6 +125,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Section for completed guardias
             const Text(
               'Guardias Realizadas',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -117,6 +151,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
               ),
             ),
             const SizedBox(height: 20),
+            // Section for unasigned guardias (pending)
             const Text(
               'Guardias Pendientes',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -130,24 +165,24 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                 child: ListView.builder(
                   itemCount: guardiasUnasigned.length,
                   itemBuilder: (context, index) {
+                    final guardia = guardiasUnasigned[index];
+                    String guardiaInfo =
+                        'Guardia ${guardia.id} - ${guardia.observations}';
+                    bool isSelected = selectedGuardias.contains(guardia);
                     return ListTile(
-                      title: Text(guardiasUnasigned[index]),
+                      title: Text(guardiaInfo),
                       leading: Icon(
-                        guardiaSeleccionada == guardiasUnasigned[index]
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_unchecked,
-                        color:
-                            guardiaSeleccionada == guardiasUnasigned[index]
-                                ? Colors.blue
-                                : null,
+                        isSelected
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                        color: isSelected ? Colors.blue : null,
                       ),
                       onTap: () {
                         setState(() {
-                          // If the same guardia is tapped, toggle the selection
-                          if (guardiaSeleccionada == guardiasUnasigned[index]) {
-                            guardiaSeleccionada = null;
+                          if (isSelected) {
+                            selectedGuardias.remove(guardia);
                           } else {
-                            guardiaSeleccionada = guardiasUnasigned[index];
+                            selectedGuardias.add(guardia);
                           }
                         });
                       },
@@ -162,9 +197,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
               children: [
                 ElevatedButton(
                   onPressed: eliminarGuardia,
-                  child: const Text(
-                    'Eliminar Guardia Seleccionada (pa que no?)',
-                  ),
+                  child: const Text('Eliminar Guardia Seleccionadas'),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
@@ -173,6 +206,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                 ),
               ],
             ),
+            // Added test button to print retrieved guardias
           ],
         ),
       ),

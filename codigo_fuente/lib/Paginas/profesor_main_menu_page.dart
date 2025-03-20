@@ -136,8 +136,24 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                       ),
                     ),
                   ),
-                  PopupMenuItem(value: 'ajustes', child: Text('Ajustes')),
-                  PopupMenuItem(value: 'salir', child: Text('Cerrar Sesión')),
+                  PopupMenuItem(
+                    value: 'ajustes',
+                    child: Text(
+                      Translations.translate(
+                        'settings',
+                        GlobalSettings.language.value.code,
+                      ),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'salir',
+                    child: Text(
+                      Translations.translate(
+                        'logout',
+                        GlobalSettings.language.value.code,
+                      ),
+                    ),
+                  ),
                 ],
             icon: const Icon(
               Icons.account_circle,
@@ -257,6 +273,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                     print(
                       'Language Code: $languageCode',
                     ); // Check the current language code
+                    print("Test???");
                     return Text(
                       Translations.translate(
                         'viewMySupervisions',
@@ -288,7 +305,12 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                   foregroundColor:
                       _selectedDay != null ? Colors.black : Colors.grey[600],
                 ),
-                child: const Text("Añadir Ausencia"),
+                child: Text(
+                  Translations.translate(
+                    'addAusencia',
+                    GlobalSettings.language.value.code,
+                  ),
+                ),
               ),
               ElevatedButton(
                 onPressed:
@@ -312,7 +334,12 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                   foregroundColor:
                       _selectedDay != null ? Colors.black : Colors.grey[600],
                 ),
-                child: const Text("Ver Ausencias"),
+                child: Text(
+                  Translations.translate(
+                    'viewGuardias',
+                    GlobalSettings.language.value.code,
+                  ),
+                ),
               ),
             ],
           ),

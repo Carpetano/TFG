@@ -20,6 +20,24 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
   List<GuardiaObject> pendienteGuardias = [];
   List<GuardiaObject> asignadaGuardias = [];
 
+  /// Displays a snackbar message at the bottom of the screen
+  /// This function creates a snackbar with the provided message, text color,
+  /// and background color, then displays it using the ScaffoldMessenger
+  ///
+  /// - [message]: The text content of the snackbar
+  /// - [textColor]: The color of the text inside the snackbar
+  /// - [bgColor]: The background color of the snackbar
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   // Fetch guardias by day
   Future<void> fetchGuardiasObjects() async {
     final response = await SupabaseManager.instance.getAllGuardiasByDay(
@@ -62,12 +80,12 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
       }
 
       String infoText = '''
-Guardia ID: ${guardia.id}
-Missing Teacher ID: ${guardia.missingTeacherId ?? 'N/A'}
-Substitute Teacher ID: ${guardia.substituteTeacherId ?? 'N/A'}
-Observations: ${guardia.observations}
-Status: ${guardia.status}
-Day: ${guardia.day.toLocal()}
+ID: ${guardia.id}
+Profesor ausente ID: ${guardia.missingTeacherId ?? 'N/A'}
+Profesor sustituto ID: ${guardia.substituteTeacherId ?? 'N/A'}
+Observaciones: ${guardia.observations}
+Estado: ${guardia.status}
+Dia: ${guardia.day.toLocal()}
       ''';
 
       if (context.mounted) {
@@ -235,6 +253,11 @@ Day: ${guardia.day.toLocal()}
                   actionLabel: 'Asignar',
                   onActionTap: (guardia, ctx) {
                     claimGuardia(guardia.id);
+                    showSnackBar(
+                      "Asignada correctamente",
+                      Colors.white,
+                      Colors.black,
+                    );
                   },
                 ),
             // Asignadas Section

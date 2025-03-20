@@ -20,6 +20,24 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
   List<GuardiaObject> guardiasUnasigned = [];
   List<GuardiaObject> selectedGuardias = [];
 
+  /// Displays a snackbar message at the bottom of the screen
+  /// This function creates a snackbar with the provided message, text color,
+  /// and background color, then displays it using the ScaffoldMessenger
+  ///
+  /// - [message]: The text content of the snackbar
+  /// - [textColor]: The color of the text inside the snackbar
+  /// - [bgColor]: The background color of the snackbar
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   // Fetch unassigned guardias
   Future<void> getAllUnasignedUserGuardias(int userId) async {
     final response = await SupabaseManager.instance.getAllUnasignedUserGuardias(
@@ -229,6 +247,11 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                     setState(() {
                       selectedGuardias.clear();
                     });
+                    showSnackBar(
+                      "Guardias Borradas",
+                      Colors.white,
+                      Colors.black,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent,

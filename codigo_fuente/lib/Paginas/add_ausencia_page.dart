@@ -63,6 +63,24 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
     });
   }
 
+  /// Displays a snackbar message at the bottom of the screen
+  /// This function creates a snackbar with the provided message, text color,
+  /// and background color, then displays it using the ScaffoldMessenger
+  ///
+  /// - [message]: The text content of the snackbar
+  /// - [textColor]: The color of the text inside the snackbar
+  /// - [bgColor]: The background color of the snackbar
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   Future<void> insertAusencia() async {
     if (selectedClassCode == null || selectedTurno == null) {
       // Ensure a turno is selected
@@ -73,6 +91,7 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
           ),
         ),
       );
+      showSnackBar("Insertado correctamente", Colors.white, Colors.black);
       return;
     }
 

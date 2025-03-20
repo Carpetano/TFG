@@ -21,6 +21,24 @@ class _PerfilPageState extends State<PerfilPage> {
     _loadUser();
   }
 
+  /// Displays a snackbar message at the bottom of the screen
+  /// This function creates a snackbar with the provided message, text color,
+  /// and background color, then displays it using the ScaffoldMessenger
+  ///
+  /// - [message]: The text content of the snackbar
+  /// - [textColor]: The color of the text inside the snackbar
+  /// - [bgColor]: The background color of the snackbar
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   Future<void> _loadUser() async {
     final user = await SupabaseManager.instance.getCurrentUser();
     setState(() {
@@ -31,6 +49,7 @@ class _PerfilPageState extends State<PerfilPage> {
 
   /// Seleccionar y subir una imagen
   Future<void> _pickAndUploadImage() async {
+    showSnackBar("Porfavor seleccione una imagen", Colors.white, Colors.black);
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 

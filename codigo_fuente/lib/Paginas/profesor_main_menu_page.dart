@@ -2,6 +2,7 @@
 
 import 'package:codigo/Objetos/guardia_object.dart';
 import 'package:codigo/Paginas/view_guardias_page.dart';
+import 'package:codigo/global_settings.dart';
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,8 @@ class ProfesorMainMenuPage extends StatefulWidget {
   _ProfesorMainMenuPageState createState() => _ProfesorMainMenuPageState();
 }
 
-class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
+class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
+    with RouteAware {
   final CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime? _selectedDay;
   DateTime _focusedDay = DateTime.now();
@@ -29,15 +31,58 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
   @override
   void initState() {
     super.initState();
-    fetchUnasignedGuardias(); // Fetch the unassigned guardias when the page is initialized
+    fetchUnasignedGuardias();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when the page is pushed back into view
+    print("test");
+    fetchUnasignedGuardias();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Ensure you unsubscribe when the widget is disposed
   }
 
   Future<void> fetchUnasignedGuardias() async {
     final response = await SupabaseManager.instance.getUnasignedGuardias();
     print(response);
     setState(() {
-      unasignedGuardias = response; // Store the fetched guardias in the list
+      unasignedGuardias = response;
     });
+    if (unasignedGuardias.isNotEmpty) {
+      showSnackBar(
+        "Hay ${unasignedGuardias.length} guardia sin asignar",
+        Colors.white,
+        Colors.black,
+      );
+    } else {
+      showSnackBar("No hay guardias sin asignar", Colors.white, Colors.black);
+    }
+  }
+
+  /// Displays a snackbar message at the bottom of the screen
+  ///
+  /// This function creates a snackbar with the provided message, text color,
+  /// and background color, then displays it using the ScaffoldMessenger
+  ///
+  /// - [message]: The text content of the snackbar
+  /// - [textColor]: The color of the text inside the snackbar
+  /// - [bgColor]: The background color of the snackbar
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    // Create a Snack BAr given the parameters
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    // Show the snack bar
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   // Make this a synchronous function to be compatible with eventLoader
@@ -82,15 +127,17 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
             },
             itemBuilder:
                 (BuildContext context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'perfil',
-                    child: Text('Ver Perfil'),
+                    child: Text(
+                      Translations.translate(
+                        'profile',
+                        GlobalSettings.language.value.code,
+                      ),
+                    ),
                   ),
-                  const PopupMenuItem(value: 'ajustes', child: Text('Ajustes')),
-                  const PopupMenuItem(
-                    value: 'salir',
-                    child: Text('Cerrar Sesión'),
-                  ),
+                  PopupMenuItem(value: 'ajustes', child: Text('Ajustes')),
+                  PopupMenuItem(value: 'salir', child: Text('Cerrar Sesión')),
                 ],
             icon: const Icon(
               Icons.account_circle,
@@ -204,7 +251,20 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage> {
                   backgroundColor: Colors.blueAccent,
                   foregroundColor: Colors.black,
                 ),
-                child: const Text("Ver mis guardias"),
+                child: Builder(
+                  builder: (context) {
+                    String languageCode = GlobalSettings.language.value.code;
+                    print(
+                      'Language Code: $languageCode',
+                    ); // Check the current language code
+                    return Text(
+                      Translations.translate(
+                        'viewMySupervisions',
+                        languageCode,
+                      ),
+                    );
+                  },
+                ),
               ),
               ElevatedButton(
                 onPressed:

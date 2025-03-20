@@ -1,8 +1,7 @@
 import 'package:codigo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/Paginas/change_password_page.dart';
-import 'package:codigo/theme_config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:codigo/global_settings.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -13,176 +12,406 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool notificaciones = true;
-  String idioma = "Español";
-  bool temaOscuro = false;
-
-  // Simple translations map for demonstration.
-  final Map<String, Map<String, String>> translations = {
-    'Español': {
-      'title': 'Ajustes',
-      'personalization': 'Personalización',
-      'darkMode': 'Modo oscuro',
-      'darkModeSubtitle': 'Cambia entre el tema claro y oscuro',
-      'language': 'Idioma',
-      'languageSubtitle': 'Selecciona el idioma de la aplicación',
-      'notifications': 'Recibir notificaciones',
-      'notificationsSubtitle': 'Activa o desactiva las notificaciones',
-      'changePassword': 'Cambiar Contraseña',
-    },
-    'Inglés': {
-      'title': 'Settings',
-      'personalization': 'Personalization',
-      'darkMode': 'Dark Mode',
-      'darkModeSubtitle': 'Switch between light and dark themes',
-      'language': 'Language',
-      'languageSubtitle': 'Select the app language',
-      'notifications': 'Receive Notifications',
-      'notificationsSubtitle': 'Toggle notifications on or off',
-      'changePassword': 'Change Password',
-    },
-    'Francés': {
-      'title': 'Paramètres',
-      'personalization': 'Personnalisation',
-      'darkMode': 'Mode sombre',
-      'darkModeSubtitle': 'Changer entre les thèmes clair et sombre',
-      'language': 'Langue',
-      'languageSubtitle': 'Sélectionnez la langue de l\'application',
-      'notifications': 'Recevoir des notifications',
-      'notificationsSubtitle': 'Activer ou désactiver les notifications',
-      'changePassword': 'Changer le mot de passe',
-    },
-  };
-
-  // Shortcut getter for current translations.
-  Map<String, String> get t => translations[idioma]!;
+  AppLanguage idioma =
+      GlobalSettings.language.value; // Use AppLanguage enum for language
+  bool temaOscuro =
+      GlobalSettings.isDarkMode.value; // Use global dark mode setting
 
   @override
   void initState() {
     super.initState();
-    _loadThemePreference();
-  }
 
-  // Load the stored theme preference
-  void _loadThemePreference() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool savedTheme = prefs.getBool('temaOscuro') ?? false;
-    setState(() {
-      temaOscuro = savedTheme;
+    // Listen for language and theme changes
+    GlobalSettings.language.addListener(() {
+      if (mounted) {
+        setState(() {
+          idioma = GlobalSettings.language.value;
+        });
+      }
     });
-  }
 
-  // Save the theme preference
-  void _saveThemePreference(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('temaOscuro', value);
-  }
-
-  // Navigate to change password page.
-  void goToChangePassword() async {
-    bool? passwordChanged = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
-    );
-    if (passwordChanged == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "${t['changePassword']} cambiada con éxito. Regresando a ajustes...",
-          ),
-        ),
-      );
-    }
-  }
-
-  // Toggle the theme for the entire app by rebuilding with the new theme.
-  void toggleTheme(bool value) {
-    setState(() {
-      temaOscuro = value;
+    GlobalSettings.isDarkMode.addListener(() {
+      if (mounted) {
+        setState(() {
+          temaOscuro = GlobalSettings.isDarkMode.value;
+        });
+      }
     });
-    _saveThemePreference(temaOscuro); // Save the theme preference when toggled.
-
-    // Rebuild the app with the new theme using AppEasyTheme.
-    runApp(
-      AppEasyTheme().buildAppWithTheme(
-        isDarkMode: temaOscuro,
-        title: "Test", // You can change this title as needed.
-        onThemeToggle: () {}, // Passing this function again.
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.sizeOf(context).width;
+    double screenHeight = MediaQuery.sizeOf(context).height;
+    final maxPhoneWidth = 600;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(t['title']!),
+        title: Text(
+          Translations.translate(
+            'title',
+            GlobalSettings.language.value.code, // Get language code dynamically
+          ),
+          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+        ),
         backgroundColor: Colors.blueAccent,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
+      body:
+          screenWidth > maxPhoneWidth
+              ? buildDesktopLayout(screenWidth, screenHeight)
+              : buildMobileLayout(screenWidth),
+    );
+  }
+
+  Widget buildDesktopLayout(double screenWidth, double screenHeight) {
+    return Center(
+      child: Container(
+        width: screenWidth > 600 ? screenWidth * 0.6 : screenWidth * 1,
+        padding: EdgeInsets.all(30),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              Translations.translate(
+                'personalization',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            _buildSettingTile(
+              icon: Icons.dark_mode,
+              title: Translations.translate(
+                'darkMode',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+              subtitle: Translations.translate(
+                'darkModeSubtitle',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+              trailing: Switch(
+                value: temaOscuro,
+                onChanged: (value) async {
+                  await GlobalSettings.setTheme(value);
+                },
+              ),
+            ),
+            _buildSettingTile(
+              icon: Icons.language,
+              title: Translations.translate(
+                'language',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+              subtitle: Translations.translate(
+                'languageSubtitle',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+              trailing: DropdownButton<AppLanguage>(
+                value: idioma,
+                onChanged: (newValue) async {
+                  setState(() {
+                    idioma = newValue!;
+                  });
+
+                  // Change language and update in GlobalSettings
+                  if (newValue == AppLanguage.espanol) {
+                    await GlobalSettings.setLanguage(AppLanguage.espanol);
+                  } else if (newValue == AppLanguage.english) {
+                    await GlobalSettings.setLanguage(AppLanguage.english);
+                  }
+
+                  // Refresh the page to apply changes
+                  setState(() {});
+
+                  // Ensure that the context is still valid before showing the dialog
+                  if (mounted) {
+                    // Show an AlertDialog to prompt the user to re-login
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(
+                            Translations.translate(
+                              'reloginRequired',
+                              GlobalSettings.language.value.code,
+                            ),
+                          ),
+                          content: Text(
+                            Translations.translate(
+                              'reloginRequired2',
+                              GlobalSettings.language.value.code,
+                            ),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                // Close the dialog
+                                Navigator.of(context).pop();
+
+                                // Navigate to the login screen (replace LoginScreen with your actual screen)
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MyApp(),
+                                  ),
+                                );
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+
+                items:
+                    AppLanguage.values
+                        .map(
+                          (AppLanguage value) => DropdownMenuItem<AppLanguage>(
+                            value: value,
+                            child: Text(
+                              value == AppLanguage.english
+                                  ? 'English'
+                                  : 'Español',
+                            ), // Translate enum to display name
+                          ),
+                        )
+                        .toList(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              Translations.translate(
+                'notifications',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            _buildSettingTile(
+              icon: Icons.notifications_active,
+              title: Translations.translate(
+                'notifications',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+              subtitle: Translations.translate(
+                'notificationsSubtitle',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+              trailing: Switch(
+                value: notificaciones,
+                onChanged: (value) => setState(() => notificaciones = value),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChangePasswordPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: Text(
+                Translations.translate(
+                  'changePassword',
+                  GlobalSettings
+                      .language
+                      .value
+                      .code, // Get language code dynamically
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildMobileLayout(double screenWidth) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            t['personalization']!,
+            Translations.translate(
+              'personalization',
+              GlobalSettings
+                  .language
+                  .value
+                  .code, // Get language code dynamically
+            ),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-          // Dark Mode Toggle (changes the global theme)
           _buildSettingTile(
             icon: Icons.dark_mode,
-            title: t['darkMode']!,
-            subtitle: t['darkModeSubtitle']!,
-            trailing: Switch(value: temaOscuro, onChanged: toggleTheme),
+            title: Translations.translate(
+              'darkMode',
+              GlobalSettings
+                  .language
+                  .value
+                  .code, // Get language code dynamically
+            ),
+            subtitle: Translations.translate(
+              'darkModeSubtitle',
+              GlobalSettings
+                  .language
+                  .value
+                  .code, // Get language code dynamically
+            ),
+            trailing: Switch(
+              value: temaOscuro,
+              onChanged: (value) async {
+                await GlobalSettings.setTheme(value);
+              },
+            ),
           ),
-          // Language selection (local state only)
           _buildSettingTile(
             icon: Icons.language,
-            title: t['language']!,
-            subtitle: t['languageSubtitle']!,
-            trailing: DropdownButton<String>(
+            title: Translations.translate(
+              'language',
+              GlobalSettings
+                  .language
+                  .value
+                  .code, // Get language code dynamically
+            ),
+            subtitle: Translations.translate(
+              'languageSubtitle',
+              GlobalSettings
+                  .language
+                  .value
+                  .code, // Get language code dynamically
+            ),
+            trailing: DropdownButton<AppLanguage>(
               value: idioma,
-              onChanged: (newValue) {
+              onChanged: (newValue) async {
                 setState(() {
-                  idioma = newValue!;
+                  idioma = newValue!; // Update the selected language
                 });
+
+                // Change language and update in GlobalSettings
+                if (newValue == AppLanguage.espanol) {
+                  await GlobalSettings.setLanguage(AppLanguage.espanol);
+                } else if (newValue == AppLanguage.english) {
+                  await GlobalSettings.setLanguage(AppLanguage.english);
+                }
+
+                // Refresh the page to apply changes
+                setState(() {});
               },
               items:
-                  <String>['Español', 'Inglés', 'Francés']
+                  AppLanguage.values
                       .map(
-                        (String value) =>
-                            DropdownMenuItem(value: value, child: Text(value)),
+                        (AppLanguage value) => DropdownMenuItem<AppLanguage>(
+                          value: value,
+                          child: Text(
+                            value == AppLanguage.english ? 'Inglés' : 'Español',
+                          ), // Translate enum to display name
+                        ),
                       )
                       .toList(),
             ),
           ),
+
           const SizedBox(height: 20),
           Text(
-            t['notifications']!,
+            Translations.translate(
+              'notifications',
+              GlobalSettings
+                  .language
+                  .value
+                  .code, // Get language code dynamically
+            ),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
-          // Notifications toggle (local)
           _buildSettingTile(
             icon: Icons.notifications_active,
-            title: t['notifications']!,
-            subtitle: t['notificationsSubtitle']!,
+            title: Translations.translate(
+              'notifications',
+              GlobalSettings
+                  .language
+                  .value
+                  .code, // Get language code dynamically
+            ),
+            subtitle: Translations.translate(
+              'notificationsSubtitle',
+              GlobalSettings
+                  .language
+                  .value
+                  .code, // Get language code dynamically
+            ),
             trailing: Switch(
               value: notificaciones,
               onChanged: (value) => setState(() => notificaciones = value),
             ),
           ),
           const SizedBox(height: 20),
-          // Change Password Button
           ElevatedButton(
-            onPressed: goToChangePassword,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ChangePasswordPage(),
+                ),
+              );
+            },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(t['changePassword']!),
+            child: Text(
+              Translations.translate(
+                'changePassword',
+                GlobalSettings
+                    .language
+                    .value
+                    .code, // Get language code dynamically
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Helper widget to build each setting tile.
   Widget _buildSettingTile({
     required IconData icon,
     required String title,

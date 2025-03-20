@@ -317,10 +317,10 @@ class SupabaseManager {
   Future<List<GuardiaObject>> getUnasignedGuardias() async {
     try {
       // Query Supabase for 'Guardia' objects
-      final response =
-          await Supabase.instance.client
-              .from('guardias') // Your Supabase table name
-              .select();
+      final response = await Supabase.instance.client
+          .from('guardias') // Your Supabase table name
+          .select()
+          .like('estado', 'Pendiente');
 
       // Manually map the response data into a list of GuardiaObject
       List<GuardiaObject> guardias = [];

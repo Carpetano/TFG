@@ -23,7 +23,6 @@ dependencies:
   # Fix intl version issue
   flutter_localizations:
     sdk: flutter
-  intl: any # Allow Flutter SDK to determine the compatible version
 
 dev_dependencies:
   flutter_test:
@@ -44,8 +43,3 @@ flutter:
   assets:
     - assets/profile_placeholder.png
 
-flutter_intl:
-  enabled: true
-  arb-dir: lib/l10n
-  template-arb-file: app_en.arb # Specifies the main translation file
-  output-localization-file: S.dart # Generated localization file

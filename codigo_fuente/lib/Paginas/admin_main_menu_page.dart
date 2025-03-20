@@ -51,13 +51,17 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
   }
 
   Widget buildMobileLayout(double screenWidth) {
+    double iconSize = (screenWidth * 0.04).clamp(30.0, 50.0); // Tamaño entre 24px y 40px
+    double textSize = (screenWidth * 0.02).clamp(20.0, 40.0); // Tamaño entre 14px y 20px
+    double titleSize = (screenWidth * 0.04).clamp(30.0, 50.0); // Título de 18px a 30px
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Menú Administrador",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
         actions: [
           PopupMenuButton<String>(
@@ -97,64 +101,112 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
                     child: Text('Cerrar Sesión'),
                   ),
                 ],
-            icon: const Icon(
+            icon: Icon(
               Icons.account_circle,
               size: 30,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
           ),
           const SizedBox(width: 10),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildMenuButton(
-              icon: Icons.person_add,
-              text: 'Registrar nuevo Usuario',
-              onTap: () => _navigateTo(const RegistrationPage()),
+      padding: const EdgeInsets.all(30.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // Centra los elementos
+        crossAxisAlignment: CrossAxisAlignment.center, 
+        children: [
+          Center(
+            child: Text(
+              "Bienvenido, ${MyApp.loggedInUser?.firstName ?? 'Desconocido'} 👋",
+              style: TextStyle(
+                fontSize: titleSize,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSecondary,
+              ),
+              textAlign: TextAlign.center, 
             ),
-            const SizedBox(height: 15),
-            _buildMenuButton(
-              icon: Icons.people,
-              text: 'Ver Usuarios registrados',
-              onTap: () => _navigateTo(const ViewUsersPage()),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: Text(
+              "Selecciona una opción para continuar:",
+              style: TextStyle(fontSize: textSize, color: Theme.of(context).colorScheme.secondary),
+              textAlign: TextAlign.center, 
             ),
-            const SizedBox(height: 15),
-            _buildMenuButton(
-              icon: Icons.event,
-              text: 'Ver ausencias',
-              onTap: () => _navigateTo(const ProfesorMainMenuPage()),
+          ),
+          const SizedBox(height: 30),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 1, 
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+              children: [
+                _buildOptionCard(
+                  icon: Icons.person_add,
+                  text: "Registrar nuevo Usuario",
+                  iconSize: iconSize,
+                  textSize: textSize,
+                  textColor: Theme.of(context).colorScheme.onSecondary,
+                  onTap: () => _navigateTo(const RegistrationPage()),
+                ),
+                _buildOptionCard(
+                  icon: Icons.people,
+                  text: "Ver Usuarios registrados",
+                  iconSize: iconSize,
+                  textSize: textSize,
+                  textColor: Theme.of(context).colorScheme.onSecondary,
+                  onTap: () => _navigateTo(const ViewUsersPage()),
+                ),
+                _buildOptionCard(
+                  icon: Icons.event,
+                  text: "Ver ausencias",
+                  iconSize: iconSize,
+                  textSize: textSize,
+                  textColor: Theme.of(context).colorScheme.onSecondary,
+                  onTap: () => _navigateTo(const ProfesorMainMenuPage()),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    ),
     );
   }
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
+    double iconSize = (screenWidth * 0.03).clamp(24.0, 40.0); // Tamaño entre 24px y 40px
+    double textSize = (screenWidth * 0.015).clamp(14.0, 20.0); // Tamaño entre 14px y 20px
+    double titleSize = (screenWidth * 0.03).clamp(18.0, 30.0); // Título de 18px a 30px
+
     return Scaffold(
       drawer: Drawer(
         child: ListView(
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blueAccent),
-              child: Text('Menú Administrador', style: TextStyle(color: Colors.white)),
+            DrawerHeader(
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+              child: Text('Menú Administrador', 
+                        style: TextStyle(
+                          fontSize: textSize,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onPrimary)),
             ),
             ListTile(
               leading: const Icon(Icons.assignment),
               title: const Text('Ver perfil'),
+              textColor: Theme.of(context).colorScheme.onPrimary,
               onTap: () => _onNavigationItemSelected(0),
             ),
             ListTile(
               leading: const Icon(Icons.add_circle),
               title: const Text('Ajustes'),
+              textColor: Theme.of(context).colorScheme.onPrimary,
               onTap: () => _onNavigationItemSelected(1),
             ),
             ListTile(
               leading: const Icon(Icons.view_list),
               title: const Text('Cerrar Sesión'),
+              textColor: Theme.of(context).colorScheme.onPrimary,
               onTap: () => _onNavigationItemSelected(2),
             ),
           ],
@@ -162,85 +214,167 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
       ),
       body: Row(
         children: [
-          NavigationRail(
-              minWidth: 120,
-              backgroundColor: Colors.blueAccent,
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: _onNavigationItemSelected,
-              labelType: NavigationRailLabelType.all,
-              useIndicator: false, 
-              destinations: const [
-                NavigationRailDestination(
-                  icon: Icon(Icons.account_circle),
-                  label: Text('Ver perfil'),
+        // Contenedor para el NavigationRail con un encabezado
+        Container(
+          width: screenWidth * 0.20, // El NavigationRail ocupa el 20% de la pantalla
+          color: Theme.of(context).colorScheme.primary, // Fondo azul
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // Encabezado con texto responsivo
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  "Menú Administrador", // Puedes cambiarlo por el nombre del usuario
+                  style: TextStyle(
+                    fontSize: textSize, // 3% del ancho de la pantalla
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.tune_rounded),
-                  label: Text('Ajustes'),
+              ),
+              const Divider(color: Colors.white54, thickness: 1), // Línea separadora
+
+              // NavigationRail
+              Expanded(
+                child: NavigationRail(
+                  minWidth: screenWidth * 0.15, // Ocupa el 20% de la pantalla
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: _onNavigationItemSelected,
+                  labelType: NavigationRailLabelType.all,
+                  selectedLabelTextStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary), 
+                  unselectedLabelTextStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                  useIndicator: false, 
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.account_circle, color: Theme.of(context).colorScheme.onPrimary, size: iconSize),
+                      selectedIcon: Icon(Icons.account_circle, color: Theme.of(context).colorScheme.onPrimary, size: iconSize),
+                      label: Text('Ver perfil', style: TextStyle(fontSize: textSize),),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.tune_rounded, color: Theme.of(context).colorScheme.onPrimary, size: iconSize),
+                      selectedIcon: Icon(Icons.tune_rounded, color: Theme.of(context).colorScheme.onPrimary, size: iconSize),
+                      label: Text('Ajustes', style: TextStyle(fontSize: textSize),),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.logout, color: Theme.of(context).colorScheme.onPrimary, size: iconSize),
+                      selectedIcon: Icon(Icons.logout, color: Theme.of(context).colorScheme.onPrimary, size: iconSize),
+                      label: Text('Cerrar Sesión', style: TextStyle(fontSize: textSize),),
+                    ),
+                  ],
                 ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.logout),
-                  label: Text('Cerrar Sesión'),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center, // Centra los elementos
+                crossAxisAlignment: CrossAxisAlignment.center, 
+                children: [
+                  Center(
+                    child: Text(
+                    "Bienvenido, ${MyApp.loggedInUser?.firstName ?? 'Desconocido'} 👋",
+                    style: TextStyle(
+                      fontSize: titleSize,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    textAlign: TextAlign.center, 
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Center(
+                  child: Text(
+                    "Selecciona una opción para continuar:",
+                    style: TextStyle(fontSize: textSize, color: Theme.of(context).colorScheme.secondary),
+                    textAlign: TextAlign.center, 
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Expanded(
+                  child: GridView.count(
+                    crossAxisCount: screenWidth > 1000 ? 3 : 2, // 3 columnas en pantallas grandes, 2 en pequeñas
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    children: [
+                      _buildOptionCard(
+                        icon: Icons.person_add,
+                        text: "Registrar nuevo Usuario",
+                        iconSize: iconSize,
+                        textSize: textSize,
+                        textColor: Theme.of(context).colorScheme.onSecondary,
+                        onTap: () => _navigateTo(const RegistrationPage()),
+                      ),
+                      _buildOptionCard(
+                        icon: Icons.people,
+                        text: "Ver Usuarios registrados",
+                        iconSize: iconSize,
+                        textSize: textSize,
+                        textColor: Theme.of(context).colorScheme.onSecondary,
+                        onTap: () => _navigateTo(const ViewUsersPage()),
+                      ),
+                      _buildOptionCard(
+                        icon: Icons.event,
+                        text: "Ver ausencias",
+                        iconSize: iconSize,
+                        textSize: textSize,
+                        textColor: Theme.of(context).colorScheme.onSecondary,
+                        onTap: () => _navigateTo(const ProfesorMainMenuPage()),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-          Expanded(
-            child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildMenuButton(
-                  icon: Icons.person_add,
-                  text: 'Registrar nuevo Usuario',
-                  onTap: () => _navigateTo(const RegistrationPage()),
-                ),
-                const SizedBox(height: 15),
-                _buildMenuButton(
-                  icon: Icons.people,
-                  text: 'Ver Usuarios registrados',
-                  onTap: () => _navigateTo(const ViewUsersPage()),
-                ),
-                const SizedBox(height: 15),
-                _buildMenuButton(
-                  icon: Icons.event,
-                  text: 'Ver ausencias',
-                  onTap: () => _navigateTo(const ProfesorMainMenuPage()),
-                ),
-              ],
-            ),
             ),
           ),
-        ]
-      ),
-    );
-  }
-
-  Widget _buildMenuButton({
+          ),
+        ),
+      ],
+    ),
+  );
+}
+  // Card estilizada para las opciones
+  Widget _buildOptionCard({
     required IconData icon,
     required String text,
-    required VoidCallback onTap,
+    required double iconSize,
+    required double textSize,
+    required VoidCallback onTap, 
+    required Color textColor,
   }) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  return GestureDetector(
+    onTap: onTap,
+    child: Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 6,
+      color: Theme.of(context).colorScheme.secondary,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: iconSize, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 10),
+            Text(
+              text,
+              style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
-      onPressed: onTap,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 24),
-          const SizedBox(width: 10),
-          Text(
-            text,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-    );
+    ),
+  );
   }
 
   void _navigateTo(Widget page) {

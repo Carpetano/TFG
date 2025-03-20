@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:codigo/main.dart';
 
 class PerfilPage extends StatelessWidget {
   const PerfilPage({super.key});
@@ -24,16 +25,16 @@ class PerfilPage extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Nombre y Apellidos
-              const Text(
-                "Juan Pérez López García",
+              Text(
+                " ${MyApp.loggedInUser?.firstName ?? 'Desconocido'} ${MyApp.loggedInUser?.lastName ?? 'Desconocido'} ${MyApp.loggedInUser?.secondLastName ?? 'Desconocido'}",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
 
               // Correo
-              const Text(
-                "juan.perez@example.com",
+              Text(
+                "${MyApp.loggedInUser?.email ?? 'Desconocido'}",
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 20),
@@ -53,8 +54,8 @@ class PerfilPage extends StatelessWidget {
                   ],
                 ),
                 child: Column(
-                  children: const [
-                    _ProfileInfoRow(icon: Icons.phone, label: "Teléfono", value: "+123456789"),
+                  children: [
+                    _ProfileInfoRow(icon: Icons.phone, label: "Teléfono", value: "${MyApp.loggedInUser?.phone ?? 'Desconocido'}"),
                     Divider(),
                     _ProfileInfoRow(icon: Icons.school, label: "Curso", value: "3° ESO"),
                     Divider(),

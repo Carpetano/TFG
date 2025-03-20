@@ -1,3 +1,4 @@
+import 'package:codigo/global_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:codigo/Objetos/user_object.dart';
@@ -42,11 +43,12 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
   void _filterUsers() {
     String query = searchController.text.toLowerCase();
     setState(() {
-      filteredUsers = users.where((user) {
-        return user.firstName.toLowerCase().contains(query) ||
-            user.lastName.toLowerCase().contains(query) ||
-            user.role.toLowerCase().contains(query.replaceAll(' ', '_'));
-      }).toList();
+      filteredUsers =
+          users.where((user) {
+            return user.firstName.toLowerCase().contains(query) ||
+                user.lastName.toLowerCase().contains(query) ||
+                user.role.toLowerCase().contains(query.replaceAll(' ', '_'));
+          }).toList();
     });
   }
 
@@ -59,17 +61,28 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Usuarios Registrados"),
+        title: Text(
+          Translations.translate(
+            'registeredUsers',
+            GlobalSettings.language.value.code,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: 'Buscar usuarios...',
+                hintText: Translations.translate(
+                  'lookUpUsers',
+                  GlobalSettings.language.value.code,
+                ),
                 filled: true,
                 fillColor: Colors.white,
                 prefixIcon: const Icon(Icons.search),
@@ -82,73 +95,85 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
           ),
         ),
       ),
-      body: filteredUsers.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: filteredUsers.length,
-              itemBuilder: (context, index) {
-                UserObject user = filteredUsers[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 4,
-                  child: Slidable(
-                    endActionPane: ActionPane(
-                      motion: const DrawerMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (context) {
+      body:
+          filteredUsers.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: filteredUsers.length,
+                itemBuilder: (context, index) {
+                  UserObject user = filteredUsers[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                    child: Slidable(
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => EditUserPage(user: user),
+                                ),
+                              );
+                            },
+                            backgroundColor: Colors.blue,
+                            icon: Icons.edit,
+                            label: Translations.translate(
+                              'edit',
+                              GlobalSettings.language.value.code,
+                            ),
+                          ),
+                          SlidableAction(
+                            onPressed: (context) => deactivateUser(user),
+                            backgroundColor: Colors.red,
+                            icon: Icons.delete,
+                            label: Translations.translate(
+                              'deactivate',
+                              GlobalSettings.language.value.code,
+                            ),
+                          ),
+                        ],
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16),
+                        title: GestureDetector(
+                          onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => EditUserPage(user: user),
+                                builder: (context) => UserStatsPage(user: user),
                               ),
                             );
                           },
-                          backgroundColor: Colors.blue,
-                          icon: Icons.edit,
-                          label: 'Editar',
-                        ),
-                        SlidableAction(
-                          onPressed: (context) => deactivateUser(user),
-                          backgroundColor: Colors.red,
-                          icon: Icons.delete,
-                          label: 'Desactivar',
-                        ),
-                      ],
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16),
-                      title: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UserStatsPage(user: user),
+                          child: Text(
+                            "${user.firstName} ${user.lastName}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.blue,
                             ),
-                          );
-                        },
-                        child: Text(
-                          "${user.firstName} ${user.lastName}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.blue,
                           ),
                         ),
+                        subtitle: Text(user.role.replaceAll("_", " ")),
+                        trailing:
+                            user.status.toLowerCase() == 'activo'
+                                ? const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                )
+                                : const Icon(Icons.cancel, color: Colors.red),
                       ),
-                      subtitle: Text(user.role.replaceAll("_", " ")),
-                      trailing: user.status.toLowerCase() == 'activo'
-                          ? const Icon(Icons.check_circle, color: Colors.green)
-                          : const Icon(Icons.cancel, color: Colors.red),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
     );
   }
 }

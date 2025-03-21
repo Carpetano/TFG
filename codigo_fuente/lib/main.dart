@@ -4,6 +4,7 @@
 import 'package:codigo/Paginas/admin_main_menu_page.dart';
 import 'package:codigo/Paginas/profesor_main_menu_page.dart';
 import 'package:codigo/Paginas/sala_page.dart';
+import 'package:codigo/Paginas/settings_page.dart';
 import 'package:codigo/global_settings.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'dart:io';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SupabaseManager.instance.initialize();
+  await GlobalSettings.loadSettings();
   await GlobalSettings.initialize();
 
   // Load the default language from file
@@ -71,36 +73,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AppLanguage>(
-      valueListenable: GlobalSettings.language,
-      builder: (context, language, _) {
-        return MaterialApp(
-          title: "Test",
-          themeMode: _themeMode, // Use the stored theme mode
-          theme: ThemeData(
-            brightness: Brightness.light,
-            primaryColor: Colors.blue,
-            colorScheme: ColorScheme.light(
-              primary: Colors.blue,
-              onPrimary: Colors.white,
-              secondary: Colors.blueAccent,
-              onSecondary: Colors.black,
-            ),
-          ),
-          darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            primaryColor: Colors.blueGrey,
-            colorScheme: ColorScheme.dark(
-              primary: Colors.blueGrey,
-              onPrimary: Colors.white,
-              secondary: Colors.teal,
-              onSecondary: Colors.white70,
-            ),
-          ),
-          home: MyHomePage(title: "Test", onThemeToggle: _toggleTheme),
-        );
-      },
+    return ValueListenableBuilder<bool>(
+  valueListenable: GlobalSettings.isDarkMode,
+  builder: (context, isDark, child) {
+    return MaterialApp(
+      theme: GlobalSettings.lightTheme,
+      darkTheme: GlobalSettings.darkTheme,
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      home: MyHomePage(title: 'Test', onThemeToggle: () {}),
     );
+  },
+);
   }
 }
 

@@ -30,10 +30,11 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
         MaterialPageRoute(builder: (context) => const SettingsPage()),
       );
     } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const MyApp()),
-      );
+       Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const MyApp()), 
+      (Route<dynamic> route) => false,
+    );
     }
   }
 
@@ -92,10 +93,11 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
                   MaterialPageRoute(builder: (context) => const SettingsPage()),
                 );
               } else if (value == 'salir') {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MyApp()),
-                );
+                Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const MyApp()), 
+        (Route<dynamic> route) => false,
+      );
               }
             },
             itemBuilder:

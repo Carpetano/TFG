@@ -4,8 +4,6 @@ import 'package:codigo/Paginas/change_password_page.dart';
 import 'package:codigo/global_settings.dart';
 import 'dart:io';
 
-import 'package:shared_preferences/shared_preferences.dart';
-
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
 
@@ -64,6 +62,21 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+              iconSize: 24,
+              onPressed: () {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);  // Regresar a la pantalla anterior
+      } else {
+        Navigator.pushAndRemoveUntil(
+  context,
+  MaterialPageRoute(builder: (context) => MyHomePage(title: "Guardias Calderón", onThemeToggle: () {})),
+  (route) => false, // Elimina todas las rutas anteriores
+);
+      }
+    },
+            ),
         title: Text(
           Translations.translate('pageTitle'),
           style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
@@ -115,11 +128,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 // Get language code dynamically
               ),
               trailing: Switch(
-                value: temaOscuro,
+                value: GlobalSettings.isDarkMode.value,
                 onChanged: (value) async {
                   await GlobalSettings.setTheme(value);
                 },
-              ),
+              )
             ),
             _buildSettingTile(
               icon: Icons.language,

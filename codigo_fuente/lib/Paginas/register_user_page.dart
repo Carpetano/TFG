@@ -93,7 +93,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ),
                     ],
                   ),
-
+                  const SizedBox(height: 10),
+                  
                   // Correo
                   _buildTextField(_emailController, "Correo Electrónico"),
                   const SizedBox(height: 10),

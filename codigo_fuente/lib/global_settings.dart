@@ -169,11 +169,16 @@ class GlobalSettings {
     );
   }
 
+  static Future<void> loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    isDarkMode.value = prefs.getBool('isDarkMode') ?? false;
+  }
+
   /// Save theme preference.
   static Future<void> setTheme(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDarkMode', value);
-    isDarkMode.value = value;
+    isDarkMode.value = value; // Notifica a los widgets
   }
 
   /// Save language preference.

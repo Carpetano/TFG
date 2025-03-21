@@ -3,7 +3,9 @@ import 'package:codigo/global_settings.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 
+/// Main menu for those users which role is 'Sala_de_profesores'
 class SalaProfesoresPage extends StatefulWidget {
+  // Page constructor
   const SalaProfesoresPage({super.key});
 
   @override
@@ -12,9 +14,16 @@ class SalaProfesoresPage extends StatefulWidget {
 
 class _SalaProfesoresPageState extends State<SalaProfesoresPage>
     with SingleTickerProviderStateMixin {
+  // Animation controller while supabase fetches data
   late AnimationController _controller;
+
+  // List of guardia objects from today
   List<GuardiaObject> guardiasFromToday = [];
+
+  // Store whether if it's loading to display an animation
   bool isLoading = true;
+
+  // Store if the request gave an error
   bool hasError = false;
 
   @override
@@ -30,10 +39,13 @@ class _SalaProfesoresPageState extends State<SalaProfesoresPage>
     super.dispose();
   }
 
+  /// Fetch all of the guardia objects from today and assign it to the local variable
   Future<void> getGuardiasFromToday() async {
     try {
+      // Request all of the guardias from today
       final response = await SupabaseManager.instance.getTodayGuardias();
-      print('TODAY GUARDIAS ---- $response');
+      // print('TODAY GUARDIAS ---- $response');
+      // Assign variables to the response and set loading as false since we retreived all of the neccesary data
       setState(() {
         guardiasFromToday = response;
         isLoading = false;
@@ -46,22 +58,28 @@ class _SalaProfesoresPageState extends State<SalaProfesoresPage>
     }
   }
 
+  /// Get an icon depending on the given status
+  ///
+  /// - [status] accepted status: 'pendiente' & 'asignada'
   IconData getStatusIcon(String status) {
-    switch (status) {
-      case 'Pendiente':
+    switch (status.toLowerCase()) {
+      case 'pendiente':
         return Icons.error_outline; // Exclamation mark
-      case 'Asignada':
+      case 'asignada':
         return Icons.check_circle; // Checkmark
       default:
-        return Icons.info_outline; // Fallback info icon
+        return Icons.info_outline; // info icon
     }
   }
 
+  /// Get an color depending on the given status
+  ///
+  /// - [status] accepted status: 'pendiente' & 'asignada'
   Color getStatusColor(String status) {
-    switch (status) {
-      case 'Pendiente':
+    switch (status.toLowerCase()) {
+      case 'pendiente':
         return Colors.orange;
-      case 'Asignada':
+      case 'asignada':
         return Colors.green;
       default:
         return Colors.blue;
@@ -91,7 +109,9 @@ class _SalaProfesoresPageState extends State<SalaProfesoresPage>
         padding: const EdgeInsets.all(16.0),
         child:
             isLoading
-                ? const Center(child: CircularProgressIndicator()) // Loading
+                ? const Center(
+                  child: CircularProgressIndicator(),
+                ) // Loading animation
                 : hasError
                 ? const Center(
                   child: Text("Error loading data. Please try again."),

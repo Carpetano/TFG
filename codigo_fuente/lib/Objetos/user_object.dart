@@ -1,3 +1,4 @@
+/// User object representing a logged in user in the database, Teacher, Admin or Sala de profesores
 class UserObject {
   final int id;
   final String authId;
@@ -9,7 +10,7 @@ class UserObject {
   final String email;
   final DateTime registrationDate;
   final String status;
-  final String? profileImageUrl; // 🔹 Ahora sí está bien integrada
+  final String? profileImageUrl;
 
   UserObject({
     required this.id,
@@ -25,7 +26,6 @@ class UserObject {
     this.profileImageUrl,
   });
 
-  // 🔹 Método para copiar y actualizar propiedades específicas del usuario
   UserObject copyWith({
     int? id,
     String? authId,
@@ -37,7 +37,7 @@ class UserObject {
     String? email,
     DateTime? registrationDate,
     String? status,
-    String? profileImageUrl, // 🔹 Se añadió aquí
+    String? profileImageUrl,
   }) {
     return UserObject(
       id: id ?? this.id,
@@ -50,11 +50,10 @@ class UserObject {
       phone: phone ?? this.phone,
       registrationDate: registrationDate ?? this.registrationDate,
       status: status ?? this.status,
-      profileImageUrl: profileImageUrl ?? this.profileImageUrl, // 🔹 Ahora sí se actualiza
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
     );
   }
 
-  // 🔹 Convertir un Map (desde Supabase) en un UserObject
   factory UserObject.fromMap(Map<String, dynamic> data) {
     return UserObject(
       id: data['id'] as int,
@@ -67,11 +66,10 @@ class UserObject {
       phone: data['phone'] as String,
       registrationDate: DateTime.parse(data['registration_date'] as String),
       status: data['status'] as String,
-      profileImageUrl: data['profile_image_url'] as String?, // 🔹 Se añadió aquí
+      profileImageUrl: data['profile_image_url'] as String?,
     );
   }
 
-  // 🔹 Convertir una lista de datos de Supabase en una lista de UserObject
   static List<UserObject> mapFromResponse(List<dynamic>? response) {
     if (response == null || response.isEmpty) {
       return [];

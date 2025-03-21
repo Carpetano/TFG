@@ -7,7 +7,9 @@ import 'package:codigo/supabase_manager.dart';
 import 'package:codigo/Paginas/edit_user_page.dart';
 import 'package:codigo/Paginas/user_stats_page.dart';
 
+/// Page to visualize all of the registered users, active or non active
 class ViewUsersPage extends StatefulWidget {
+  // Page constructor
   const ViewUsersPage({super.key});
 
   @override
@@ -53,9 +55,10 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
     });
   }
 
+  /// Deactivate the parsed in user
   void deactivateUser(UserObject user) async {
     await SupabaseManager.instance.setUserAsInactive(user.id);
-    fetchUsers();
+    fetchUsers(); // Update lists
   }
 
   @override

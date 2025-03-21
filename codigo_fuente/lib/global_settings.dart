@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Enum for supported languages.
+/// Enum for supported languages
 enum AppLanguage { english, espanol }
 
-/// Extension to get language code and display name.
+/// Extension to get language code and display name
 extension AppLanguageExtension on AppLanguage {
   String get code {
     switch (this) {
@@ -25,7 +25,7 @@ extension AppLanguageExtension on AppLanguage {
   }
 }
 
-/// Class for managing translations.
+/// Class for managing translations
 class Translations {
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
@@ -140,13 +140,14 @@ class Translations {
     },
   };
 
+  /// Translate a text given it's reference in the local dictionaries, automatically gets the display language and returns the translaed text
   static String translate(String key) {
     String langCode = GlobalSettings.language.value.code;
     return _localizedValues[langCode]?[key] ?? key;
   }
 }
 
-/// Global app settings.
+/// Global app settings
 class GlobalSettings {
   static final GlobalSettings instance = GlobalSettings._internal();
 

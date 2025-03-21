@@ -13,7 +13,9 @@ import 'package:codigo/Paginas/perfil_page.dart';
 import 'package:codigo/Paginas/settings_page.dart';
 import 'package:codigo/Paginas/register_user_page.dart';
 
+/// Main menu page for those users which role is 'Profesor'
 class ProfesorMainMenuPage extends StatefulWidget {
+  // Page constructor
   const ProfesorMainMenuPage({super.key});
 
   @override
@@ -22,25 +24,46 @@ class ProfesorMainMenuPage extends StatefulWidget {
 
 class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
     with RouteAware {
+  // Calendar widget for the user to interact
   final CalendarFormat _calendarFormat = CalendarFormat.month;
+
+  // Keep track on which day is selected
   DateTime? _selectedDay;
+
+  // Keep track on what day we live
   DateTime _focusedDay = DateTime.now();
+
+  // List of unasigned guardia objects to show notifications
   List<GuardiaObject> unasignedGuardias = [];
+
+  // Keep track on which calendar day index is selected
   int _selectedIndex = 0;
 
+  /// Navigate to a page given it's index:
+  ///
+  /// - [index] page index to navigate:
+  ///     0 -> Profile page
+  ///     1 -> Settings page
+  ///     2 -> Main menu page
   void _onNavigationItemSelected(int index) {
+    // Change this inner class selected index
     setState(() => _selectedIndex = index);
+
+    // Depending on the index navigate to one page or another
     if (index == 0) {
+      // Goto profile page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const PerfilPage()),
       );
     } else if (index == 1) {
+      // Goto settings page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const SettingsPage()),
       );
     } else if (index == 2) {
+      // Goto main menu page
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const MyApp()),
@@ -56,23 +79,29 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
 
   @override
   void didPopNext() {
-    // Called when the page is pushed back into view
-    print("test");
+    /*
+      SUPPOSEDLY this should when navigating back from other pages, but I can't get this page to refresh
+    */
     fetchUnasignedGuardias();
   }
 
   @override
   void dispose() {
     super.dispose();
-    // Ensure you unsubscribe when the widget is disposed
   }
 
+  /// Fetch and assign to the local list the retreived list of unassigned guardias in supabase
   Future<void> fetchUnasignedGuardias() async {
+    // Fetch from supabase those unasigned supervisions
     final response = await SupabaseManager.instance.getUnasignedGuardias();
-    print(response);
+    // print(response);
+
+    // Assign the value to the local list
     setState(() {
       unasignedGuardias = response;
     });
+
+    // Show a message depending on the amount of unasigned supervisions
     if (unasignedGuardias.isNotEmpty) {
       showSnackBar(
         "${Translations.translate('unasignedGuardiasSnackBar')} ${unasignedGuardias.length}",
@@ -121,18 +150,26 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen width and height
     double screenWidth = MediaQuery.sizeOf(context).width;
     double screenHeight = MediaQuery.sizeOf(context).height;
+
+    // Determine the threshold on where a screen is considered phone or desktop
     final maxPhoneWidth = 600;
 
+    // Return the scaffold containing the layout
     return Scaffold(
       body:
+          // Depengin on the screen width return either desktop or mobile layout
           screenWidth > maxPhoneWidth
               ? buildDesktopLayout(screenWidth, screenHeight)
               : buildMobileLayout(screenWidth),
     );
   }
 
+  /// Return a scaffold containing the mobile layout
+  ///
+  /// - [screenWidth] screen width to calculate responseive design
   Widget buildMobileLayout(double screenWidth) {
     return Scaffold(
       appBar: AppBar(
@@ -148,13 +185,21 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PerfilPage()),
-                );
+                ).then((_) {
+                  setState(() {
+                    fetchUnasignedGuardias();
+                  });
+                });
               } else if (value == 'ajustes') {
                 // NO TRANSLATE
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SettingsPage()),
-                );
+                ).then((_) {
+                  setState(() {
+                    fetchUnasignedGuardias();
+                  });
+                });
               } else if (value == 'salir') {
                 // NO TRANSLATE
                 Navigator.pushReplacement(
@@ -201,8 +246,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
             calendarFormat: _calendarFormat,
             selectedDayPredicate:
                 (day) => _selectedDay != null && isSameDay(_selectedDay, day),
-            eventLoader:
-                _getEventsForDay, // Use _getEventsForDay to load events
+            eventLoader: _getEventsForDay,
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 if (_selectedDay != null &&
@@ -210,6 +254,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                   _selectedDay = null;
                 } else {
                   _selectedDay = selectedDay;
+                  // Get events for the selected day
                   List<GuardiaObject> events = _getEventsForDay(selectedDay);
                   if (events.isNotEmpty) {
                     print(
@@ -286,7 +331,11 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                       MaterialPageRoute(
                         builder: (context) => VerMisGuardiasPage(),
                       ),
-                    );
+                    ).then((_) {
+                      setState(() {
+                        fetchUnasignedGuardias();
+                      });
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
@@ -315,7 +364,11 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                                     (context) =>
                                         AddAusenciaPage(day: _selectedDay!),
                               ),
-                            );
+                            ).then((_) {
+                              setState(() {
+                                fetchUnasignedGuardias();
+                              });
+                            });
                           }
                           : null,
                   style: ElevatedButton.styleFrom(
@@ -340,7 +393,11 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                                     (context) =>
                                         ViewGuardiasPage(day: _selectedDay!),
                               ),
-                            );
+                            ).then((_) {
+                              setState(() {
+                                fetchUnasignedGuardias();
+                              });
+                            });
                           }
                           : null,
                   style: ElevatedButton.styleFrom(
@@ -363,7 +420,9 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
     );
   }
 
+  /// Return a scaffold containing the layout for desktop or wide screens
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
+    // Calculate the icon / Text size
     double iconSize = (screenWidth * 0.03).clamp(24.0, 40.0);
     double textSize = (screenWidth * 0.015).clamp(14.0, 20.0);
 
@@ -579,7 +638,11 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                                               day: _selectedDay!,
                                             ),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      setState(() {
+                                        fetchUnasignedGuardias();
+                                      });
+                                    });
                                   }
                                   : null,
                           child: Text(Translations.translate('addAusencia')),
@@ -596,7 +659,11 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                                               day: _selectedDay!,
                                             ),
                                       ),
-                                    );
+                                    ).then((_) {
+                                      setState(() {
+                                        fetchUnasignedGuardias();
+                                      });
+                                    });
                                   }
                                   : null,
                           child: Text(Translations.translate('viewGuardias')),

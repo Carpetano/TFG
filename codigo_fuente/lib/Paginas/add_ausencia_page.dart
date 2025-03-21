@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'package:codigo/Objetos/guardia_object.dart'; // Correct the file name here
+import 'package:codigo/Objetos/guardia_object.dart';
 import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
@@ -9,8 +9,12 @@ import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 
+/// Page in our app to add a new entry in the ausencias table
 class AddAusenciaPage extends StatefulWidget {
+  // Page argument specifying in which day to insert the ausencia
   DateTime day;
+
+  // Constructor page
   AddAusenciaPage({super.key, required this.day});
 
   @override
@@ -20,15 +24,23 @@ class AddAusenciaPage extends StatefulWidget {
 class _AddAusenciaPageState extends State<AddAusenciaPage> {
   final TextEditingController comentarioController = TextEditingController();
 
+  // List of teachers to select from
   List<UserObject> teachersToAssign = [];
-  List<AulaObject> classesToSelect = [];
-  String? selectedTeacherId;
-  String? selectedClassCode; // Variable to store selected Aula (class)
 
+  // List of classes to select from
+  List<AulaObject> classesToSelect = [];
+
+  // Variable to keep track of which teacher and what class to select
+  String? selectedTeacherId;
+  String? selectedClassCode;
+
+  // Store whether if it's the entire day or specific trams
   bool isAllDay = true;
 
-  // New variables for Diurno, Verspertino, Nocturno and checkboxes
+  // Store whether if its morning, afternoon and night
   String? selectedTurno;
+
+  // Map to store which checkboxes have been selected
   Map<int, bool> checkboxes = {
     1: false,
     2: false,
@@ -38,6 +50,8 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
     6: false,
     7: false,
   };
+
+  // Store whether if all checkboxes were selected
   bool selectAllCheckboxes = false;
 
   @override
@@ -47,17 +61,24 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
     populateClasesToSelect();
   }
 
+  /// Fetch and populate the list of active users
   Future<void> populateActiveUsersList() async {
+    // Get a list of the active users
     List<UserObject> fetchedTeachers =
         await SupabaseManager.instance.getActiveUsers();
+
+    // Assign response to our list
     setState(() {
       teachersToAssign = fetchedTeachers;
     });
   }
 
+  /// Fetch and populate the list of classes to select
   Future<void> populateClasesToSelect() async {
+    // Get a list of the available classes
     List<AulaObject> fetchedClases =
         await SupabaseManager.instance.getAllAulas();
+    // Assign response to our list
     setState(() {
       classesToSelect = fetchedClases;
     });
@@ -81,28 +102,30 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  /// Insert an ausencia in our database
   Future<void> insertAusencia() async {
+    // Check fields have been selected
     if (selectedClassCode == null || selectedTurno == null) {
       // Ensure a turno is selected
       ScaffoldMessenger.of(context).showSnackBar(
+        // Create a snackbar displaying the user to select all widgets
         SnackBar(
           content: Text(
             Translations.translate('plsSelectTeacherClassAndShift'),
           ),
         ),
       );
-      showSnackBar("Insertado correctamente", Colors.white, Colors.black);
       return;
     }
 
-    // Collect selected checkboxes (1-7)
+    // Collect selected checkboxes as a list
     List<int> selectedCheckboxes =
         checkboxes.entries
             .where((entry) => entry.value)
             .map((entry) => entry.key)
             .toList();
 
-    // Apply the turno offset to the selected checkboxes
+    // Apply the turno offset to the selected checkboxes (offset = 7)
     int turnoOffset = 0;
     if (selectedTurno == 'Verspertino') {
       turnoOffset = 7; // Shift values by 7 for Verspertino
@@ -116,13 +139,16 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
             .map((checkboxId) => checkboxId + turnoOffset)
             .toList();
 
+    // Insert an ausencia with the logged in user id and the code from the selected class in the page argument
     AusenciaObject? ausencia = await SupabaseManager.instance.insertAusencia(
       MyApp.loggedInUser!.id,
       selectedClassCode!,
-      widget.day, // Pass the page's day
+      widget.day,
     );
 
     print("AUSENCIA INSERTED: $ausencia");
+
+    // Check if the returned object is not null
     if (ausencia != null) {
       print("Successfully inserted Ausencia with ID: ${ausencia.id}");
 
@@ -133,6 +159,7 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
         return;
       }
 
+      // Create a list of guardias to insert, there will be as many as checkboxes selected
       List<GuardiaObject> guardiasToInsert =
           shiftedCheckboxes.map((checkboxId) {
             return GuardiaObject(
@@ -147,7 +174,9 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
             );
           }).toList();
 
+      // Insert all of the guardias calcualted before
       await SupabaseManager.instance.insertGuardias(guardiasToInsert);
+      showSnackBar("Insertado correctamente", Colors.white, Colors.black);
     } else {
       print('Failed to insert ausencia.');
     }
@@ -214,7 +243,7 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
                                 (aula) => DropdownMenuItem(
                                   value: aula.classcode,
                                   child: Text(
-                                    "Grupo: ${aula.group}  Planta: ${aula.floor.isEmpty ? 'N/A' : aula.floor}  Ala: ${aula.wing.isEmpty ? 'N/A' : aula.wing}  Código: ${aula.classcode}",
+                                    "Grupo: ${aula.group}  Planta: ${aula.floor.isEmpty ? 'N/A' : aula.floor}  Ala: ${aula.wing.isEmpty ? 'N/A' : aula.wing}  Código: ${aula.classcode}", // Show datails for the class
                                   ),
                                 ),
                               )

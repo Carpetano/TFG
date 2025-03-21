@@ -5,13 +5,11 @@ import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 
-/// Class in charge of performing actions against the supabase database,utilize the initialize method once
+/// Class in charge of performing actions against the supabase database,utilize the initialize method once (the core of everything)
 /// then access it statically using .instance to share the same instance across the entire app
 class SupabaseManager {
   // Static Supabase object
@@ -28,7 +26,14 @@ class SupabaseManager {
   /// Initialize Supabase client
   Future<void> initialize() async {
     if (_client == null) {
-      // Initialize Supabase
+      /*
+
+====================================================================================== SE QUE ESTO ES MUUUUUUUUUUUY MALA PRACTICA =================================================================================================================================================================================================================================================================================================================
+        
+        QUE LAS CREDENCIALES NO SE GUARDAN EN TEXTO PLANO, SINO EN UNA VARIABLE DE ENTORNO
+
+      */
+      // Initialize Supabase with it's matching url and anonkey
       await Supabase.initialize(
         url: 'https://gykqibexlzwxpliezelo.supabase.co',
         anonKey:
@@ -68,21 +73,25 @@ class SupabaseManager {
     }
   }
 
-  /// Subir imagen de perfil a Supabase Storage
+  /// Upload a profile picture to supabase
+  ///
+  /// - [imageFile] Image to upload
+  /// - [userId] user id to tie the image to
   Future<String?> uploadProfilePicture(XFile imageFile, String userId) async {
     try {
+      // Define the path for the user image
       final storagePath = 'avatars/$userId.png';
 
-      // 🔹 Convertir imagen a formato compatible según la plataforma
+      // Convert the image to a compatible format
       Uint8List fileBytes;
+      // Web uses bytes while android and ios use File
       if (kIsWeb) {
-        fileBytes = await imageFile.readAsBytes(); // Web usa bytes
+        fileBytes = await imageFile.readAsBytes();
       } else {
-        fileBytes =
-            await File(imageFile.path).readAsBytes(); // Android/iOS usa File
+        fileBytes = await File(imageFile.path).readAsBytes();
       }
 
-      // Subir imagen a Supabase Storage
+      // Upload image to supabase
       await Supabase.instance.client.storage
           .from('avatars')
           .uploadBinary(
@@ -91,17 +100,18 @@ class SupabaseManager {
             fileOptions: const FileOptions(upsert: true),
           );
 
-      // Obtener la URL pública de la imagen
+      // Retreive the public url of the image
       final publicUrl = Supabase.instance.client.storage
           .from('avatars')
           .getPublicUrl(storagePath);
 
-      // 📌 Actualizar la URL en la tabla 'usuarios'
+      // Upade the url in the table's column
       await Supabase.instance.client
           .from('usuarios')
           .update({'profile_image_url': publicUrl})
           .eq('id_auth', userId);
 
+      // Return the public url
       return publicUrl;
     } catch (e) {
       print("Error al subir la imagen: $e");
@@ -303,36 +313,32 @@ class SupabaseManager {
     }
   }
 
-  // Gud
-  // Gud
-  /// TODO COMMENT
+  /// Insert an ausencia
+  ///
+  /// - [missingTeacherId] id of the missing teacher
+  /// - [classCode] Code of the class where the ausencia is taking place
+  /// - [day] which day
   Future<AusenciaObject?> insertAusencia(
     int missingTeacherId,
     String classCode,
     DateTime day,
   ) async {
     try {
+      // Perform le insert
       final response =
           await Supabase.instance.client
               .from('ausencias')
-              .insert({
-                'profesor_ausente': missingTeacherId,
-                'aula': classCode,
-                // Removed 'dia' field here as it's not needed
-              })
-              .select(
-                'id_ausencia, profesor_ausente, aula',
-              ) // No need to select 'dia'
+              .insert({'profesor_ausente': missingTeacherId, 'aula': classCode})
+              .select('id_ausencia, profesor_ausente, aula')
               .single();
 
       print("---- Inserted Ausencia Response: $response");
 
       // Map the response to AusenciaObject
       return AusenciaObject(
-        id: response['id_ausencia'], // Use the id_ausencia field from the response
-        missingTeacherId:
-            response['profesor_ausente'], // Map to missingTeacherId
-        classCode: response['aula'], // Map to classCode
+        id: response['id_ausencia'],
+        missingTeacherId: response['profesor_ausente'],
+        classCode: response['aula'],
       );
     } catch (e) {
       print("Error inserting ausencia: $e");
@@ -340,9 +346,12 @@ class SupabaseManager {
     }
   }
 
-  // Gud
+  /// Insert a list of guardias
+  ///
+  /// - [guardiasToInsert] list of guardias to insert
   Future<void> insertGuardias(List<GuardiaObject> guardiasToInsert) async {
     try {
+      // List of responses, like a Stringbuilder
       List fullResponse = [];
 
       for (var guardia in guardiasToInsert) {
@@ -368,15 +377,18 @@ class SupabaseManager {
     }
   }
 
+  /// Get a list of guardias which state is set to 'pendiente'
+  ///
+  /// Returns: a list of guardia objects
   Future<List<GuardiaObject>> getUnasignedGuardias() async {
     try {
       // Query Supabase for 'Guardia' objects
       final response = await Supabase.instance.client
           .from('guardias') // Your Supabase table name
           .select()
-          .like('estado', 'Pendiente');
+          .ilike('estado', 'Pendiente');
 
-      // Manually map the response data into a list of GuardiaObject
+      // Map the response data into a list of GuardiaObject
       List<GuardiaObject> guardias = [];
       for (var data in response) {
         // Manually handle each field
@@ -395,9 +407,7 @@ class SupabaseManager {
                 : null;
         String observations = data['observaciones'] as String;
         String status = data['estado'] as String;
-        DateTime day = DateTime.parse(
-          data['dia'] as String,
-        ); // Assuming 'dia' is a valid date string
+        DateTime day = DateTime.parse(data['dia'] as String);
 
         // Create the GuardiaObject manually
         GuardiaObject guardia = GuardiaObject(
@@ -417,7 +427,7 @@ class SupabaseManager {
 
       return guardias;
     } catch (e) {
-      // Handle any unexpected errors
+      // Handle any unexpected errors and return an empty list
       print('Unexpected error: $e');
       return [];
     }
@@ -435,7 +445,7 @@ class SupabaseManager {
       final response = await Supabase.instance.client
           .from('usuarios')
           .select()
-          .ilike('estado', 'activo'); // Case-insensitive match
+          .ilike('estado', 'activo');
 
       // Debugging: Print raw response for inspection
       print("[DEBUG]: Raw Supabase Response: $response");
@@ -543,18 +553,24 @@ class SupabaseManager {
     }
   }
 
+  /// Get all of the guardias done given a day
+  ///
+  /// - [day] Day to filter by
   Future<List<GuardiaObject>> getAllGuardiasByDay(DateTime day) async {
+    // Perform request with matching day
     final response = await Supabase.instance.client
         .from('guardias')
         .select()
-        .eq('dia', day.toIso8601String().split('T')[0]); // Filter by date
+        .eq('dia', day.toIso8601String().split('T')[0]); // Normalize date
 
     print("RESPONSE: $response");
 
+    // Return an empty list in case of no results
     if (response.isEmpty) {
       return [];
     }
 
+    // Map the responsae
     return response
         .map(
           (data) => GuardiaObject(
@@ -565,24 +581,28 @@ class SupabaseManager {
             substituteTeacherId: data['id_profesor_sustituto'] ?? 0,
             observations: data['observaciones'] ?? '',
             status: data['estado'],
-            day: DateTime.parse(data['dia']), // Ensure it's a DateTime object
+            day: DateTime.parse(data['dia']),
           ),
         )
         .toList();
   }
 
+  /// Get a list of guardia objects which state is 'pendiente
   Future<List<GuardiaObject>> getAllUnasignedGuardias() async {
+    // Select all pending guardias
     final response = await Supabase.instance.client
         .from('guardias')
         .select()
-        .like('estado', 'pendiente');
+        .ilike('estado', 'pendiente');
 
     print("RESPONSE: $response");
 
+    // return an empty list in case of no results
     if (response.isEmpty) {
       return [];
     }
 
+    // Map the response to an object
     return response
         .map(
           (data) => GuardiaObject(
@@ -599,6 +619,10 @@ class SupabaseManager {
         .toList();
   }
 
+  /// Assign a guardia to an user
+  ///
+  /// - [idGuardia] id of the guardia to update
+  /// - [idSubstituteTeacher] id of the teacher to assign it to
   Future<void> assignGuardiaToUser(
     int idGuardia,
     int idSubstituteTeacher,
@@ -621,6 +645,9 @@ class SupabaseManager {
     }
   }
 
+  /// Get a guardia by its id
+  ///
+  /// - [id] id of the guardia to retreive
   Future<GuardiaObject?> getGuardiaById(int id) async {
     try {
       final response =
@@ -645,6 +672,9 @@ class SupabaseManager {
     }
   }
 
+  /// Get all of the guardias done by an user
+  ///
+  /// - [userId] id of the user to get all of the guardias from
   Future<List<GuardiaObject>> getAllGuardiasByUserId(int userId) async {
     try {
       // Query the 'guardias' table, filtering by 'userId'
@@ -673,6 +703,9 @@ class SupabaseManager {
     }
   }
 
+  /// Get all of the guardias done by an user
+  ///
+  /// - [userId] id of the user to get all of the guardias from
   Future<List<GuardiaObject>> getAllGuardiasDoneByUser(int userId) async {
     try {
       // Fetch all guardias assigned to the user
@@ -695,6 +728,9 @@ class SupabaseManager {
     }
   }
 
+  /// Update an user in the database given an object
+  ///
+  /// - [user] user object to reterive the data from
   Future<bool> updateUser(UserObject user) async {
     try {
       final response =
@@ -726,6 +762,9 @@ class SupabaseManager {
     }
   }
 
+  /// Change the password given an user id
+  ///
+  /// - [newPassword] new password to assign
   Future<bool> changeUserPassword(String newPassword) async {
     try {
       await Supabase.instance.client.auth.updateUser(
@@ -740,12 +779,14 @@ class SupabaseManager {
     }
   }
 
+  /// Change the password given an user id
+  ///
+  /// - [userId] id of the user to change the password
+  /// - [newPassword] new password to assign
   Future<bool> changeUserPasswordByAdmin(int userId, String newPassword) async {
     try {
       final response = await Supabase.instance.client
-          .from(
-            'auth.users',
-          ) // ⚠ IMPORTANTE: Requiere permisos de administrador en Supabase
+          .from('auth.users')
           .update({'password': newPassword})
           .eq('id', userId);
 
@@ -764,17 +805,17 @@ class SupabaseManager {
     }
   }
 
+  /// Get a list of unasigned guardias from a specific user only
+  ///
+  /// - [id] if of the user
   Future<List<GuardiaObject>> getAllUnasignedUserGuardias(int id) async {
     try {
       // Fetch data from Supabase filtering for 'Pendiente' state and matching the provided 'id_profesor_ausente'
       final response = await Supabase.instance.client
           .from('guardias')
           .select()
-          .like('estado', 'Pendiente') // Only 'Pendiente' guardias
-          .eq(
-            'id_profesor_ausente',
-            id,
-          ); // Filter by the missing teacher ID (id_profesor_ausente)
+          .ilike('estado', 'Pendiente')
+          .eq('id_profesor_ausente', id);
 
       // Manually map the response data to a list of GuardiaObject
       List<GuardiaObject> guardias = [];
@@ -810,35 +851,39 @@ class SupabaseManager {
         print("No data found or error occurred.");
       }
 
-      return guardias; // Return the list of GuardiaObject
+      return guardias;
     } catch (e) {
       print("Error getting unassigned user guardias: $e");
-      return []; // Return an empty list in case of error
+      return [];
     }
   }
 
+  /// Delete a guardia given it's id
+  ///
+  /// - [guardiaId] id of the guardia to delete
   Future<bool> deleteGuardiaById(int guardiaId) async {
     try {
       // Deleting the guardia by its ID
       final response = await Supabase.instance.client
           .from('guardias')
           .delete()
-          .eq('id_guardia', guardiaId); // Delete where the guardia ID matches
+          .eq('id_guardia', guardiaId);
 
-      // Check if the deletion was successful (Supabase returns the deleted records in response)
+      // Check if the deletion was successful
       if (response.isEmpty) {
         print("Guardia with ID $guardiaId was not found or already deleted.");
-        return false; // No rows deleted
+        return false;
       }
 
       print("Guardia with ID $guardiaId was deleted successfully.");
-      return true; // Deletion successful
+      return true;
     } catch (e) {
       print("Error deleting guardia with ID $guardiaId: $e");
-      return false; // Return false in case of error
+      return false;
     }
   }
 
+  /// Get all of the guardias from today
   Future<List<GuardiaObject>> getTodayGuardias() async {
     try {
       DateTime now = DateTime.now();

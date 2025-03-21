@@ -24,7 +24,9 @@ void main() async {
   runApp(const MyApp());
 }
 
+// Get the stored language inside default_lant.txt
 Future<AppLanguage> getDefaultLanguage() async {
+  // Define the file name
   final file = File('default_lang.txt');
   try {
     if (!await file.exists()) {
@@ -33,9 +35,11 @@ Future<AppLanguage> getDefaultLanguage() async {
       print("[INFO] default_lang.txt not found. Created and set to 'es'.");
     }
 
+    // Read the file
     String langCode = await file.readAsString();
     print('LANG FROM FILE: $langCode');
 
+    // Depending on the language code set the global display lang accordingly
     switch (langCode.toLowerCase()) {
       case 'en':
         return AppLanguage.english;
@@ -44,13 +48,15 @@ Future<AppLanguage> getDefaultLanguage() async {
     print("[ERROR] Failed to read/write default language: $e");
   }
 
-  // Fallback language
+  // Default language
   return AppLanguage.espanol;
 }
 
 class MyApp extends StatefulWidget {
+  // Page constructor
   const MyApp({super.key});
 
+  // Statically stored the logged in user
   static UserObject? loggedInUser;
 
   @override
@@ -129,6 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    // Video stored in supabase
     _videoController = VideoPlayerController.networkUrl(
       Uri.parse(
         "https://gykqibexlzwxpliezelo.supabase.co/storage/v1/object/public/tfgbucket/videos/main.mp4",
@@ -189,6 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (supabaseUser != null) {
       MyApp.loggedInUser = supabaseUser;
 
+      // Depending on the role of the user navigate to a specified page
       switch (supabaseUser.role.toLowerCase()) {
         case "administrador":
           Navigator.push(
@@ -228,18 +236,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen width and height
     double screenWidth = MediaQuery.sizeOf(context).width;
     double screenHeight = MediaQuery.sizeOf(context).height;
+    // Determine the threshold on where a screen stops being a phone or a desktop
     final maxPhoneWidth = 600;
 
     return Scaffold(
       body:
+          // Depending on the size build one layout or another
           screenWidth > maxPhoneWidth
               ? buildDesktopLayout(screenWidth, screenHeight)
               : buildMobileLayout(screenWidth),
     );
   }
 
+  /// Build the desktop layout
+  ///
+  /// - [screenWidth] Width of the screen to make responsive design
+  /// - [screenHeight] Height of the screen to make responsive design
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
     return Stack(
       children: [
@@ -278,7 +293,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Center(
                   // Add a Center widget to center the Text
                   child: Text(
-                    "Guardias Calderón",
+                    "Guardias Calderón", // DO NOT TRANSLATE
                     style: TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -352,6 +367,9 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  /// Build the mobile layout
+  ///
+  /// - [screenWidth] Width of the screen to make responsive design
   Widget buildMobileLayout(double screenWidth) {
     return Center(
       child: Column(
@@ -380,10 +398,7 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: _emailController,
               decoration: InputDecoration(
                 hintStyle: TextStyle(
-                  color:
-                      Theme.of(
-                        context,
-                      ).colorScheme.onSecondary, // Cambia el color del texto
+                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
                 hintText: Translations.translate('email'),
                 border: OutlineInputBorder(

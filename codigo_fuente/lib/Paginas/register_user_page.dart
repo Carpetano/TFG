@@ -1,7 +1,9 @@
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 
+/// Page for user registration
 class RegistrationPage extends StatefulWidget {
+  // Page constructor
   const RegistrationPage({Key? key}) : super(key: key);
 
   @override
@@ -9,35 +11,40 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
-  // Controladores de los campos de entrada
+  // Controllers to keep track of the filled-in information
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _secondLastNameController = TextEditingController();
+  final TextEditingController _secondLastNameController =
+      TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
+  // Keep track of which role is selected, by default make it "Profesor"
   String? selectedRole = 'Profesor';
 
+  /// Register a new user into the databse given the information presented in the controllers
   void registerIntoDB() {
-  String firstName = _firstNameController.text;
-  String lastName = _lastNameController.text;
-  String secondLastName = _secondLastNameController.text;
-  String email = _emailController.text;
-  String password = _passwordController.text;
-  String phone = _phoneController.text;
-  String selectedRoleText = selectedRole!.replaceAll(' ', '_');
+    String firstName = _firstNameController.text;
+    String lastName = _lastNameController.text;
+    String secondLastName = _secondLastNameController.text;
+    String email = _emailController.text;
+    String password = _passwordController.text;
+    String phone = _phoneController.text;
+    // Replace spaces with _ to match role 'Sala_de_profesores' insetead of 'Sala de profesores'
+    String selectedRoleText = selectedRole!.replaceAll(' ', '_');
 
-  SupabaseManager.instance.register(
-    email,
-    password,
-    firstName,
-    lastName,
-    secondLastName,
-    phone,
-    selectedRoleText,
-  );
-}
+    // Register and send an email to the given mail
+    SupabaseManager.instance.register(
+      email,
+      password,
+      firstName,
+      lastName,
+      secondLastName,
+      phone,
+      selectedRoleText,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +80,21 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildTextField(_firstNameController, "Nombre", width: isWideScreen ? screenWidth * 0.28 : null),
-                      _buildTextField(_lastNameController, "Primer Apellido", width: isWideScreen ? screenWidth * 0.28 : null),
-                      _buildTextField(_secondLastNameController, "Segundo Apellido", width: isWideScreen ? screenWidth * 0.28 : null),
+                      _buildTextField(
+                        _firstNameController,
+                        "Nombre",
+                        width: isWideScreen ? screenWidth * 0.28 : null,
+                      ),
+                      _buildTextField(
+                        _lastNameController,
+                        "Primer Apellido",
+                        width: isWideScreen ? screenWidth * 0.28 : null,
+                      ),
+                      _buildTextField(
+                        _secondLastNameController,
+                        "Segundo Apellido",
+                        width: isWideScreen ? screenWidth * 0.28 : null,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -85,7 +104,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   const SizedBox(height: 10),
 
                   // Contraseña
-                  _buildTextField(_passwordController, "Contraseña", isPassword: true),
+                  _buildTextField(
+                    _passwordController,
+                    "Contraseña",
+                    isPassword: true,
+                  ),
                   const SizedBox(height: 10),
 
                   // Teléfono
@@ -103,10 +126,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       value: selectedRole,
                       isExpanded: true,
                       underline: const SizedBox(),
-                      onChanged: (newValue) => setState(() => selectedRole = newValue),
-                      items: ["Administrador", "Profesor", "Sala de profesores"]
-                          .map((role) => DropdownMenuItem(value: role, child: Text(role)))
-                          .toList(),
+                      onChanged:
+                          (newValue) => setState(() => selectedRole = newValue),
+                      items:
+                          ["Administrador", "Profesor", "Sala de profesores"]
+                              .map(
+                                (role) => DropdownMenuItem(
+                                  value: role,
+                                  child: Text(role),
+                                ),
+                              )
+                              .toList(),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -118,9 +148,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       onPressed: registerIntoDB,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text("Registrar", style: TextStyle(fontSize: 18)),
+                      child: const Text(
+                        "Registrar",
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
                   ),
                 ],
@@ -132,7 +167,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, {bool isPassword = false, double? width}) {
+  /// Build a text field with the parsed in information
+  ///
+  /// - [controller] Controller in charge of storing the changed information
+  /// - [hint] Hint text
+  /// - [isPassword] whether if the text field is a password or not to obscure the text
+  /// - [width] Width of the form field
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hint, {
+    bool isPassword = false,
+    double? width,
+  }) {
     return SizedBox(
       width: width,
       child: TextField(

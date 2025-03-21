@@ -3,7 +3,7 @@
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:codigo/Paginas/add_ausencia_page.dart';
-import 'package:codigo/Paginas/asignar_guardia.dart';
+import 'asignar_guardia.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';

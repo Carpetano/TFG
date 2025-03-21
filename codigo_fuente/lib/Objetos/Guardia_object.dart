@@ -1,9 +1,10 @@
+/// Guardia object representing a supervision to be done in the database
 class GuardiaObject {
   final int id;
-  final int? missingTeacherId; // Nullable field
-  final int? ausenciaId; // Nullable field
-  final int? tramoHorario; // Nullable field
-  final int? substituteTeacherId; // Nullable field
+  final int? missingTeacherId;
+  final int? ausenciaId;
+  final int? tramoHorario;
+  final int? substituteTeacherId;
   final String observations;
   final String status;
   final DateTime day;
@@ -19,10 +20,9 @@ class GuardiaObject {
     required this.day,
   });
 
-  // Factory constructor to create a GuardiaObject from a map
   factory GuardiaObject.fromMap(Map<String, dynamic> data) {
     return GuardiaObject(
-      id: data['id_guardia'] as int, // Assuming 'id_guardia' is always present
+      id: data['id_guardia'] as int,
       missingTeacherId:
           data['id_profesor_ausente'] != null
               ? data['id_profesor_ausente'] as int
@@ -46,7 +46,6 @@ class GuardiaObject {
     return 'GuardiaObject(id: $id, missingTeacherId: $missingTeacherId, ausenciaId: $ausenciaId, tramoHorario: $tramoHorario, substituteTeacherId: $substituteTeacherId, observations: $observations, status: $status, day: $day)';
   }
 
-  // This method maps the response from Supabase to a list of GuardiaObject
   static List<GuardiaObject> mapFromResponse(List<dynamic> response) {
     return response
         .map((data) => GuardiaObject.fromMap(data as Map<String, dynamic>))

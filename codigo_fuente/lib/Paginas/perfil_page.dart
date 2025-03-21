@@ -4,7 +4,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:codigo/Objetos/user_object.dart';
 
+// Profile page to visualize data from the logged in user
+// TODO implement user profile picture
 class PerfilPage extends StatefulWidget {
+  // Page constructor
   const PerfilPage({super.key});
 
   @override
@@ -12,7 +15,10 @@ class PerfilPage extends StatefulWidget {
 }
 
 class _PerfilPageState extends State<PerfilPage> {
+  // User object to extract the data from
   UserObject? _user;
+
+  // Image url (Unused but will be added in future)
   String? _profileImageUrl;
 
   @override
@@ -43,7 +49,7 @@ class _PerfilPageState extends State<PerfilPage> {
     final user = await SupabaseManager.instance.getCurrentUser();
     setState(() {
       _user = user;
-      _profileImageUrl = user?.profileImageUrl; // Si ya tiene foto, se carga
+      _profileImageUrl = user?.profileImageUrl;
     });
   }
 

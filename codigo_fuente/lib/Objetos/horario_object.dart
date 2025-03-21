@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Object representing a schedule in the database, holds the id, whether the schedule type, morning, afternoon or nocturnal, and from how much time it covers
 class HorarioObject {
   final int id;
   final String type;
@@ -12,21 +13,15 @@ class HorarioObject {
     required this.endTime,
   });
 
-  // Factory constructor to create a HorarioObject from a map
   factory HorarioObject.fromMap(Map<String, dynamic> data) {
     return HorarioObject(
-      id: data['id'] as int, // Assuming 'id' field is always present
-      type: data['type'] as String, // Assuming 'type' field is always present
-      startTime: _parseTimeOfDay(
-        data['start_time'] as String,
-      ), // Assuming start_time is in string format
-      endTime: _parseTimeOfDay(
-        data['end_time'] as String,
-      ), // Assuming end_time is in string format
+      id: data['id'] as int,
+      type: data['type'] as String,
+      startTime: _parseTimeOfDay(data['start_time'] as String),
+      endTime: _parseTimeOfDay(data['end_time'] as String),
     );
   }
 
-  // Helper function to parse TimeOfDay from a string (e.g., "14:30")
   static TimeOfDay _parseTimeOfDay(String time) {
     final parts = time.split(':');
     final hour = int.parse(parts[0]);
@@ -34,12 +29,11 @@ class HorarioObject {
     return TimeOfDay(hour: hour, minute: minute);
   }
 
-  // Static method to map a list of response data into a list of HorarioObject instances
   static List<HorarioObject> mapFromResponse(List<dynamic>? response) {
     if (response == null || response.isEmpty) {
       return [];
     }
-    // Map each entry in the response list to a HorarioObject using the fromMap factory constructor
+
     return response.map((data) => HorarioObject.fromMap(data)).toList();
   }
 

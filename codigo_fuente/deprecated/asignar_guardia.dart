@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// Assign guardia page in our app to let the user notify other users they are not going to show up on the specified date
 class AsignarGuardia extends StatefulWidget {
+  // Page Constructor
   const AsignarGuardia({super.key});
 
   @override
@@ -8,16 +10,16 @@ class AsignarGuardia extends StatefulWidget {
 }
 
 class _AsignarGuardiaState extends State<AsignarGuardia> {
-  int? selectedRow; // Fila seleccionada
-  List<List<List<TextEditingController>>> controllers =
-      []; // Controladores para cada celda
+  // Keep track on what row was selected
+  int? selectedRow;
 
-  Future<void> claimGuardia() async {}
+  // List of text controllers to keep track of the typed text
+  List<List<List<TextEditingController>>> controllers = [];
 
   @override
   void initState() {
     super.initState();
-    // Inicializar controladores (8 filas x 7 sesiones x 3 columnas)
+    // Initialise all of the controllers
     for (int i = 0; i < 8; i++) {
       List<List<TextEditingController>> rowControllers = [];
       for (int j = 0; j < 7; j++) {
@@ -33,7 +35,7 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
 
   @override
   void dispose() {
-    // Liberar controladores al cerrar la pantalla
+    // Dispose all of the controllers when leaving the page
     for (var row in controllers) {
       for (var session in row) {
         for (var controller in session) {
@@ -46,6 +48,7 @@ class _AsignarGuardiaState extends State<AsignarGuardia> {
 
   @override
   Widget build(BuildContext context) {
+    // Return a Scaffold contaning the layout of the page
     return Scaffold(
       appBar: AppBar(
         title: const Text(

@@ -7,8 +7,12 @@ import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
 
+/// View all of the guardia entries associated with the logged in user
 class VerMisGuardiasPage extends StatefulWidget {
+  // Logged in user id
   final int userId = MyApp.loggedInUser!.id;
+
+  // Page constructor
   VerMisGuardiasPage({super.key});
 
   @override
@@ -16,8 +20,11 @@ class VerMisGuardiasPage extends StatefulWidget {
 }
 
 class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
+  // List of guardias done / unasigned associated to the user
   List<GuardiaObject> guardiasRealizadas = [];
   List<GuardiaObject> guardiasUnasigned = [];
+
+  // List of selected guardias to delete
   List<GuardiaObject> selectedGuardias = [];
 
   /// Displays a snackbar message at the bottom of the screen
@@ -38,29 +45,42 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  // Fetch unassigned guardias
+  /// Fetch and update local lists of unassigned guardias
+  ///
+  /// - [userId] user id to look for
   Future<void> getAllUnasignedUserGuardias(int userId) async {
+    // Request all usasigned guardias
     final response = await SupabaseManager.instance.getAllUnasignedUserGuardias(
       userId,
     );
+
+    // Update lists
     setState(() {
       guardiasUnasigned = response;
     });
   }
 
-  // Fetch guardias done by user
+  /// Fetch and update local lists of done guardias
+  ///
+  /// - [userId] user id to look for
   Future<void> getAllGuardiasDoneByUser(int userId) async {
+    // Request all done guardias
     final response = await SupabaseManager.instance.getAllGuardiasDoneByUser(
       userId,
     );
+
+    // Update lists
     setState(() {
       guardiasRealizadas = response;
     });
   }
 
-  // Fetch user object by ID to get the teacher's first name
+  /// Get an user object given its id
+  ///
+  /// - [userId] user id to look for
   Future<UserObject> getUserObjectById(int userId) async {
     try {
+      // Request the user with matching id
       final user = await SupabaseManager.instance.getUserObjectById(userId);
       print("Fetched user: $user");
       return user;
@@ -70,9 +90,12 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
     }
   }
 
-  // Delete an unassigned guardia by its ID
+  /// Delete an unassigned guardia by its ID
+  ///
+  /// - [id] id of the guardia to delete
   Future<void> deleteUnasignedGuardia(int id) async {
     try {
+      // Delete the matching id from supabase
       await SupabaseManager.instance.deleteGuardiaById(id);
       print("Deleted guardia with ID: $id");
     } catch (e) {
@@ -90,7 +113,6 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Gradient AppBar for a modern header
       appBar: AppBar(
         title: Text(
           Translations.translate('mySupervisions'),

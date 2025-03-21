@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:codigo/supabase_manager.dart';
 
+/// Page in charge of changing users' password
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
 
@@ -10,22 +11,37 @@ class ChangePasswordPage extends StatefulWidget {
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
+
+  // Controller to keep track of the textfields
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
+  // Change the password of the logged in user
   Future<void> changePassword() async {
+    // Check if state of the formkey is valid
     if (_formKey.currentState!.validate()) {
-      // Validación de cambio de contraseña
-      bool success = await SupabaseManager.instance.changeUserPassword(newPasswordController.text);
+      // Change the password in supabase
+      bool success = await SupabaseManager.instance.changeUserPassword(
+        newPasswordController.text,
+      );
 
+      // Depending on the result, show a success or failure snackbar
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Contraseña actualizada correctamente")),
         );
-        Navigator.pop(context, true);  // Regresa a la página anterior con un valor 'true'
+        Navigator.pop(
+          context,
+          true,
+        ); // Regresa a la página anterior con un valor 'true'
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error al actualizar la contraseña. Intenta nuevamente.")),
+          const SnackBar(
+            content: Text(
+              "Error al actualizar la contraseña. Intenta nuevamente.",
+            ),
+          ),
         );
       }
     }
@@ -50,7 +66,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             children: [
               TextFormField(
                 controller: newPasswordController,
-                decoration: const InputDecoration(labelText: "Nueva Contraseña"),
+                decoration: const InputDecoration(
+                  labelText: "Nueva Contraseña",
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.length < 6) {
@@ -61,7 +79,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               TextFormField(
                 controller: confirmPasswordController,
-                decoration: const InputDecoration(labelText: "Confirmar Contraseña"),
+                decoration: const InputDecoration(
+                  labelText: "Confirmar Contraseña",
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value != newPasswordController.text) {

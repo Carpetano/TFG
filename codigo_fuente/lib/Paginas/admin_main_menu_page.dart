@@ -7,7 +7,9 @@ import 'package:codigo/Paginas/perfil_page.dart';
 import 'package:codigo/Paginas/settings_page.dart';
 import 'package:codigo/main.dart';
 
+/// Admin main menu page, this page should allow the allowed users to perform almost anything
 class AdminMainMenuPage extends StatefulWidget {
+  // Page constructor
   const AdminMainMenuPage({super.key});
 
   @override
@@ -17,21 +19,30 @@ class AdminMainMenuPage extends StatefulWidget {
 class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
   int _selectedIndex = 0;
 
+  /// Navigate to a page given an index
+  ///
+  /// - [index] index of the page to navigate to
+  ///     1 - Profile page
+  ///     2 - Settings page
+  ///     3 - Main menu
   void _onNavigationItemSelected(int index) {
+    // Set this inner class attribute as the parsed in argument
     setState(() => _selectedIndex = index);
+
+    // Depending on the parsed in index, navigate to the corresponding page
     if (index == 0) {
       Navigator.push(
-        context,
+        context, // Navigate to the profile page
         MaterialPageRoute(builder: (context) => const PerfilPage()),
       );
     } else if (index == 1) {
       Navigator.push(
-        context,
+        context, // Navigate to the settings page
         MaterialPageRoute(builder: (context) => const SettingsPage()),
       );
     } else if (index == 2) {
       Navigator.push(
-        context,
+        context, // Navigate to the Main menu
         MaterialPageRoute(builder: (context) => const MyApp()),
       );
     }
@@ -39,32 +50,33 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen width and height
     double screenWidth = MediaQuery.sizeOf(context).width;
     double screenHeight = MediaQuery.sizeOf(context).height;
+
+    // Whats the threshold to determine whether to build a desktop or mobile layout
     final maxPhoneWidth = 600;
 
+    // Return a scaffold depending on the current screen size
     return Scaffold(
       body:
+          // If screen size is greater than 600 build a desktop layout, otherwise build a mobile layout
           screenWidth > maxPhoneWidth
               ? buildDesktopLayout(screenWidth, screenHeight)
               : buildMobileLayout(screenWidth),
     );
   }
 
+  /// Build a thinner screen, associated to mobile devices
+  ///
+  /// - [screenWidth] Current screen width for responsive design
   Widget buildMobileLayout(double screenWidth) {
-    double iconSize = (screenWidth * 0.04).clamp(
-      30.0,
-      50.0,
-    ); // Tamaño entre 24px y 40px
-    double textSize = (screenWidth * 0.02).clamp(
-      20.0,
-      40.0,
-    ); // Tamaño entre 14px y 20px
-    double titleSize = (screenWidth * 0.04).clamp(
-      30.0,
-      50.0,
-    ); // Título de 18px a 30px
+    // Calculate the icon/Text/Tile size given the screen width
+    double iconSize = (screenWidth * 0.04).clamp(30.0, 50.0);
+    double textSize = (screenWidth * 0.02).clamp(20.0, 40.0);
+    double titleSize = (screenWidth * 0.04).clamp(30.0, 50.0);
 
+    // Return a scaffold containing the mobile layout
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -81,16 +93,19 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'perfil') {
+                // Navigate to the profile page
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const PerfilPage()),
                 );
               } else if (value == 'ajustes') {
+                // Navigate to the settings page
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SettingsPage()),
                 );
               } else if (value == 'salir') {
+                // Log out or go to the main menu
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const MyApp()),
@@ -99,14 +114,17 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
             },
             itemBuilder:
                 (BuildContext context) => [
+                  // Profile translation dependingon the displaly language
                   PopupMenuItem(
                     value: 'perfil',
                     child: Text(Translations.translate('viewProfile')),
                   ),
+                  // Settings translation depending on the display language
                   PopupMenuItem(
                     value: 'ajustes',
                     child: Text(Translations.translate('settings')),
                   ),
+                  // Log out translation depening on the display language
                   PopupMenuItem(
                     value: 'salir',
                     child: Text(Translations.translate('logout')),
@@ -118,7 +136,7 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
               color: Theme.of(context).colorScheme.onPrimary,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 10), // Add some spacing to remove cluttering
         ],
       ),
       body: Padding(
@@ -128,6 +146,7 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
+              // Title text
               child: Text(
                 "${Translations.translate('welcome')}, ${MyApp.loggedInUser?.firstName ?? ''} 👋",
                 style: TextStyle(
@@ -140,6 +159,7 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
             ),
             const SizedBox(height: 10),
             Center(
+              // Subtitle text
               child: Text(
                 Translations.translate('selectOption2Continue'),
                 style: TextStyle(
@@ -189,20 +209,17 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
     );
   }
 
+  /// Build a desktop or 'wide' layout
+  ///
+  /// - [screenWidth] Current screen width for responsive design
+  /// - [screenHeight] Current scren Height for responsive design
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
-    double iconSize = (screenWidth * 0.03).clamp(
-      24.0,
-      40.0,
-    ); // Tamaño entre 24px y 40px
-    double textSize = (screenWidth * 0.015).clamp(
-      14.0,
-      20.0,
-    ); // Tamaño entre 14px y 20px
-    double titleSize = (screenWidth * 0.03).clamp(
-      18.0,
-      30.0,
-    ); // Título de 18px a 30px
+    // Calculate the icon/Text/Tile size given the screen width
+    double iconSize = (screenWidth * 0.03).clamp(24.0, 40.0);
+    double textSize = (screenWidth * 0.015).clamp(14.0, 20.0);
+    double titleSize = (screenWidth * 0.03).clamp(18.0, 30.0);
 
+    // Return a scaffold containing a wide / desktop layout
     return Scaffold(
       drawer: Drawer(
         child: ListView(
@@ -243,36 +260,30 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
       ),
       body: Row(
         children: [
-          // Contenedor para el NavigationRail con un encabezado
           Container(
-            width:
-                screenWidth *
-                0.20, // El NavigationRail ocupa el 20% de la pantalla
-            color: Theme.of(context).colorScheme.primary, // Fondo azul
+            // Calculate the width of the container depending on the screen width
+            width: screenWidth * 0.20,
+            color: Theme.of(context).colorScheme.primary,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // Encabezado con texto responsivo
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     Translations.translate('adminMenu'),
                     style: TextStyle(
-                      fontSize: textSize, // 3% del ancho de la pantalla
+                      fontSize: textSize,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const Divider(
-                  color: Colors.white54,
-                  thickness: 1,
-                ), // Línea separadora
-                // NavigationRail
+                // Spacing
+                const Divider(color: Colors.white54, thickness: 1),
                 Expanded(
                   child: NavigationRail(
-                    minWidth: screenWidth * 0.15, // Ocupa el 20% de la pantalla
+                    minWidth: screenWidth * 0.15,
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     selectedIndex: _selectedIndex,
                     onDestinationSelected: _onNavigationItemSelected,
@@ -344,8 +355,7 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
               padding: const EdgeInsets.all(30.0),
               child: Center(
                 child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center, // Centra los elementos
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Center(
@@ -373,10 +383,7 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
                     const SizedBox(height: 30),
                     Expanded(
                       child: GridView.count(
-                        crossAxisCount:
-                            screenWidth > 1000
-                                ? 3
-                                : 2, // 3 columnas en pantallas grandes, 2 en pequeñas
+                        crossAxisCount: screenWidth > 1000 ? 3 : 2,
                         crossAxisSpacing: 20,
                         mainAxisSpacing: 20,
                         children: [
@@ -421,7 +428,14 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
     );
   }
 
-  // Card estilizada para las opciones
+  /// Get a card given the following attributes:
+  ///
+  /// - [icon] Icon to display
+  /// - [text] Text to display
+  /// - [iconSize] Size of the display icon
+  /// - [textSize] Size of the display text
+  /// - [onTap] Which function to perform when tapped
+  /// - [textColor] color of the display color
   Widget _buildOptionCard({
     required IconData icon,
     required String text,
@@ -467,6 +481,9 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
     );
   }
 
+  /// Navigate to the parsed in page
+  ///
+  /// - [page] Page to navigate to
   void _navigateTo(Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }

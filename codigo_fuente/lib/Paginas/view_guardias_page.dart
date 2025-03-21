@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:codigo/Objetos/guardia_object.dart';
 
+/// Page to visualize guardias given a specific date
 class ViewGuardiasPage extends StatefulWidget {
+  // Date to check fetch data from
   final DateTime day;
+  // Page constructor
   const ViewGuardiasPage({super.key, required this.day});
 
   @override
@@ -15,8 +18,13 @@ class ViewGuardiasPage extends StatefulWidget {
 
 class _ViewGuardiasPageState extends State<ViewGuardiasPage>
     with SingleTickerProviderStateMixin {
+  // Animation controller to show only when it's loading
   late AnimationController _controller;
+
+  // Null list of guardias to display
   late List<GuardiaObject> guardiasToDisplay;
+
+  // List of pending and asigned guardias to populate later on
   List<GuardiaObject> pendienteGuardias = [];
   List<GuardiaObject> asignadaGuardias = [];
 
@@ -40,9 +48,12 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
 
   // Fetch guardias by day
   Future<void> fetchGuardiasObjects() async {
+    // Get the list of guardias from supabase manager
     final response = await SupabaseManager.instance.getAllGuardiasByDay(
       widget.day,
     );
+
+    // Assign states
     setState(() {
       guardiasToDisplay = response;
       // Separate into 'pendiente' and 'asignada' states
@@ -57,21 +68,31 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
     });
   }
 
+  /// Assign the current user as substitute teacher for the parsed in guardia's id
+  ///
+  /// - [guardiaId] Guardia to assign the substitute teacher
   Future<void> claimGuardia(int guardiaId) async {
+    // Assign the substitute teacher
     await SupabaseManager.instance.assignGuardiaToUser(
       guardiaId,
       MyApp.loggedInUser!.id,
     );
-    // Optionally, refresh the list after claiming
+    // Refresh guardias list
     await fetchGuardiasObjects();
   }
 
+  /// Show an information dialog given a guardia id
+  ///
+  /// - [guardiaId] Guardia to assign the substitute teacher
+  /// - [context] current context
   Future<void> showGuardiaInfo(int guardiaId, BuildContext context) async {
     try {
+      // Get a guardia object with matching guardia id
       GuardiaObject? guardia = await SupabaseManager.instance.getGuardiaById(
         guardiaId,
       );
 
+      // Check for null values and if the widget is still mounted
       if (guardia == null) {
         if (context.mounted) {
           _showAlertDialog(context, 'No data found for Guardia ID $guardiaId');
@@ -79,6 +100,7 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
         return;
       }
 
+      // Text to display
       String infoText = '''
 ID: ${guardia.id}
 Profesor ausente ID: ${guardia.missingTeacherId ?? 'N/A'}
@@ -98,7 +120,10 @@ Dia: ${guardia.day.toLocal()}
     }
   }
 
-  // Helper to show an AlertDialog
+  /// Show an alart dialog given a message
+  ///
+  /// - [context] Current context
+  /// - [message] Text to display
   void _showAlertDialog(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -133,7 +158,14 @@ Dia: ${guardia.day.toLocal()}
     super.dispose();
   }
 
-  // Builds a section with a title and a list of Slidable ListTiles
+  /// Builds a section with a title and a list of Slidable ListTiles
+  ///
+  /// - [sectionTitle] Title of the section
+  /// - [guardias] List of guardias to display
+  /// - [actionColor] Color of the action
+  /// - [actionIcon] Action Action Icon
+  /// - [actionLabel] Label Action text
+  /// - [onActionTap] Function to perform when tapping
   Widget buildGuardiaSection({
     required String sectionTitle,
     required List<GuardiaObject> guardias,

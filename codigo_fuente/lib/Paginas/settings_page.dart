@@ -2,6 +2,9 @@ import 'package:codigo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/Paginas/change_password_page.dart';
 import 'package:codigo/global_settings.dart';
+import 'dart:io';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -39,6 +42,20 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+  /// Save language preference and update the file.
+  static Future<void> writeToLangConfigFile(String txt) async {
+    final file = File('default_lang.txt');
+    try {
+      await file.writeAsString(
+        txt,
+        mode: FileMode.write,
+      ); // Overwrites existing content
+      print("[INFO] Written: '$txt' in default_lang.txt.");
+    } catch (e) {
+      print("[ERROR] Failed to update default_lang.txt: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.sizeOf(context).width;
@@ -48,10 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          Translations.translate(
-            'title',
-            GlobalSettings.language.value.code, // Get language code dynamically
-          ),
+          Translations.translate('pageTitle'),
           style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
         ),
         backgroundColor: Colors.blueAccent,
@@ -85,11 +99,7 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             Text(
               Translations.translate(
-                'personalization',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
+                'personalization', // Get language code dynamically
               ),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -98,17 +108,11 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.dark_mode,
               title: Translations.translate(
                 'darkMode',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
+                // Get language code dynamically
               ),
               subtitle: Translations.translate(
                 'darkModeSubtitle',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
+                // Get language code dynamically
               ),
               trailing: Switch(
                 value: temaOscuro,
@@ -121,17 +125,11 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.language,
               title: Translations.translate(
                 'language',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
+                // Get language code dynamically
               ),
               subtitle: Translations.translate(
                 'languageSubtitle',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
+                // Get language code dynamically
               ),
               trailing: DropdownButton<AppLanguage>(
                 value: idioma,
@@ -143,8 +141,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   // Change language and update in GlobalSettings
                   if (newValue == AppLanguage.espanol) {
                     await GlobalSettings.setLanguage(AppLanguage.espanol);
+                    writeToLangConfigFile('es');
                   } else if (newValue == AppLanguage.english) {
                     await GlobalSettings.setLanguage(AppLanguage.english);
+                    writeToLangConfigFile('en');
                   }
 
                   // Refresh the page to apply changes
@@ -158,16 +158,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: Text(
-                            Translations.translate(
-                              'reloginRequired',
-                              GlobalSettings.language.value.code,
-                            ),
+                            Translations.translate('reloginRequired'),
                           ),
                           content: Text(
-                            Translations.translate(
-                              'reloginRequired2',
-                              GlobalSettings.language.value.code,
-                            ),
+                            Translations.translate('reloginRequired2'),
                           ),
                           actions: <Widget>[
                             TextButton(
@@ -211,10 +205,7 @@ class _SettingsPageState extends State<SettingsPage> {
             Text(
               Translations.translate(
                 'notifications',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
+                // Get language code dynamically
               ),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -223,17 +214,11 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.notifications_active,
               title: Translations.translate(
                 'notifications',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
+                // Get language code dynamically
               ),
               subtitle: Translations.translate(
                 'notificationsSubtitle',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
+                // Get language code dynamically
               ),
               trailing: Switch(
                 value: notificaciones,
@@ -251,15 +236,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: Text(
-                Translations.translate(
-                  'changePassword',
-                  GlobalSettings
-                      .language
-                      .value
-                      .code, // Get language code dynamically
-                ),
-              ),
+              child: Text(Translations.translate('changePassword')),
             ),
           ],
         ),
@@ -273,32 +250,14 @@ class _SettingsPageState extends State<SettingsPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            Translations.translate(
-              'personalization',
-              GlobalSettings
-                  .language
-                  .value
-                  .code, // Get language code dynamically
-            ),
+            Translations.translate('personalization'),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           _buildSettingTile(
             icon: Icons.dark_mode,
-            title: Translations.translate(
-              'darkMode',
-              GlobalSettings
-                  .language
-                  .value
-                  .code, // Get language code dynamically
-            ),
-            subtitle: Translations.translate(
-              'darkModeSubtitle',
-              GlobalSettings
-                  .language
-                  .value
-                  .code, // Get language code dynamically
-            ),
+            title: Translations.translate('darkMode'),
+            subtitle: Translations.translate('darkModeSubtitle'),
             trailing: Switch(
               value: temaOscuro,
               onChanged: (value) async {
@@ -308,32 +267,22 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           _buildSettingTile(
             icon: Icons.language,
-            title: Translations.translate(
-              'language',
-              GlobalSettings
-                  .language
-                  .value
-                  .code, // Get language code dynamically
-            ),
-            subtitle: Translations.translate(
-              'languageSubtitle',
-              GlobalSettings
-                  .language
-                  .value
-                  .code, // Get language code dynamically
-            ),
+            title: Translations.translate('language'),
+            subtitle: Translations.translate('languageSubtitle'),
             trailing: DropdownButton<AppLanguage>(
               value: idioma,
               onChanged: (newValue) async {
                 setState(() {
-                  idioma = newValue!; // Update the selected language
+                  idioma = newValue!;
                 });
 
                 // Change language and update in GlobalSettings
                 if (newValue == AppLanguage.espanol) {
                   await GlobalSettings.setLanguage(AppLanguage.espanol);
+                  writeToLangConfigFile('es');
                 } else if (newValue == AppLanguage.english) {
                   await GlobalSettings.setLanguage(AppLanguage.english);
+                  writeToLangConfigFile('en');
                 }
 
                 // Refresh the page to apply changes
@@ -355,32 +304,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 20),
           Text(
-            Translations.translate(
-              'notifications',
-              GlobalSettings
-                  .language
-                  .value
-                  .code, // Get language code dynamically
-            ),
+            Translations.translate('notifications'),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           _buildSettingTile(
             icon: Icons.notifications_active,
-            title: Translations.translate(
-              'notifications',
-              GlobalSettings
-                  .language
-                  .value
-                  .code, // Get language code dynamically
-            ),
-            subtitle: Translations.translate(
-              'notificationsSubtitle',
-              GlobalSettings
-                  .language
-                  .value
-                  .code, // Get language code dynamically
-            ),
+            title: Translations.translate('notifications'),
+            subtitle: Translations.translate('notificationsSubtitle'),
             trailing: Switch(
               value: notificaciones,
               onChanged: (value) => setState(() => notificaciones = value),
@@ -397,15 +328,7 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(
-              Translations.translate(
-                'changePassword',
-                GlobalSettings
-                    .language
-                    .value
-                    .code, // Get language code dynamically
-              ),
-            ),
+            child: Text(Translations.translate('changePassword')),
           ),
         ],
       ),

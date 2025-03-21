@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print
 
 import 'package:codigo/Objetos/guardia_object.dart';
+import 'package:codigo/Objetos/user_object.dart';
+import 'package:codigo/global_settings.dart';
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -14,199 +16,271 @@ class VerMisGuardiasPage extends StatefulWidget {
 }
 
 class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
-  List<String> guardiasRealizadas = [];
+  List<GuardiaObject> guardiasRealizadas = [];
   List<GuardiaObject> guardiasUnasigned = [];
   List<GuardiaObject> selectedGuardias = [];
 
-  // Function to print the ids of selected guardias when the "delete" button is pressed
-  void eliminarGuardia() async {
-    if (selectedGuardias.isNotEmpty) {
-      // Loop through all selected guardias and delete them
-      for (var guardia in selectedGuardias) {
-        print('Selected Guardia id: ${guardia.id}');
+  /// Displays a snackbar message at the bottom of the screen
+  /// This function creates a snackbar with the provided message, text color,
+  /// and background color, then displays it using the ScaffoldMessenger
+  ///
+  /// - [message]: The text content of the snackbar
+  /// - [textColor]: The color of the text inside the snackbar
+  /// - [bgColor]: The background color of the snackbar
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
-        // Call the delete method from SupabaseManager to delete the guardia
-        bool result = await SupabaseManager.instance.deleteGuardiaById(
-          guardia.id,
-        );
-        if (result) {
-          print('Guardia ${guardia.id} deleted successfully');
-        } else {
-          print('Failed to delete Guardia ${guardia.id}');
-        }
-      }
+  // Fetch unassigned guardias
+  Future<void> getAllUnasignedUserGuardias(int userId) async {
+    final response = await SupabaseManager.instance.getAllUnasignedUserGuardias(
+      userId,
+    );
+    setState(() {
+      guardiasUnasigned = response;
+    });
+  }
 
-      // Ensure `guardiasUnasigned` is not null before updating
-      setState(() {
-        // Safely remove the deleted guardias from the unasigned list
-        if (guardiasUnasigned != null) {
-          guardiasUnasigned.removeWhere(
-            (guardia) => selectedGuardias.contains(guardia),
-          );
-        }
+  // Fetch guardias done by user
+  Future<void> getAllGuardiasDoneByUser(int userId) async {
+    final response = await SupabaseManager.instance.getAllGuardiasDoneByUser(
+      userId,
+    );
+    setState(() {
+      guardiasRealizadas = response;
+    });
+  }
 
-        // Clear the selected guardias list after deletion
-        selectedGuardias.clear();
-      });
-    } else {
-      print('No guardias selected for deletion.');
+  // Fetch user object by ID to get the teacher's first name
+  Future<UserObject> getUserObjectById(int userId) async {
+    try {
+      final user = await SupabaseManager.instance.getUserObjectById(userId);
+      print("Fetched user: $user");
+      return user;
+    } catch (e) {
+      print("Error fetching user: $e");
+      rethrow;
     }
   }
 
-  // Fetch the unasigned guardias for the current user
-  Future<void> fetchAllUserUnasignedGuardias() async {
+  // Delete an unassigned guardia by its ID
+  Future<void> deleteUnasignedGuardia(int id) async {
     try {
-      // Call the function from SupabaseManager that returns a List<GuardiaObject>
-      final unasigned = await SupabaseManager.instance
-          .getAllUnasignedUserGuardias(MyApp.loggedInUser!.id);
-
-      print(unasigned); // Debug print to check the fetched data
-      setState(() {
-        guardiasUnasigned = unasigned;
-      });
+      await SupabaseManager.instance.deleteGuardiaById(id);
+      print("Deleted guardia with ID: $id");
     } catch (e) {
-      print("Error fetching unasigned guardias: $e");
-    }
-  }
-
-  // Fetch all guardias (both completed and pending)
-  Future<void> fetchAllGuardias() async {
-    try {
-      final response = await SupabaseManager.instance.getAllGuardiasByUserId(
-        widget.userId,
-      );
-
-      final completedGuardias = await SupabaseManager.instance
-          .getAllGuardiasDoneByUser(widget.userId);
-
-      setState(() {
-        guardiasRealizadas.clear();
-      });
-
-      Set<String> addedGuardias = {};
-
-      // Process the response and add completed guardias to the 'guardiasRealizadas' list
-      for (var guardia in response) {
-        String guardiaInfo = 'Guardia ${guardia.id} - ${guardia.observations}';
-        if (guardia.substituteTeacherId == widget.userId) {
-          if (!addedGuardias.contains(guardiaInfo)) {
-            guardiasRealizadas.add(guardiaInfo);
-            addedGuardias.add(guardiaInfo);
-          }
-        }
-      }
-
-      // Add the completed guardias from the getAllGuardiasDoneByUser function to the list
-      for (var completedGuardia in completedGuardias) {
-        String completedGuardiaInfo =
-            'Guardia ${completedGuardia.id} - ${completedGuardia.observations}';
-        if (!addedGuardias.contains(completedGuardiaInfo)) {
-          guardiasRealizadas.add(completedGuardiaInfo);
-          addedGuardias.add(completedGuardiaInfo);
-        }
-      }
-    } catch (e) {
-      print("Error fetching guardias: $e");
+      print("Error deleting guardia: $e");
     }
   }
 
   @override
   void initState() {
     super.initState();
-    fetchAllGuardias();
-    fetchAllUserUnasignedGuardias();
+    getAllGuardiasDoneByUser(widget.userId);
+    getAllUnasignedUserGuardias(widget.userId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis Guardias')),
+      // Gradient AppBar for a modern header
+      appBar: AppBar(
+        title: Text(
+          Translations.translate('mySupervisions'),
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue, Colors.purpleAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+      backgroundColor: Colors.grey[100],
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Section for completed guardias
-            const Text(
-              'Guardias Realizadas',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            // Section Title for Guardias Realizadas
+            Text(
+              Translations.translate('guardiasDone'),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 10),
+            // Card for Guardias Realizadas List
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.greenAccent),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: ListView.builder(
-                  itemCount: guardiasRealizadas.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(guardiasRealizadas[index]),
-                      leading: const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Section for unasigned guardias (pending)
-            const Text(
-              'Guardias Pendientes',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.orangeAccent),
-                ),
-                child: ListView.builder(
-                  itemCount: guardiasUnasigned.length,
-                  itemBuilder: (context, index) {
-                    final guardia = guardiasUnasigned[index];
-                    String guardiaInfo =
-                        'Guardia ${guardia.id} - ${guardia.observations}';
-                    bool isSelected = selectedGuardias.contains(guardia);
-                    return ListTile(
-                      title: Text(guardiaInfo),
-                      leading: Icon(
-                        isSelected
-                            ? Icons.check_box
-                            : Icons.check_box_outline_blank,
-                        color: isSelected ? Colors.blue : null,
-                      ),
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            selectedGuardias.remove(guardia);
-                          } else {
-                            selectedGuardias.add(guardia);
+                elevation: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.greenAccent),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListView.builder(
+                    itemCount: guardiasRealizadas.length,
+                    itemBuilder: (context, index) {
+                      final guardia = guardiasRealizadas[index];
+                      String formattedDate =
+                          '${guardia.day.day}/${guardia.day.month}/${guardia.day.year}';
+                      return FutureBuilder<UserObject>(
+                        future: getUserObjectById(guardia.missingTeacherId!),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return ListTile(
+                              title: Text(formattedDate),
+                              leading: const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              ),
+                            );
                           }
-                        });
-                      },
-                    );
-                  },
+                          if (snapshot.hasData) {
+                            // In a full implementation you might show the teacher's name
+                            return ListTile(
+                              title: Text(formattedDate),
+                              leading: const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              ),
+                            );
+                          }
+                          if (snapshot.hasError) {
+                            return ListTile(
+                              title: Text('$formattedDate - Profesor: N/A'),
+                              leading: const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              ),
+                            );
+                          }
+                          return ListTile(
+                            title: Text('$formattedDate - Profesor: N/A'),
+                            leading: const Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 20),
+            // Section Title for Guardias Pendientes
+            Text(
+              Translations.translate('pendingGuardias'),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            // Card for Guardias Unasigned List
+            Expanded(
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.orangeAccent),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListView.builder(
+                    itemCount: guardiasUnasigned.length,
+                    itemBuilder: (context, index) {
+                      final guardia = guardiasUnasigned[index];
+                      String guardiaInfo =
+                          '${guardia.day.day}/${guardia.day.month}/${guardia.day.year} - Tramo: ${guardia.tramoHorario}';
+                      bool isSelected = selectedGuardias.contains(guardia);
+                      return ListTile(
+                        title: Text(guardiaInfo),
+                        leading: Icon(
+                          isSelected
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                          color: isSelected ? Colors.blue : null,
+                        ),
+                        onTap: () {
+                          setState(() {
+                            isSelected
+                                ? selectedGuardias.remove(guardia)
+                                : selectedGuardias.add(guardia);
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Action Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                  onPressed: eliminarGuardia,
-                  child: const Text('Eliminar Guardia Seleccionadas'),
+                  onPressed: () async {
+                    for (var guardia in selectedGuardias) {
+                      await deleteUnasignedGuardia(guardia.id);
+                      setState(() {
+                        guardiasUnasigned.remove(guardia);
+                      });
+                    }
+                    setState(() {
+                      selectedGuardias.clear();
+                    });
+                    showSnackBar(
+                      "Guardias Borradas",
+                      Colors.white,
+                      Colors.black,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(Translations.translate('deleteGuardia')),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                  child: const Text('Volver'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(Translations.translate('goback')),
                 ),
               ],
             ),
-            // Added test button to print retrieved guardias
           ],
         ),
       ),

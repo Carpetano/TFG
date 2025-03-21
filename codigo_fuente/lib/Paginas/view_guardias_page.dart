@@ -1,3 +1,4 @@
+import 'package:codigo/global_settings.dart';
 import 'package:codigo/main.dart';
 import 'package:codigo/supabase_manager.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,24 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
   List<GuardiaObject> pendienteGuardias = [];
   List<GuardiaObject> asignadaGuardias = [];
 
+  /// Displays a snackbar message at the bottom of the screen
+  /// This function creates a snackbar with the provided message, text color,
+  /// and background color, then displays it using the ScaffoldMessenger
+  ///
+  /// - [message]: The text content of the snackbar
+  /// - [textColor]: The color of the text inside the snackbar
+  /// - [bgColor]: The background color of the snackbar
+  void showSnackBar(String message, Color textColor, Color bgColor) {
+    var snackBar = SnackBar(
+      content: DefaultTextStyle(
+        style: TextStyle(color: textColor),
+        child: Text(message),
+      ),
+      backgroundColor: bgColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   // Fetch guardias by day
   Future<void> fetchGuardiasObjects() async {
     final response = await SupabaseManager.instance.getAllGuardiasByDay(
@@ -39,65 +58,61 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
   }
 
   Future<void> claimGuardia(int guardiaId) async {
-    SupabaseManager.instance.assignGuardiaToUser(
+    await SupabaseManager.instance.assignGuardiaToUser(
       guardiaId,
       MyApp.loggedInUser!.id,
     );
+    // Optionally, refresh the list after claiming
+    await fetchGuardiasObjects();
   }
 
   Future<void> showGuardiaInfo(int guardiaId, BuildContext context) async {
     try {
-      // Fetch GuardiaObject by ID
       GuardiaObject? guardia = await SupabaseManager.instance.getGuardiaById(
         guardiaId,
       );
 
-      print(guardia);
-
       if (guardia == null) {
-        // Show a dialog if no data was found
         if (context.mounted) {
           _showAlertDialog(context, 'No data found for Guardia ID $guardiaId');
         }
         return;
       }
 
-      // Prepare the text to display
       String infoText = '''
-    Guardia ID: ${guardia.id}
-    Missing Teacher ID: ${guardia.missingTeacherId ?? 'N/A'}
-    Substitute Teacher ID: ${guardia.substituteTeacherId ?? 'N/A'}
-    Observations: ${guardia.observations}
-    Status: ${guardia.status}
-    Day: ${guardia.day.toLocal()}
-    ''';
+ID: ${guardia.id}
+Profesor ausente ID: ${guardia.missingTeacherId ?? 'N/A'}
+Profesor sustituto ID: ${guardia.substituteTeacherId ?? 'N/A'}
+Observaciones: ${guardia.observations}
+Estado: ${guardia.status}
+Dia: ${guardia.day.toLocal()}
+      ''';
 
-      // Show the dialog with the fetched data
       if (context.mounted) {
         _showAlertDialog(context, infoText);
       }
     } catch (e) {
-      print("Error getting Guardia info: $e");
       if (context.mounted) {
         _showAlertDialog(context, 'Error fetching Guardia info');
       }
     }
   }
 
-  // Helper function to show the AlertDialog
+  // Helper to show an AlertDialog
   void _showAlertDialog(BuildContext context, String message) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
-          title: Text('Información sobre la guardia'),
+          title: Text(
+            'Información sobre la guardia',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: Text(message),
-          actions: <Widget>[
+          actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -118,108 +133,159 @@ class _ViewGuardiasPageState extends State<ViewGuardiasPage>
     super.dispose();
   }
 
+  // Builds a section with a title and a list of Slidable ListTiles
+  Widget buildGuardiaSection({
+    required String sectionTitle,
+    required List<GuardiaObject> guardias,
+    required Color actionColor,
+    required IconData actionIcon,
+    required String actionLabel,
+    required Function(GuardiaObject, BuildContext) onActionTap,
+  }) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                sectionTitle,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            ...guardias.map((guardia) {
+              return Slidable(
+                key: Key(guardia.id.toString()),
+                startActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      onPressed: (context) {
+                        onActionTap(guardia, context);
+                      },
+                      backgroundColor: actionColor,
+                      foregroundColor: Colors.white,
+                      icon: actionIcon,
+                      label: actionLabel,
+                    ),
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
+                  ),
+                  title: Text(
+                    "Id Profesor ausente: ${guardia.missingTeacherId}",
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text("Tramo: ${guardia.tramoHorario}"),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                ),
+              );
+            }).toList(),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String formattedDate =
+        "${widget.day.day}/${widget.day.month}/${widget.day.year}";
     return Scaffold(
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("Guardias"),
             Text(
-              "${widget.day.day} / ${widget.day.month} / ${widget.day.year}",
+              Translations.translate('supervisions'),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
+            Text(formattedDate, style: const TextStyle(fontSize: 16)),
           ],
         ),
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue, Colors.purpleAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
-      body: ListView(
-        padding: EdgeInsets.only(top: 20, bottom: 20),
-        children: [
-          // Display pendientes section
-          pendienteGuardias.isEmpty
-              ? const Center(child: Text("No hay guardias pendientes"))
-              : Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
+      backgroundColor: Colors.grey[100],
+      body: RefreshIndicator(
+        onRefresh: fetchGuardiasObjects,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          children: [
+            // Pendientes Section
+            pendienteGuardias.isEmpty
+                ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
                     child: Text(
-                      "Pendientes",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      Translations.translate('noPendingGuardias'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),
-                  ...pendienteGuardias.map((guardia) {
-                    return Slidable(
-                      key: Key(guardia.id.toString()),
-                      startActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) {
-                              // Handle action for pendiente
-                              print("Pendiente action for ${guardia.id}");
-                              claimGuardia(guardia.id);
-                            },
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            icon: Icons.check,
-                            label: 'Asignar',
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        title: Text("Guardia ${guardia.id}"),
-                        subtitle: Text("Tramo: ${guardia.tramoHorario}"),
-                      ),
+                )
+                : buildGuardiaSection(
+                  sectionTitle: "Pendientes",
+                  guardias: pendienteGuardias,
+                  actionColor: Colors.green,
+                  actionIcon: Icons.check,
+                  actionLabel: 'Asignar',
+                  onActionTap: (guardia, ctx) {
+                    claimGuardia(guardia.id);
+                    showSnackBar(
+                      "Asignada correctamente",
+                      Colors.white,
+                      Colors.black,
                     );
-                  }),
-                ],
-              ),
-          // Display asignadas section
-          asignadaGuardias.isEmpty
-              ? const Center(child: Text("No hay guardias asignadas"))
-              : Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
+                  },
+                ),
+            // Asignadas Section
+            asignadaGuardias.isEmpty
+                ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
                     child: Text(
-                      "Asignadas",
+                      "No hay guardias asignadas",
                       style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),
-                  ...asignadaGuardias.map((guardia) {
-                    return Slidable(
-                      key: Key(guardia.id.toString()),
-                      startActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) {
-                              // Handle action for asignada
-                              print("Asignada action for ${guardia.id}");
-                              showGuardiaInfo(guardia.id, context);
-                            },
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            icon: Icons.info,
-                            label: 'Información',
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        title: Text("Guardia ${guardia.id}"),
-                        subtitle: Text("Tramo: ${guardia.tramoHorario}"),
-                      ),
-                    );
-                  }),
-                ],
-              ),
-        ],
+                )
+                : buildGuardiaSection(
+                  sectionTitle: "Asignadas",
+                  guardias: asignadaGuardias,
+                  actionColor: Colors.blue,
+                  actionIcon: Icons.info,
+                  actionLabel: 'Información',
+                  onActionTap: (guardia, ctx) {
+                    showGuardiaInfo(guardia.id, ctx);
+                  },
+                ),
+          ],
+        ),
       ),
     );
   }

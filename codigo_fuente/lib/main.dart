@@ -1,19 +1,51 @@
 // ignore_for_file: avoid_print
 
+// Translated
 import 'package:codigo/Paginas/admin_main_menu_page.dart';
 import 'package:codigo/Paginas/profesor_main_menu_page.dart';
+import 'package:codigo/Paginas/sala_page.dart';
+import 'package:codigo/global_settings.dart';
 import 'package:codigo/supabase_manager.dart';
-import 'package:codigo/theme_config.dart';
 import 'package:flutter/material.dart';
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:io';
 
 /// Main function for the entire app
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure initialization
-  await SupabaseManager.instance
-      .initialize(); // Initialize Supabase before running the app
+  WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseManager.instance.initialize();
+  await GlobalSettings.initialize();
+
+  // Load the default language from file
+  GlobalSettings.setLanguage(await getDefaultLanguage());
+  print("[DEBUG]: Display lang: ${GlobalSettings.language.value.name}");
+
   runApp(const MyApp());
+}
+
+Future<AppLanguage> getDefaultLanguage() async {
+  final file = File('default_lang.txt');
+  try {
+    if (!await file.exists()) {
+      // If the file doesn't exist, create it and set default to 'es'
+      await file.writeAsString('es');
+      print("[INFO] default_lang.txt not found. Created and set to 'es'.");
+    }
+
+    String langCode = await file.readAsString();
+    print('LANG FROM FILE: $langCode');
+
+    switch (langCode.toLowerCase()) {
+      case 'en':
+        return AppLanguage.english;
+    }
+  } catch (e) {
+    print("[ERROR] Failed to read/write default language: $e");
+  }
+
+  // Fallback language
+  return AppLanguage.espanol;
 }
 
 class MyApp extends StatefulWidget {
@@ -39,12 +71,35 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return AppEasyTheme().buildAppWithTheme(
-      isDarkMode: _themeMode == ThemeMode.dark, // Pass the correct theme mode
-      title: "Test",
-      onThemeToggle:
-          () =>
-              _toggleTheme(), // Pass the theme toggle function wrapped in a closure
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: GlobalSettings.language,
+      builder: (context, language, _) {
+        return MaterialApp(
+          title: "Test",
+          themeMode: _themeMode, // Use the stored theme mode
+          theme: ThemeData(
+            brightness: Brightness.light,
+            primaryColor: Colors.blue,
+            colorScheme: ColorScheme.light(
+              primary: Colors.blue,
+              onPrimary: Colors.white,
+              secondary: Colors.blueAccent,
+              onSecondary: Colors.black,
+            ),
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            primaryColor: Colors.blueGrey,
+            colorScheme: ColorScheme.dark(
+              primary: Colors.blueGrey,
+              onPrimary: Colors.white,
+              secondary: Colors.teal,
+              onSecondary: Colors.white70,
+            ),
+          ),
+          home: MyHomePage(title: "Test", onThemeToggle: _toggleTheme),
+        );
+      },
     );
   }
 }
@@ -105,7 +160,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// Displays a snackbar message at the bottom of the screen
-  ///
   /// This function creates a snackbar with the provided message, text color,
   /// and background color, then displays it using the ScaffoldMessenger
   ///
@@ -113,7 +167,6 @@ class _MyHomePageState extends State<MyHomePage> {
   /// - [textColor]: The color of the text inside the snackbar
   /// - [bgColor]: The background color of the snackbar
   void showSnackBar(String message, Color textColor, Color bgColor) {
-    // Create a Snack BAr given the parameters
     var snackBar = SnackBar(
       content: DefaultTextStyle(
         style: TextStyle(color: textColor),
@@ -121,46 +174,29 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       backgroundColor: bgColor,
     );
-    // Show the snack bar
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   /// Attempt to log-in into Supabase given the text inside the email and password controllers
-  ///
   /// If it succeeds it will redirect the user to the corresponding page depending on the assigned role
   /// Otherwise, it will display a snackbar providing the Supabase error
   Future<void> supabaseLogin() async {
-    // Attempt to log in with the data from the form fields
     final supabaseUser = await SupabaseManager.instance.login(
       _emailController.text,
       _passwordController.text,
     );
 
-    // Check if the returned user is null
     if (supabaseUser != null) {
-      // Store the logged-in user globally in MyApp
       MyApp.loggedInUser = supabaseUser;
 
-      // Show a welcome message
-      showSnackBar(
-        "Bienvenido ${supabaseUser.firstName.toString()}",
-        Colors.white,
-        Colors.black,
-      );
-
-      // Depending on the role navigate to a page or another
       switch (supabaseUser.role.toLowerCase()) {
-        // Admin Role
         case "administrador":
-          // Navigate to the admin page
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AdminMainMenuPage()),
           );
           break;
-        // Profesor Role
         case "profesor":
-          // Navigate to the Profesor page
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -168,9 +204,16 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           );
           break;
+        // Sala role
+        case "sala_de_profesores":
+          // Navigate to the Sala page
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SalaProfesoresPage()),
+          );
+          break;
         // This shouldn't show up but just in case
         default:
-          // Show an error snack bar
           showSnackBar(
             "Error redirigiendo, no se ha encontrado un rol válido: ${supabaseUser.role}",
             Colors.red,
@@ -179,7 +222,6 @@ class _MyHomePageState extends State<MyHomePage> {
           break;
       }
     } else {
-      // Show error sign
       showSnackBar("Credenciales incorrectas", Colors.white, Colors.black);
     }
   }
@@ -201,7 +243,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget buildDesktopLayout(double screenWidth, double screenHeight) {
     return Stack(
       children: [
-        // Video de fondo que ocupa toda la pantalla
         Positioned.fill(
           child:
               _videoController.value.isInitialized
@@ -215,7 +256,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   )
                   : const Center(child: CircularProgressIndicator()),
         ),
-        // Contenido centrado en el contenedor responsivo
         Center(
           child: Container(
             width: screenWidth > 600 ? screenWidth * 0.6 : screenWidth * 1,
@@ -235,38 +275,32 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  "Guardias Calderón",
-                  style: TextStyle(
-                    fontSize: 48, // Font size of 48
-                    fontWeight: FontWeight.bold, // Make the text bold
-                    fontStyle: FontStyle.italic, // Make the text italic
-                    color:
-                        Theme.of(context)
-                            .colorScheme
-                            .primary, // Use the primary color from the theme
-                    shadows: [
-                      Shadow(
-                        blurRadius: 30.0, // Blur radius of the shadow
-                        color:
-                            Theme.of(
-                              context,
-                            ).colorScheme.primary, // Shadow color
-                        offset: Offset(5.0, 5.0), // Shadow offset (x, y)
-                      ),
-                    ],
+                Center(
+                  // Add a Center widget to center the Text
+                  child: Text(
+                    "Guardias Calderón",
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic,
+                      color: Theme.of(context).colorScheme.primary,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 30.0,
+                          color: Theme.of(context).colorScheme.primary,
+                          offset: Offset(5.0, 5.0),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 30),
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    hintText: "Correo",
+                    hintText: Translations.translate('email'),
                     hintStyle: TextStyle(
-                      color:
-                          Theme.of(context)
-                              .colorScheme
-                              .onSecondary, // Cambia el color del texto
+                      color: Theme.of(context).colorScheme.onSecondary,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -283,7 +317,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
-                    hintText: "Contraseña",
+                    hintText: Translations.translate('password'),
                     hintStyle: TextStyle(
                       color: Theme.of(context).colorScheme.onSecondary,
                     ),
@@ -308,7 +342,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text("Iniciar Sesión"),
+                  child: Text(Translations.translate('login')),
                 ),
               ],
             ),
@@ -324,20 +358,17 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Guardias Calderón",
+            Translations.translate('Guardias Calderón'),
             style: TextStyle(
-              fontSize: 48, // Font size of 48
-              fontWeight: FontWeight.bold, // Make the text bold
-              fontStyle: FontStyle.italic, // Make the text italic
-              color:
-                  Theme.of(
-                    context,
-                  ).colorScheme.primary, // Use the primary color from the theme
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              fontStyle: FontStyle.italic,
+              color: Theme.of(context).colorScheme.primary,
               shadows: [
                 Shadow(
-                  blurRadius: 30.0, // Blur radius of the shadow
-                  color: Theme.of(context).colorScheme.primary, // Shadow color
-                  offset: Offset(5.0, 5.0), // Shadow offset (x, y)
+                  blurRadius: 30.0,
+                  color: Theme.of(context).colorScheme.primary,
+                  offset: Offset(5.0, 5.0),
                 ),
               ],
             ),
@@ -348,13 +379,13 @@ class _MyHomePageState extends State<MyHomePage> {
             child: TextFormField(
               controller: _emailController,
               decoration: InputDecoration(
-                hintText: "Correo",
                 hintStyle: TextStyle(
                   color:
                       Theme.of(
                         context,
                       ).colorScheme.onSecondary, // Cambia el color del texto
                 ),
+                hintText: Translations.translate('email'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -373,10 +404,10 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: _passwordController,
               obscureText: true,
               decoration: InputDecoration(
-                hintText: "Contraseña",
                 hintStyle: TextStyle(
                   color: Theme.of(context).colorScheme.onSecondary,
                 ),
+                hintText: Translations.translate('password'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -391,14 +422,9 @@ class _MyHomePageState extends State<MyHomePage> {
           SizedBox(height: 20),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  Theme.of(context).colorScheme.primary, // Background color
-              foregroundColor:
-                  Theme.of(context).colorScheme.onPrimary, // Text color
-              padding: EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ), // Button padding
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8), // Rounded corners
                 side: BorderSide(
@@ -408,7 +434,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             onPressed: supabaseLogin,
-            child: Text("Iniciar Sesión"),
+            child: Text(Translations.translate('login')),
           ),
         ],
       ),

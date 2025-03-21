@@ -5,6 +5,11 @@ import 'package:codigo/Objetos/aula_object.dart';
 import 'package:codigo/Objetos/ausencia_object.dart';
 import 'package:codigo/Objetos/user_object.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 /// Class in charge of performing actions against the supabase database,utilize the initialize method once
 /// then access it statically using .instance to share the same instance across the entire app
@@ -59,6 +64,47 @@ class SupabaseManager {
     } catch (e) {
       // If an error occurs during login, log the error for debugging purposes
       print("[DEBUG]: Error during login: $e");
+      return null;
+    }
+  }
+
+  /// Subir imagen de perfil a Supabase Storage
+  Future<String?> uploadProfilePicture(XFile imageFile, String userId) async {
+    try {
+      final storagePath = 'avatars/$userId.png';
+
+      // 🔹 Convertir imagen a formato compatible según la plataforma
+      Uint8List fileBytes;
+      if (kIsWeb) {
+        fileBytes = await imageFile.readAsBytes(); // Web usa bytes
+      } else {
+        fileBytes =
+            await File(imageFile.path).readAsBytes(); // Android/iOS usa File
+      }
+
+      // Subir imagen a Supabase Storage
+      await Supabase.instance.client.storage
+          .from('avatars')
+          .uploadBinary(
+            storagePath,
+            fileBytes,
+            fileOptions: const FileOptions(upsert: true),
+          );
+
+      // Obtener la URL pública de la imagen
+      final publicUrl = Supabase.instance.client.storage
+          .from('avatars')
+          .getPublicUrl(storagePath);
+
+      // 📌 Actualizar la URL en la tabla 'usuarios'
+      await Supabase.instance.client
+          .from('usuarios')
+          .update({'profile_image_url': publicUrl})
+          .eq('id_auth', userId);
+
+      return publicUrl;
+    } catch (e) {
+      print("Error al subir la imagen: $e");
       return null;
     }
   }
@@ -161,12 +207,19 @@ class SupabaseManager {
         'registration_date':
             user.createdAt, // Assuming createdAt is a valid string
         'status': response['estado'],
+        'profile_image_url': response['profile_image_url'],
       });
     } catch (e) {
       // Log error if mapping fails
       print("[DEBUG]:  Error mapping user: $e");
       return null;
     }
+  }
+
+  Future<UserObject?> getCurrentUser() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return null;
+    return await instance.mapUser(user);
   }
 
   /// Sets a user as inactive in the 'usuarios' table
@@ -250,6 +303,7 @@ class SupabaseManager {
     }
   }
 
+  // Gud
   // Gud
   /// TODO COMMENT
   Future<AusenciaObject?> insertAusencia(
@@ -470,11 +524,11 @@ class SupabaseManager {
       // Map the response to a UserObject
       return UserObject(
         id: response['id_usuario'] ?? 0,
-        authId: response['auth_id'] ?? '',
-        role: response['role'] ?? '',
-        firstName: response['primer_nombre'] ?? '',
-        lastName: response['apellido_paterno'] ?? '',
-        secondLastName: response['apellido_materno'] ?? '',
+        authId: response['id_auth'] ?? '',
+        role: response['rol'] ?? '',
+        firstName: response['nombre'] ?? '',
+        lastName: response['apellido1'] ?? '',
+        secondLastName: response['apellido2'] ?? '',
         phone: response['telefono'] ?? '',
         email: response['email'] ?? '',
         registrationDate: DateTime.parse(
@@ -782,6 +836,39 @@ class SupabaseManager {
     } catch (e) {
       print("Error deleting guardia with ID $guardiaId: $e");
       return false; // Return false in case of error
+    }
+  }
+
+  Future<List<GuardiaObject>> getTodayGuardias() async {
+    try {
+      DateTime now = DateTime.now();
+      // Format the date as YYYY-MM-DD
+      String currentDay =
+          "${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+      // Use eq for an exact match since the database field is of type date
+      final response = await Supabase.instance.client
+          .from('guardias')
+          .select()
+          .eq('dia', currentDay);
+
+      final data = response as List<dynamic>;
+      return data.map((item) {
+        return GuardiaObject(
+          id: item['id_guardia'] as int,
+          missingTeacherId: item['id_profesor_ausente'] as int?,
+          ausenciaId: item['id_ausencia'] as int?,
+          tramoHorario: item['tramo_horario'] as int?,
+          substituteTeacherId: item['id_profesor_sustituto'] as int?,
+          observations: item['observaciones'] as String,
+          status: item['estado'] as String,
+          // Parse the date string into a DateTime object.
+          day: DateTime.parse(item['dia'] as String),
+        );
+      }).toList();
+    } catch (e) {
+      print("Error getting guardias from today: $e");
+      return [];
     }
   }
 }

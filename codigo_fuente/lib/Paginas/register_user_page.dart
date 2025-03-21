@@ -70,15 +70,29 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   const SizedBox(height: 20),
 
                   // Campos de nombre
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Column(
                     children: [
-                      _buildTextField(_firstNameController, "Nombre", width: isWideScreen ? screenWidth * 0.28 : null),
-                      _buildTextField(_lastNameController, "Primer Apellido", width: isWideScreen ? screenWidth * 0.28 : null),
-                      _buildTextField(_secondLastNameController, "Segundo Apellido", width: isWideScreen ? screenWidth * 0.28 : null),
+                      if (isWideScreen)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildTextField(_firstNameController, "Nombre", width: screenWidth * 0.28),
+                            _buildTextField(_lastNameController, "Primer Apellido", width: screenWidth * 0.28),
+                            _buildTextField(_secondLastNameController, "Segundo Apellido", width: screenWidth * 0.28),
+                          ],
+                        )
+                      else
+                        Column(
+                          children: [
+                            _buildTextField(_firstNameController, "Nombre"),
+                            const SizedBox(height: 10),
+                            _buildTextField(_lastNameController, "Primer Apellido"),
+                            const SizedBox(height: 10),
+                            _buildTextField(_secondLastNameController, "Segundo Apellido"),
+                          ],
+                        ),
                     ],
                   ),
-                  const SizedBox(height: 10),
 
                   // Correo
                   _buildTextField(_emailController, "Correo Electrónico"),

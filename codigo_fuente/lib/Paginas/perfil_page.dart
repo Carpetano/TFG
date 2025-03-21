@@ -73,8 +73,11 @@ class _PerfilPageState extends State<PerfilPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Translations.translate('profile')),
-        backgroundColor: Colors.blueAccent,
+        title: Text(Translations.translate('profile'), style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        leading: BackButton(
+          color: Theme.of(context).colorScheme.onPrimary, 
+        ),
       ),
       body:
           _user == null
@@ -121,7 +124,7 @@ class _PerfilPageState extends State<PerfilPage> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color:Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
@@ -170,14 +173,17 @@ class _ProfileInfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: Colors.blueAccent),
+        Icon(icon, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 10),
         Text("$label: ", style: const TextStyle(fontWeight: FontWeight.bold)),
         Expanded(
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: const TextStyle(color: Colors.black87),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],

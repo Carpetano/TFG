@@ -476,7 +476,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                         selectedIcon: Icon(
                           Icons.account_circle,
                           size: iconSize,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                         label: Text(
                           Translations.translate('viewProfile'),
@@ -495,7 +495,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                         selectedIcon: Icon(
                           Icons.tune_rounded,
                           size: iconSize,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                         label: Text(
                           Translations.translate('settings'),
@@ -514,7 +514,7 @@ class _ProfesorMainMenuPageState extends State<ProfesorMainMenuPage>
                         selectedIcon: Icon(
                           Icons.logout,
                           size: iconSize,
-                          color: Colors.white,
+                          color:Theme.of(context).colorScheme.onPrimary,
                         ),
                         label: Text(
                           Translations.translate('logout'),

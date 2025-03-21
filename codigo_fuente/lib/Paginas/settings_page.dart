@@ -66,22 +66,22 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
               iconSize: 24,
               onPressed: () {
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context);  // Regresar a la pantalla anterior
-      } else {
-        Navigator.pushAndRemoveUntil(
-  context,
-  MaterialPageRoute(builder: (context) => MyHomePage(title: "Guardias Calderón", onThemeToggle: () {})),
-  (route) => false, // Elimina todas las rutas anteriores
-);
-      }
-    },
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);  // Regresar a la pantalla anterior
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyHomePage(title: "Guardias Calderón", onThemeToggle: () {})),
+                    (route) => false, // Elimina todas las rutas anteriores
+                  );
+                }
+              },
             ),
         title: Text(
           Translations.translate('pageTitle'),
           style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body:
           screenWidth > maxPhoneWidth
@@ -96,7 +96,7 @@ class _SettingsPageState extends State<SettingsPage> {
         width: screenWidth > 600 ? screenWidth * 0.6 : screenWidth * 1,
         padding: EdgeInsets.all(30),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -276,6 +276,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (value) async {
                 await GlobalSettings.setTheme(value);
               },
+              activeColor: Theme.of(context).colorScheme.primary,
             ),
           ),
           _buildSettingTile(
@@ -340,8 +341,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(Translations.translate('changePassword')),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: Text(
+              Translations.translate('changePassword'),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary, 
+                fontWeight: FontWeight.bold, 
+                fontSize: 16,
+              ),
+            ),
           ),
         ],
       ),
@@ -355,12 +366,19 @@ class _SettingsPageState extends State<SettingsPage> {
     required Widget trailing,
   }) {
     return Card(
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       elevation: 3,
       child: ListTile(
-        leading: Icon(icon, color: Colors.blueAccent),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(subtitle),
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8), // Más contraste
+            fontWeight: FontWeight.w500, // Un poco más grueso para mayor legibilidad
+          ),
+        ),
         trailing: trailing,
       ),
     );

@@ -172,7 +172,7 @@ Dia: ${guardia.day.toLocal()}
                         onActionTap(guardia, context);
                       },
                       backgroundColor: actionColor,
-                      foregroundColor: Colors.white,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       icon: actionIcon,
                       label: actionLabel,
                     ),
@@ -188,7 +188,7 @@ Dia: ${guardia.day.toLocal()}
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text("Tramo: ${guardia.tramoHorario}"),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Theme.of(context).colorScheme.onPrimary),
                 ),
               );
             }).toList(),
@@ -209,23 +209,29 @@ Dia: ${guardia.day.toLocal()}
           children: [
             Text(
               Translations.translate('supervisions'),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Theme.of(context).colorScheme.onPrimary),
             ),
             Text(formattedDate, style: const TextStyle(fontSize: 16)),
           ],
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.purpleAccent],
+              colors: [Theme.of(context).colorScheme.primary, Colors.purpleAccent],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: RefreshIndicator(
         onRefresh: fetchGuardiasObjects,
         child: ListView(
@@ -238,9 +244,10 @@ Dia: ${guardia.day.toLocal()}
                   child: Center(
                     child: Text(
                       Translations.translate('noPendingGuardias'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontStyle: FontStyle.italic,
+                        color: Theme.of(context).colorScheme.onSecondary,
                       ),
                     ),
                   ),
@@ -262,7 +269,7 @@ Dia: ${guardia.day.toLocal()}
                 ),
             // Asignadas Section
             asignadaGuardias.isEmpty
-                ? const Padding(
+                ? Padding(
                   padding: EdgeInsets.symmetric(vertical: 20),
                   child: Center(
                     child: Text(
@@ -270,6 +277,7 @@ Dia: ${guardia.day.toLocal()}
                       style: TextStyle(
                         fontSize: 18,
                         fontStyle: FontStyle.italic,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                   ),

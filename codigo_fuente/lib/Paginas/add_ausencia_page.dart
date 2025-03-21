@@ -160,9 +160,15 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
       appBar: AppBar(
         title: Text(
           Translations.translate('addAusencia'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -173,7 +179,7 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
           ),
         ),
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -410,8 +416,8 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
                 ElevatedButton(
                   onPressed: insertAusencia,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 30,
                       vertical: 12,
@@ -424,21 +430,6 @@ class _AddAusenciaPageState extends State<AddAusenciaPage> {
                     'Guardar Ausencia',
                     style: TextStyle(fontSize: 16),
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text('Volver', style: TextStyle(fontSize: 16)),
                 ),
               ],
             ),

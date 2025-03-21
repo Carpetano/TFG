@@ -62,9 +62,15 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Translations.translate('registeredUsers')),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(Translations.translate('registeredUsers'),style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),),
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: Padding(
@@ -77,8 +83,8 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
               decoration: InputDecoration(
                 hintText: Translations.translate('lookUpUsers'),
                 filled: true,
-                fillColor: Colors.white,
-                prefixIcon: const Icon(Icons.search),
+                fillColor: Theme.of(context).colorScheme.surface,
+                prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide.none,
@@ -97,6 +103,7 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                 itemBuilder: (context, index) {
                   UserObject user = filteredUsers[index];
                   return Card(
+                    color: Theme.of(context).colorScheme.surface,
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -141,21 +148,23 @@ class _ViewUsersPageState extends State<ViewUsersPage> {
                           },
                           child: Text(
                             "${user.firstName} ${user.lastName}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: Colors.blue,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ),
-                        subtitle: Text(user.role.replaceAll("_", " ")),
-                        trailing:
-                            user.status.toLowerCase() == 'activo'
-                                ? const Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green,
-                                )
-                                : const Icon(Icons.cancel, color: Colors.red),
+                        subtitle: Text(
+                          user.role.replaceAll("_", " "), 
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                        ),
+                        trailing: Icon(
+                          user.status.toLowerCase() == 'activo' ? Icons.check_circle : Icons.cancel,
+                          color: user.status.toLowerCase() == 'activo'
+                            ? Colors.green
+                            : Colors.red,
+                        ),
                       ),
                     ),
                   );

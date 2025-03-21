@@ -438,12 +438,12 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 6,
-        color: Theme.of(context).colorScheme.secondary,
+        color: Theme.of(context).colorScheme.surface,
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            color: Theme.of(context).colorScheme.onPrimary,
+            color: Theme.of(context).colorScheme.surface,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -459,7 +459,7 @@ class _AdminMainMenuPageState extends State<AdminMainMenuPage> {
                 style: TextStyle(
                   fontSize: textSize,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSecondary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),

@@ -47,13 +47,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Registro de Usuario"),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Card(
+            color: Theme.of(context).colorScheme.surface,
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -63,9 +65,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     "Crear una Cuenta",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface,),
                   ),
                   const SizedBox(height: 20),
 
@@ -111,7 +113,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color:Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: DropdownButton<String>(
@@ -120,7 +122,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       underline: const SizedBox(),
                       onChanged: (newValue) => setState(() => selectedRole = newValue),
                       items: ["Administrador", "Profesor", "Sala de profesores"]
-                          .map((role) => DropdownMenuItem(value: role, child: Text(role)))
+                          .map((role) => DropdownMenuItem(
+                            value: role, 
+                            child: Text(role, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                          ))
                           .toList(),
                     ),
                   ),
@@ -156,12 +161,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
         decoration: InputDecoration(
           hintText: hint,
           filled: true,
-          fillColor: Colors.grey[200],
+          fillColor: Theme.of(context).colorScheme.surface,
+          hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
         ),
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
       ),
     );
   }

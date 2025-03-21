@@ -94,20 +94,26 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
       appBar: AppBar(
         title: Text(
           Translations.translate('mySupervisions'),
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
         ),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.purpleAccent],
+              colors: [Theme.of(context).colorScheme.primary, Colors.purpleAccent],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -115,7 +121,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
             // Section Title for Guardias Realizadas
             Text(
               Translations.translate('guardiasDone'),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Theme.of(context).colorScheme.onBackground,),
             ),
             const SizedBox(height: 10),
             // Card for Guardias Realizadas List
@@ -125,6 +131,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 4,
+                color: Theme.of(context).colorScheme.surface,
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -187,7 +194,11 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
             // Section Title for Guardias Pendientes
             Text(
               Translations.translate('pendingGuardias'),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.onBackground, // Adaptable text color
+              ),
             ),
             const SizedBox(height: 10),
             // Card for Guardias Unasigned List
@@ -197,6 +208,7 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 4,
+                color: Theme.of(context).colorScheme.surface,
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -250,11 +262,11 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                     showSnackBar(
                       "Guardias Borradas",
                       Colors.white,
-                      Colors.black,
+                      Theme.of(context).colorScheme.secondary,
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
+                    backgroundColor:Theme.of(context).colorScheme.error,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 30,
                       vertical: 12,
@@ -264,20 +276,6 @@ class _VerMisGuardiasPageState extends State<VerMisGuardiasPage> {
                     ),
                   ),
                   child: Text(Translations.translate('deleteGuardia')),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(Translations.translate('goback')),
                 ),
               ],
             ),

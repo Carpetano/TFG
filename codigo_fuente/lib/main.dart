@@ -376,7 +376,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            Translations.translate('hello'),
+            "Guardias Calderón",
             style: TextStyle(
               fontSize: 48,
               fontWeight: FontWeight.bold,

@@ -127,9 +127,9 @@ class Translations {
       'goback': 'Volver',
       'plsSelectTeacherClassAndShift':
           'Porfavor selecciona un profesor, un aula y un turno',
-      'selectClass': 'Select class',
+      'selectClass': 'Seleccionar clase',
       'supervisions': 'Guardias',
-      'noPendingGuardias': 'No pending Supervisions',
+      'noPendingGuardias': 'No hay guardias sin asignar',
       'mySupervisions': 'Mis guardias',
       'phone': 'Número de teléfono',
       'role': 'Rol',

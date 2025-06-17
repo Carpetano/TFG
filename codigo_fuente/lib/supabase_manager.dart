@@ -35,9 +35,9 @@ class SupabaseManager {
       */
       // Initialize Supabase with it's matching url and anonkey
       await Supabase.initialize(
-        url: 'https://gykqibexlzwxpliezelo.supabase.co',
+        url: 'xxxxx',
         anonKey:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5a3FpYmV4bHp3eHBsaWV6ZWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5MDUzMDEsImV4cCI6MjA1NzQ4MTMwMX0.MRfnjfhl5A7ZbK_ien8G1OPUmlF-3eqzOmx_EFTQHZk',
+            'xxxxx',
         debug: true,
       );
     }
